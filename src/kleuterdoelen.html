@@ -1,0 +1,2437 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌈 Kleuterleren - Vlaamse Onderwijsdoelen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sunny-yellow: #FFE66D; --sky-blue: #4ECDC4; --coral-pink: #FF6B6B;
+            --grass-green: #95E1A3; --lavender: #C9B1FF; --cream: #FFF8E7;
+            --soft-orange: #FFB347; --deep-purple: #5D5FEF; --white: #FFFFFF;
+            --dark-text: #2D3436; --shadow-light: rgba(0,0,0,0.08); --shadow-medium: rgba(0,0,0,0.15);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Quicksand', sans-serif; background: linear-gradient(135deg, var(--cream) 0%, #FFF5E6 50%, #E8F6F3 100%); min-height: 100vh; color: var(--dark-text); overflow-x: hidden; }
+        .floating-shapes { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+        .shape { position: absolute; border-radius: 50%; opacity: 0.3; animation: float 20s infinite ease-in-out; }
+        .shape:nth-child(1) { width: 100px; height: 100px; background: var(--coral-pink); top: 10%; left: 5%; }
+        .shape:nth-child(2) { width: 60px; height: 60px; background: var(--sky-blue); top: 20%; right: 10%; animation-delay: 3s; }
+        .shape:nth-child(3) { width: 80px; height: 80px; background: var(--sunny-yellow); bottom: 15%; left: 15%; animation-delay: 6s; }
+        .shape:nth-child(4) { width: 50px; height: 50px; background: var(--grass-green); bottom: 30%; right: 20%; animation-delay: 9s; }
+        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(5deg); } }
+        header { position: relative; z-index: 10; background: linear-gradient(135deg, var(--deep-purple) 0%, #7B7FFF 100%); padding: 1.5rem 2rem; border-radius: 0 0 40px 40px; box-shadow: 0 10px 40px var(--shadow-medium); }
+        header h1 { font-family: 'Baloo 2', cursive; font-size: clamp(1.8rem, 5vw, 3rem); color: var(--white); text-align: center; text-shadow: 3px 3px 0 rgba(0,0,0,0.1); margin-bottom: 0.5rem; }
+        header p { text-align: center; color: rgba(255,255,255,0.9); font-weight: 500; font-size: 1rem; }
+        .nav-tabs { position: relative; z-index: 10; display: flex; justify-content: center; gap: 0.5rem; padding: 1rem; flex-wrap: wrap; }
+        .nav-tab { background: var(--white); border: none; padding: 0.75rem 1.25rem; border-radius: 50px; font-family: 'Baloo 2', cursive; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 4px 15px var(--shadow-light); display: flex; align-items: center; gap: 0.4rem; }
+        .nav-tab:hover { transform: translateY(-3px) scale(1.05); }
+        .nav-tab.active { transform: scale(1.08); box-shadow: 0 6px 20px var(--shadow-medium); }
+        .nav-tab[data-tab="vocabulary"] { background: linear-gradient(135deg, var(--coral-pink), #FF8E8E); color: white; }
+        .nav-tab[data-tab="games"] { background: linear-gradient(135deg, var(--grass-green), #B5F0BE); color: var(--dark-text); }
+        .nav-tab[data-tab="writing"] { background: linear-gradient(135deg, var(--sky-blue), #7EDCD5); color: white; }
+        .nav-tab[data-tab="goals"] { background: linear-gradient(135deg, var(--lavender), #D9C8FF); color: var(--dark-text); }
+        .nav-tab[data-tab="tasks"] { background: linear-gradient(135deg, var(--soft-orange), #FFCC80); color: var(--dark-text); }
+        main { position: relative; z-index: 5; max-width: 1400px; margin: 0 auto; padding: 1rem 2rem 3rem; }
+        .tab-content { display: none; animation: fadeIn 0.5s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .section-title { font-family: 'Baloo 2', cursive; font-size: 1.8rem; margin: 1.5rem 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem; }
+        .category-card { background: var(--white); border-radius: 20px; padding: 1.25rem; box-shadow: 0 6px 25px var(--shadow-light); transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .category-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; border-radius: 20px 20px 0 0; }
+        .category-card:hover { transform: translateY(-4px); box-shadow: 0 12px 35px var(--shadow-medium); }
+        .category-card h3 { font-family: 'Baloo 2', cursive; font-size: 1.15rem; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem; }
+        .category-card .goal-codes { font-size: 0.7rem; color: #888; margin-bottom: 0.6rem; }
+        .word-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+        .word-tag { background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 0.35rem 0.7rem; border-radius: 18px; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; border: 2px solid transparent; position: relative; user-select: none; }
+        .word-tag:hover { transform: scale(1.05); border-color: var(--sky-blue); }
+        .word-tag .click-count { position: absolute; top: -6px; right: -6px; background: var(--coral-pink); color: white; border-radius: 50%; min-width: 18px; height: 18px; font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .word-tag.clicked-1 { background: linear-gradient(135deg, #E8F5E9, #C8E6C9); border-color: #81C784; }
+        .word-tag.clicked-2 { background: linear-gradient(135deg, #C8E6C9, #A5D6A7); border-color: #66BB6A; }
+        .word-tag.clicked-3 { background: linear-gradient(135deg, #A5D6A7, #81C784); border-color: #4CAF50; }
+        .word-tag.clicked-many { background: linear-gradient(135deg, var(--grass-green), #7DCE82); border-color: #43A047; }
+        .category-card.location::before { background: var(--coral-pink); }
+        .category-card.nature::before { background: var(--grass-green); }
+        .category-card.weather::before { background: var(--sky-blue); }
+        .category-card.time::before { background: var(--sunny-yellow); }
+        .category-card.body::before { background: var(--soft-orange); }
+        .category-card.math::before { background: var(--lavender); }
+        .category-card.music::before { background: var(--deep-purple); }
+        .category-card.animals::before { background: var(--grass-green); }
+        .category-card.art::before { background: var(--lavender); }
+        .category-card.writing::before { background: var(--sky-blue); }
+        .category-card.geography::before { background: linear-gradient(135deg, #4ECDC4, #44A08D); }
+        .stats-bar { background: var(--white); border-radius: 18px; padding: 0.9rem 1.25rem; box-shadow: 0 4px 15px var(--shadow-light); margin-bottom: 1.25rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: center; }
+        .stat-item { display: flex; align-items: center; gap: 0.4rem; font-weight: 600; font-size: 0.9rem; }
+        .stat-item .stat-value { font-family: 'Baloo 2', cursive; font-size: 1.15rem; color: var(--deep-purple); }
+        .reset-btn, .export-btn { background: linear-gradient(135deg, var(--coral-pink), #FF8E8E); color: white; border: none; padding: 0.45rem 0.9rem; border-radius: 18px; cursor: pointer; font-family: 'Quicksand', sans-serif; font-weight: 600; font-size: 0.85rem; transition: all 0.2s ease; }
+        .export-btn { background: linear-gradient(135deg, var(--deep-purple), #7B7FFF); }
+        .reset-btn:hover, .export-btn:hover { transform: scale(1.05); }
+        .search-box { background: var(--white); border-radius: 25px; padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 0.6rem; box-shadow: 0 4px 15px var(--shadow-light); max-width: 350px; margin: 0.75rem auto 1rem; }
+        .search-box input { border: none; outline: none; font-family: 'Quicksand', sans-serif; font-size: 0.95rem; width: 100%; }
+        .filter-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; margin-bottom: 1.25rem; }
+        .filter-pill { background: var(--white); border: 2px solid #eee; padding: 0.4rem 0.85rem; border-radius: 18px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .filter-pill:hover, .filter-pill.active { border-color: var(--deep-purple); background: linear-gradient(135deg, #F4E4FF, #FAF0FF); }
+        .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.25rem; }
+        .game-card { background: var(--white); border-radius: 20px; padding: 1.5rem; box-shadow: 0 6px 25px var(--shadow-light); text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .game-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 15px 40px var(--shadow-medium); }
+        .game-card .game-emoji { font-size: 3rem; margin-bottom: 0.75rem; display: block; }
+        .game-card h3 { font-family: 'Baloo 2', cursive; font-size: 1.25rem; margin-bottom: 0.35rem; }
+        .game-card p { color: #666; font-size: 0.85rem; }
+        .game-card .goal-tag { font-size: 0.65rem; background: var(--lavender); padding: 0.15rem 0.4rem; border-radius: 8px; margin-top: 0.4rem; display: inline-block; }
+        .game-card.colors { background: linear-gradient(135deg, #FFE4E4, #FFF0F0); }
+        .game-card.counting { background: linear-gradient(135deg, #E4F4FF, #F0F9FF); }
+        .game-card.shapes { background: linear-gradient(135deg, #E8FFE4, #F0FFF0); }
+        .game-card.animals { background: linear-gradient(135deg, #FFF4E4, #FFFAF0); }
+        .game-card.body { background: linear-gradient(135deg, #F4E4FF, #FAF0FF); }
+        .game-card.weather { background: linear-gradient(135deg, #E4FFFC, #F0FFFE); }
+        .game-card.position { background: linear-gradient(135deg, #FFFCE4, #FFFEF0); }
+        .game-card.rhyme { background: linear-gradient(135deg, #FFE4F4, #FFF0FA); }
+        .game-card.emotions { background: linear-gradient(135deg, #E4F0FF, #F0F6FF); }
+        .game-card.sorting { background: linear-gradient(135deg, #F0FFE4, #F6FFF0); }
+        .game-card.days { background: linear-gradient(135deg, #FFE4FF, #FFF0FF); }
+        .game-card.letters { background: linear-gradient(135deg, #E4FFE4, #F0FFF0); }
+        .game-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 1rem; }
+        .game-modal.active { display: flex; }
+        .game-content { background: var(--white); border-radius: 28px; padding: 1.75rem; max-width: 550px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        .close-btn { position: absolute; top: 0.75rem; right: 0.75rem; background: var(--coral-pink); color: white; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; transition: transform 0.2s ease; }
+        .close-btn:hover { transform: scale(1.1) rotate(90deg); }
+        .game-title { font-family: 'Baloo 2', cursive; font-size: 1.75rem; text-align: center; margin-bottom: 1rem; }
+        .game-area { min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.25rem; }
+        .game-question { font-size: 1.35rem; text-align: center; font-weight: 600; }
+        .game-options { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+        .game-option { background: linear-gradient(135deg, #f8f9fa, #e9ecef); border: 3px solid transparent; padding: 0.85rem 1.5rem; border-radius: 18px; font-size: 1.1rem; font-family: 'Quicksand', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.2s ease; min-width: 90px; text-align: center; }
+        .game-option:hover { transform: scale(1.05); border-color: var(--sky-blue); }
+        .game-option.correct { background: linear-gradient(135deg, var(--grass-green), #B5F0BE); border-color: #4CAF50; animation: pulse 0.5s ease; }
+        .game-option.wrong { background: linear-gradient(135deg, var(--coral-pink), #FF8E8E); border-color: #f44336; animation: shake 0.5s ease; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+        .game-visual { font-size: 4rem; text-align: center; line-height: 1.2; }
+        .score-display { background: linear-gradient(135deg, var(--sunny-yellow), var(--soft-orange)); padding: 0.6rem 1.25rem; border-radius: 25px; font-family: 'Baloo 2', cursive; font-size: 1.1rem; }
+        .progress-bar { width: 100%; height: 8px; background: #eee; border-radius: 4px; margin-bottom: 0.75rem; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--sky-blue), var(--grass-green)); border-radius: 4px; transition: width 0.3s ease; }
+        .next-btn { background: linear-gradient(135deg, var(--deep-purple), #7B7FFF); color: white; border: none; padding: 0.85rem 2rem; border-radius: 25px; font-family: 'Baloo 2', cursive; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease; margin-top: 0.75rem; }
+        .next-btn:hover { transform: scale(1.05); }
+        .color-display { width: 130px; height: 130px; border-radius: 50%; box-shadow: 0 8px 25px var(--shadow-medium); margin: 0.75rem auto; }
+        /* Position game 3D visual */
+        .position-scene { width: 200px; height: 200px; position: relative; margin: 1rem auto; perspective: 300px; }
+        .position-box { width: 80px; height: 80px; background: linear-gradient(135deg, #8B4513, #A0522D); border: 3px solid #654321; border-radius: 8px; position: absolute; display: flex; align-items: center; justify-content: center; font-size: 2rem; box-shadow: 5px 5px 15px rgba(0,0,0,0.3); }
+        .position-cat { font-size: 3rem; position: absolute; z-index: 10; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3)); }
+        /* Goal tracking */
+        .goal-card { background: var(--white); border-radius: 18px; padding: 1.25rem; box-shadow: 0 5px 18px var(--shadow-light); margin-bottom: 0.85rem; border-left: 4px solid var(--deep-purple); }
+        .goal-card h4 { font-family: 'Baloo 2', cursive; font-size: 1rem; color: var(--deep-purple); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+        .goal-card .goal-code { background: var(--lavender); padding: 0.15rem 0.5rem; border-radius: 8px; font-size: 0.75rem; font-weight: 700; }
+        .goal-card p { font-size: 0.85rem; color: #555; line-height: 1.5; margin-bottom: 0.6rem; }
+        .goal-card .goal-stats { display: flex; gap: 0.75rem; flex-wrap: wrap; font-size: 0.8rem; }
+        .goal-card .goal-stat { background: #f8f9fa; padding: 0.35rem 0.7rem; border-radius: 12px; }
+        .goal-card .goal-stat strong { color: var(--deep-purple); }
+        .goal-progress { height: 6px; background: #eee; border-radius: 3px; margin-top: 0.6rem; overflow: hidden; }
+        .goal-progress-fill { height: 100%; background: linear-gradient(90deg, var(--grass-green), var(--sky-blue)); border-radius: 3px; transition: width 0.5s ease; }
+        .goal-filter { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.25rem; justify-content: center; }
+        .goal-filter-btn { background: var(--white); border: 2px solid #eee; padding: 0.4rem 0.85rem; border-radius: 18px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .goal-filter-btn:hover, .goal-filter-btn.active { border-color: var(--deep-purple); background: linear-gradient(135deg, #F4E4FF, #FAF0FF); }
+        .export-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 1rem; }
+        .export-modal.active { display: flex; }
+        /* Task cards */
+        .task-card { background: var(--white); border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; box-shadow: 0 4px 15px var(--shadow-light); display: flex; align-items: center; gap: 1rem; transition: all 0.3s ease; cursor: pointer; border-left: 5px solid #ddd; }
+        .task-card:hover { transform: translateX(5px); box-shadow: 0 6px 20px var(--shadow-medium); }
+        .task-card.completed { border-left-color: var(--grass-green); background: linear-gradient(135deg, #f0fff4, #e8f5e9); }
+        .task-card .task-check { width: 32px; height: 32px; border-radius: 50%; border: 3px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; transition: all 0.3s ease; }
+        .task-card.completed .task-check { background: var(--grass-green); border-color: var(--grass-green); color: white; }
+        .task-card .task-info { flex: 1; }
+        .task-card .task-title { font-family: 'Baloo 2', cursive; font-size: 1.1rem; margin-bottom: 0.25rem; }
+        .task-card .task-desc { font-size: 0.85rem; color: #666; margin-bottom: 0.25rem; }
+        .task-card .task-goals { font-size: 0.7rem; color: var(--deep-purple); }
+        .task-card .task-count { font-size: 0.8rem; color: #888; background: #f0f0f0; padding: 0.25rem 0.6rem; border-radius: 12px; }
+        .task-card.completed .task-count { background: var(--grass-green); color: white; }
+        .task-filter { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .task-filter-btn { background: var(--white); border: 2px solid #eee; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .task-filter-btn:hover, .task-filter-btn.active { border-color: var(--soft-orange); background: linear-gradient(135deg, #FFF3E0, #FFE0B2); }
+        .export-content { background: var(--white); border-radius: 20px; padding: 1.5rem; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; }
+        .export-content h3 { font-family: 'Baloo 2', cursive; margin-bottom: 1rem; }
+        .export-content textarea { width: 100%; height: 300px; font-family: monospace; font-size: 0.85rem; padding: 1rem; border: 2px solid #eee; border-radius: 12px; resize: vertical; }
+        .export-content .btn-row { display: flex; gap: 0.5rem; margin-top: 1rem; justify-content: flex-end; }
+        @media (max-width: 768px) {
+            header { padding: 1rem; border-radius: 0 0 20px 20px; }
+            .nav-tabs { gap: 0.35rem; padding: 0.75rem; }
+            .nav-tab { padding: 0.6rem 0.9rem; font-size: 0.85rem; }
+            main { padding: 0.75rem; }
+            .category-grid, .games-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-shapes"><div class="shape"></div><div class="shape"></div><div class="shape"></div><div class="shape"></div></div>
+    <header>
+        <h1>🌈 Kleuterleren</h1>
+        <p>Woorden, spelletjes & schrijfvaardigheden gekoppeld aan Vlaamse Onderwijsdoelen</p>
+    </header>
+    <nav class="nav-tabs">
+        <button class="nav-tab active" data-tab="vocabulary"><span>📚</span> Woordenschat</button>
+        <button class="nav-tab" data-tab="games"><span>🎮</span> Spelletjes</button>
+        <button class="nav-tab" data-tab="writing"><span>✏️</span> Schrijven</button>
+        <button class="nav-tab" data-tab="goals"><span>🎯</span> Doelen</button>
+        <button class="nav-tab" data-tab="tasks"><span>✋</span> Doe-opdrachten</button>
+    </nav>
+    <main>
+        <!-- VOCABULARY TAB -->
+        <div id="vocabulary" class="tab-content active">
+            <div class="search-box">
+                <span>🔍</span>
+                <input type="text" id="vocab-search" placeholder="Zoek een woord...">
+            </div>
+            <div class="stats-bar">
+                <div class="stat-item"><span>👆</span> Klikken: <span class="stat-value" id="total-clicks">0</span></div>
+                <div class="stat-item"><span>📝</span> Woorden: <span class="stat-value" id="unique-words">0</span></div>
+                <div class="stat-item"><span>🎯</span> Doelen: <span class="stat-value" id="goals-practiced">0</span></div>
+                <button class="reset-btn" onclick="resetClicks()">🔄 Reset</button>
+            </div>
+            <div class="filter-pills">
+                <button class="filter-pill active" data-filter="all">Alles</button>
+                <button class="filter-pill" data-filter="location">📍 Plaats</button>
+                <button class="filter-pill" data-filter="geography">🌍 Aardrijkskunde</button>
+                <button class="filter-pill" data-filter="nature">🌿 Natuur</button>
+                <button class="filter-pill" data-filter="body">🦶 Lichaam</button>
+                <button class="filter-pill" data-filter="math">🔢 Wiskunde</button>
+                <button class="filter-pill" data-filter="time">⏰ Tijd</button>
+                <button class="filter-pill" data-filter="animals">🐾 Dieren</button>
+                <button class="filter-pill" data-filter="art">🎨 Kunst</button>
+                <button class="filter-pill" data-filter="writing">✏️ Schrijven</button>
+            </div>
+            <div class="category-grid" id="vocabulary-grid">
+                <!-- Positie 4.1.3, 2.4.5 -->
+                <div class="category-card location" data-category="location" data-goals="4.1.3,2.4.5">
+                    <h3>📍 Positie & Richting</h3>
+                    <div class="goal-codes">4.1.3, 2.4.5 - Relatieve ligging & plaatsbegrippen</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="dichtbij" data-goals="4.1.3,2.4.5">dichtbij</span>
+                        <span class="word-tag" data-word="veraf" data-goals="4.1.3,2.4.5">veraf</span>
+                        <span class="word-tag" data-word="voor" data-goals="4.1.3,2.4.5">voor</span>
+                        <span class="word-tag" data-word="achter" data-goals="4.1.3,2.4.5">achter</span>
+                        <span class="word-tag" data-word="boven" data-goals="4.1.3,2.4.5">boven</span>
+                        <span class="word-tag" data-word="onder" data-goals="4.1.3,2.4.5">onder</span>
+                        <span class="word-tag" data-word="tussen" data-goals="4.1.3,2.4.5">tussen</span>
+                        <span class="word-tag" data-word="naast" data-goals="4.1.3,2.4.5">naast</span>
+                        <span class="word-tag" data-word="binnen" data-goals="4.1.3,2.4.5">binnen</span>
+                        <span class="word-tag" data-word="buiten" data-goals="4.1.3,2.4.5">buiten</span>
+                        <span class="word-tag" data-word="in" data-goals="4.1.3,2.4.5">in</span>
+                        <span class="word-tag" data-word="uit" data-goals="4.1.3,2.4.5">uit</span>
+                        <span class="word-tag" data-word="omhoog" data-goals="2.4.5">omhoog</span>
+                        <span class="word-tag" data-word="omlaag" data-goals="2.4.5">omlaag</span>
+                        <span class="word-tag" data-word="tegenover" data-goals="2.4.5">tegenover</span>
+                    </div>
+                </div>
+                <!-- Aarde 4.2.1, 4.2.2 -->
+                <div class="category-card nature" data-category="nature" data-goals="4.2.1,4.2.2">
+                    <h3>🌍 Aarde & Landschap</h3>
+                    <div class="goal-codes">4.2.1, 4.2.2 - Kenmerken aarde & landschappen</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="het land" data-goals="4.2.1">het land</span>
+                        <span class="word-tag" data-word="het water" data-goals="4.2.1">het water</span>
+                        <span class="word-tag" data-word="de lucht" data-goals="4.2.1">de lucht</span>
+                        <span class="word-tag" data-word="de rots" data-goals="4.2.1">de rots</span>
+                        <span class="word-tag" data-word="het zand" data-goals="4.2.1">het zand</span>
+                        <span class="word-tag" data-word="de berg" data-goals="4.2.2">de berg</span>
+                        <span class="word-tag" data-word="de vallei" data-goals="4.2.2">de vallei</span>
+                        <span class="word-tag" data-word="de zee" data-goals="4.2.2">de zee</span>
+                        <span class="word-tag" data-word="de rivier" data-goals="4.2.2">de rivier</span>
+                        <span class="word-tag" data-word="het bos" data-goals="4.2.2">het bos</span>
+                        <span class="word-tag" data-word="de weide" data-goals="4.2.2">de weide</span>
+                    </div>
+                </div>
+                <!-- Aardrijkskunde 4.1.1, 4.1.2, 4.2.6 -->
+                <div class="category-card geography" data-category="geography" data-goals="4.1.1,4.1.2,4.2.6">
+                    <h3>🌍 Aardrijkskunde</h3>
+                    <div class="goal-codes">4.1.1, 4.1.2, 4.2.6 - Topografie & Kosmografie</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="België" data-goals="4.1.1">België 🇧🇪</span>
+                        <span class="word-tag" data-word="de Schelde" data-goals="4.1.1">de Schelde</span>
+                        <span class="word-tag" data-word="de Maas" data-goals="4.1.1">de Maas</span>
+                        <span class="word-tag" data-word="de Nijl" data-goals="4.1.1">de Nijl 🇪🇬</span>
+                        <span class="word-tag" data-word="Egypte" data-goals="4.1.1">Egypte</span>
+                        <span class="word-tag" data-word="rivier" data-goals="4.1.1">rivier</span>
+                        <span class="word-tag" data-word="wereldbol" data-goals="4.1.2">wereldbol 🌍</span>
+                        <span class="word-tag" data-word="de aarde" data-goals="4.1.2,4.2.6">de aarde</span>
+                        <span class="word-tag" data-word="land" data-goals="4.1.2">land</span>
+                        <span class="word-tag" data-word="water" data-goals="4.1.2">water</span>
+                        <span class="word-tag" data-word="oceaan" data-goals="4.1.2">oceaan</span>
+                        <span class="word-tag" data-word="zee" data-goals="4.1.2">zee</span>
+                        <span class="word-tag" data-word="noordpool" data-goals="4.1.2">noordpool ❄️</span>
+                        <span class="word-tag" data-word="zuidpool" data-goals="4.1.2">zuidpool 🐧</span>
+                        <span class="word-tag" data-word="de zon" data-goals="4.2.6">de zon ☀️</span>
+                        <span class="word-tag" data-word="de maan" data-goals="4.2.6">de maan 🌙</span>
+                        <span class="word-tag" data-word="de sterren" data-goals="4.2.6">de sterren ⭐</span>
+                        <span class="word-tag" data-word="de dag" data-goals="4.2.6">de dag</span>
+                        <span class="word-tag" data-word="de nacht" data-goals="4.2.6">de nacht</span>
+                        <span class="word-tag" data-word="draaien" data-goals="4.2.6">draaien 🔄</span>
+                        <span class="word-tag" data-word="continent" data-goals="4.1.2">continent</span>
+                        <span class="word-tag" data-word="Europa" data-goals="4.1.2">Europa</span>
+                        <span class="word-tag" data-word="Afrika" data-goals="4.1.2">Afrika</span>
+                    </div>
+                </div>
+
+                <!-- Weer 4.2.4, 4.3.3 -->
+                <div class="category-card nature" data-category="nature" data-goals="4.2.4,4.3.3">
+                    <h3>🌤️ Weer & Klimaat</h3>
+                    <div class="goal-codes">4.2.4, 4.3.3 - Weersverschijnselen</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="temperatuur" data-goals="4.2.4">temperatuur</span>
+                        <span class="word-tag" data-word="neerslag" data-goals="4.2.4">neerslag</span>
+                        <span class="word-tag" data-word="bewolking" data-goals="4.2.4,4.2.5">bewolking</span>
+                        <span class="word-tag" data-word="wind" data-goals="4.2.4">wind</span>
+                        <span class="word-tag" data-word="regen" data-goals="4.3.3">regen</span>
+                        <span class="word-tag" data-word="sneeuw" data-goals="4.3.3">sneeuw</span>
+                        <span class="word-tag" data-word="hagel" data-goals="4.3.3">hagel</span>
+                        <span class="word-tag" data-word="mist" data-goals="4.3.3">mist</span>
+                    </div>
+                </div>
+                <!-- Seizoenen 4.2.7 -->
+                <div class="category-card time" data-category="time" data-goals="4.2.7">
+                    <h3>🍂 Seizoenen</h3>
+                    <div class="goal-codes">4.2.7 - Ritme seizoenen herkennen</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="lente" data-goals="4.2.7">lente</span>
+                        <span class="word-tag" data-word="zomer" data-goals="4.2.7">zomer</span>
+                        <span class="word-tag" data-word="herfst" data-goals="4.2.7">herfst</span>
+                        <span class="word-tag" data-word="winter" data-goals="4.2.7">winter</span>
+                    </div>
+                </div>
+                <!-- Heelal 4.2.6 -->
+                <div class="category-card nature" data-category="nature" data-goals="4.2.6">
+                    <h3>🌙 Heelal</h3>
+                    <div class="goal-codes">4.2.6 - Kosmografie begrippen</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="aarde" data-goals="4.2.6">aarde</span>
+                        <span class="word-tag" data-word="maan" data-goals="4.2.6">maan</span>
+                        <span class="word-tag" data-word="zon" data-goals="4.2.6">zon</span>
+                        <span class="word-tag" data-word="sterren" data-goals="4.2.6">sterren</span>
+                        <span class="word-tag" data-word="dag" data-goals="4.2.6">dag</span>
+                        <span class="word-tag" data-word="nacht" data-goals="4.2.6">nacht</span>
+                    </div>
+                </div>
+                <!-- Infrastructuur 4.2.3 -->
+                <div class="category-card location" data-category="location" data-goals="4.2.3">
+                    <h3>🏠 Wonen & Omgeving</h3>
+                    <div class="goal-codes">4.2.3 - Infrastructuur</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="huis" data-goals="4.2.3">huis</span>
+                        <span class="word-tag" data-word="appartement" data-goals="4.2.3">appartement</span>
+                        <span class="word-tag" data-word="tuin" data-goals="4.2.3">tuin</span>
+                        <span class="word-tag" data-word="straat" data-goals="4.2.3">straat</span>
+                        <span class="word-tag" data-word="bus" data-goals="4.2.3">bus</span>
+                        <span class="word-tag" data-word="trein" data-goals="4.2.3">trein</span>
+                        <span class="word-tag" data-word="winkel" data-goals="4.2.3">winkel</span>
+                        <span class="word-tag" data-word="park" data-goals="4.2.3">park</span>
+                        <span class="word-tag" data-word="boerderij" data-goals="4.2.3">boerderij</span>
+                        <span class="word-tag" data-word="fabriek" data-goals="4.2.3">fabriek</span>
+                    </div>
+                </div>
+                <!-- Lichaam 3.3.1, 3.3.2, 3.3.3 -->
+                <div class="category-card body" data-category="body" data-goals="3.3.1,3.3.2,3.3.3">
+                    <h3>🦶 Lichaam</h3>
+                    <div class="goal-codes">3.3.1-3 - Lichaamsdelen kennen, functie & aanduiden</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="spieren" data-goals="3.3.1,3.3.2">spieren</span>
+                        <span class="word-tag" data-word="botten" data-goals="3.3.1,3.3.2">botten</span>
+                        <span class="word-tag" data-word="longen" data-goals="3.3.1,3.3.2">longen</span>
+                        <span class="word-tag" data-word="hart" data-goals="3.3.1,3.3.2">hart</span>
+                        <span class="word-tag" data-word="maag" data-goals="3.3.1,3.3.2">maag</span>
+                        <span class="word-tag" data-word="ogen" data-goals="3.3.1,3.3.2,3.3.3">ogen</span>
+                        <span class="word-tag" data-word="oren" data-goals="3.3.1,3.3.2,3.3.3">oren</span>
+                        <span class="word-tag" data-word="neus" data-goals="3.3.1,3.3.2,3.3.3">neus</span>
+                        <span class="word-tag" data-word="mond" data-goals="3.3.1,3.3.2,3.3.3">mond</span>
+                        <span class="word-tag" data-word="huid" data-goals="3.3.1,3.3.2,3.3.3">huid</span>
+                    </div>
+                </div>
+                <!-- Zintuigen 3.3.1 -->
+                <div class="category-card body" data-category="body" data-goals="3.3.1">
+                    <h3>👁️ Zintuigen</h3>
+                    <div class="goal-codes">3.3.1 - Fysieke functies</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="zien" data-goals="3.3.1">zien</span>
+                        <span class="word-tag" data-word="horen" data-goals="3.3.1">horen</span>
+                        <span class="word-tag" data-word="ruiken" data-goals="3.3.1">ruiken</span>
+                        <span class="word-tag" data-word="proeven" data-goals="3.3.1">proeven</span>
+                        <span class="word-tag" data-word="voelen" data-goals="3.3.1">voelen</span>
+                        <span class="word-tag" data-word="bewegen" data-goals="3.3.1">bewegen</span>
+                        <span class="word-tag" data-word="ademen" data-goals="3.3.1">ademen</span>
+                        <span class="word-tag" data-word="honger" data-goals="3.3.1,3.2.4">honger</span>
+                        <span class="word-tag" data-word="dorst" data-goals="3.3.1,3.2.4">dorst</span>
+                    </div>
+                </div>
+                <!-- Dieren 3.1.1, 3.1.2 -->
+                <div class="category-card animals" data-category="animals" data-goals="3.1.1,3.1.2">
+                    <h3>🐾 Dieren</h3>
+                    <div class="goal-codes">3.1.1, 3.1.2 - Classificatie & kenmerken</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="fauna" data-goals="3.1.1">fauna</span>
+                        <span class="word-tag" data-word="zoogdieren" data-goals="3.1.1">zoogdieren</span>
+                        <span class="word-tag" data-word="vogels" data-goals="3.1.1">vogels</span>
+                        <span class="word-tag" data-word="vissen" data-goals="3.1.1">vissen</span>
+                        <span class="word-tag" data-word="insecten" data-goals="3.1.1">insecten</span>
+                        <span class="word-tag" data-word="flora" data-goals="3.1.1">flora</span>
+                        <span class="word-tag" data-word="eieren" data-goals="3.1.2">eieren</span>
+                        <span class="word-tag" data-word="zogend" data-goals="3.1.2">zogend</span>
+                    </div>
+                </div>
+                <!-- Planten 3.1.2 -->
+                <div class="category-card animals" data-category="animals" data-goals="3.1.2">
+                    <h3>🌱 Planten</h3>
+                    <div class="goal-codes">3.1.2 - Plantonderdelen</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="wortel" data-goals="3.1.2">wortel</span>
+                        <span class="word-tag" data-word="stengel" data-goals="3.1.2">stengel</span>
+                        <span class="word-tag" data-word="stam" data-goals="3.1.2">stam</span>
+                        <span class="word-tag" data-word="blad" data-goals="3.1.2">blad</span>
+                        <span class="word-tag" data-word="bloem" data-goals="3.1.2">bloem</span>
+                        <span class="word-tag" data-word="vrucht" data-goals="3.1.2">vrucht</span>
+                        <span class="word-tag" data-word="zaad" data-goals="3.1.2">zaad</span>
+                    </div>
+                </div>
+                <!-- Levenscyclus 3.1.3, 3.1.4 -->
+                <div class="category-card animals" data-category="animals" data-goals="3.1.3,3.1.4">
+                    <h3>🔄 Levenscyclus</h3>
+                    <div class="goal-codes">3.1.3, 3.1.4 - Levensfasen</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="geboren worden" data-goals="3.1.3">geboren worden</span>
+                        <span class="word-tag" data-word="kiemen" data-goals="3.1.3">kiemen</span>
+                        <span class="word-tag" data-word="groeien" data-goals="3.1.3">groeien</span>
+                        <span class="word-tag" data-word="sterven" data-goals="3.1.3">sterven</span>
+                        <span class="word-tag" data-word="baby" data-goals="3.1.4">baby</span>
+                        <span class="word-tag" data-word="peuter" data-goals="3.1.4">peuter</span>
+                        <span class="word-tag" data-word="kleuter" data-goals="3.1.4">kleuter</span>
+                        <span class="word-tag" data-word="kind" data-goals="3.1.4">kind</span>
+                        <span class="word-tag" data-word="volwassene" data-goals="3.1.4">volwassene</span>
+                    </div>
+                </div>
+                <!-- Licht & Magnetisme 3.5.1, 3.5.2, 3.5.4 -->
+                <div class="category-card nature" data-category="nature" data-goals="3.5.1,3.5.2,3.5.4">
+                    <h3>💡 Licht & Magnetisme</h3>
+                    <div class="goal-codes">3.5.1-4 - Natuurkundige verschijnselen</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="lamp" data-goals="3.5.1">lamp</span>
+                        <span class="word-tag" data-word="licht" data-goals="3.5.1,3.5.2">licht</span>
+                        <span class="word-tag" data-word="donker" data-goals="3.5.1">donker</span>
+                        <span class="word-tag" data-word="schaduw" data-goals="3.5.1">schaduw</span>
+                        <span class="word-tag" data-word="spiegel" data-goals="3.5.1,3.5.2">spiegel</span>
+                        <span class="word-tag" data-word="magneet" data-goals="3.5.1,3.5.4">magneet</span>
+                        <span class="word-tag" data-word="aantrekken" data-goals="3.5.1,3.5.4">aantrekken</span>
+                        <span class="word-tag" data-word="afstoten" data-goals="3.5.1,3.5.4">afstoten</span>
+                        <span class="word-tag" data-word="batterij" data-goals="3.5.1">batterij</span>
+                    </div>
+                </div>
+                <!-- Kleuren 6.3.1, 6.3.4 -->
+                <div class="category-card art" data-category="art" data-goals="6.3.1,6.3.4">
+                    <h3>🎨 Kleuren</h3>
+                    <div class="goal-codes">6.3.1, 6.3.4 - Beeld bouwstenen & kleuren</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="rood" data-goals="6.3.1,6.3.4">rood</span>
+                        <span class="word-tag" data-word="geel" data-goals="6.3.1,6.3.4">geel</span>
+                        <span class="word-tag" data-word="blauw" data-goals="6.3.1,6.3.4">blauw</span>
+                        <span class="word-tag" data-word="groen" data-goals="6.3.1,6.3.4">groen</span>
+                        <span class="word-tag" data-word="oranje" data-goals="6.3.1,6.3.4">oranje</span>
+                        <span class="word-tag" data-word="paars" data-goals="6.3.1,6.3.4">paars</span>
+                        <span class="word-tag" data-word="wit" data-goals="6.3.1">wit</span>
+                        <span class="word-tag" data-word="zwart" data-goals="6.3.1">zwart</span>
+                        <span class="word-tag" data-word="grijs" data-goals="6.3.1">grijs</span>
+                        <span class="word-tag" data-word="bruin" data-goals="6.3.1">bruin</span>
+                    </div>
+                </div>
+                <!-- Vormen 2.4.1, 2.4.2 -->
+                <div class="category-card math" data-category="math" data-goals="2.4.1,2.4.2">
+                    <h3>🔷 Vormen</h3>
+                    <div class="goal-codes">2.4.1, 2.4.2 - Vormleer</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="driehoek" data-goals="2.4.1,2.4.2">driehoek</span>
+                        <span class="word-tag" data-word="rechthoek" data-goals="2.4.1,2.4.2">rechthoek</span>
+                        <span class="word-tag" data-word="vierkant" data-goals="2.4.1,2.4.2">vierkant</span>
+                        <span class="word-tag" data-word="cirkel" data-goals="2.4.1,2.4.2">cirkel</span>
+                        <span class="word-tag" data-word="kubus" data-goals="2.4.1,2.4.2">kubus</span>
+                        <span class="word-tag" data-word="balk" data-goals="2.4.1,2.4.2">balk</span>
+                        <span class="word-tag" data-word="bol" data-goals="2.4.1,2.4.2">bol</span>
+                        <span class="word-tag" data-word="piramide" data-goals="2.4.1,2.4.2">piramide</span>
+                        <span class="word-tag" data-word="rond" data-goals="2.4.1">rond</span>
+                        <span class="word-tag" data-word="recht" data-goals="2.4.1">recht</span>
+                    </div>
+                </div>
+                <!-- Getallen 2.1.1, 2.1.7, 2.1.8 -->
+                <div class="category-card math" data-category="math" data-goals="2.1.1,2.1.7,2.1.8">
+                    <h3>🔢 Getallen</h3>
+                    <div class="goal-codes">2.1.1, 2.1.7, 2.1.8 - Tellen & vergelijken</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="evenveel" data-goals="2.1.7">evenveel</span>
+                        <span class="word-tag" data-word="veel" data-goals="2.1.7">veel</span>
+                        <span class="word-tag" data-word="weinig" data-goals="2.1.7">weinig</span>
+                        <span class="word-tag" data-word="meer" data-goals="2.1.7">meer</span>
+                        <span class="word-tag" data-word="minder" data-goals="2.1.7">minder</span>
+                        <span class="word-tag" data-word="eerste" data-goals="2.1.7">eerste</span>
+                        <span class="word-tag" data-word="laatste" data-goals="2.1.7">laatste</span>
+                        <span class="word-tag" data-word="hoeveel" data-goals="2.1.7">hoeveel</span>
+                    </div>
+                </div>
+                <!-- Meten 2.3.4, 2.3.7 -->
+                <div class="category-card math" data-category="math" data-goals="2.3.4,2.3.7">
+                    <h3>📏 Meten</h3>
+                    <div class="goal-codes">2.3.4, 2.3.7 - Lengte & massa begrippen</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="lang" data-goals="2.3.4">lang</span>
+                        <span class="word-tag" data-word="kort" data-goals="2.3.4">kort</span>
+                        <span class="word-tag" data-word="hoog" data-goals="2.3.4">hoog</span>
+                        <span class="word-tag" data-word="laag" data-goals="2.3.4">laag</span>
+                        <span class="word-tag" data-word="groot" data-goals="2.3.4">groot</span>
+                        <span class="word-tag" data-word="klein" data-goals="2.3.4">klein</span>
+                        <span class="word-tag" data-word="vol" data-goals="2.3.4">vol</span>
+                        <span class="word-tag" data-word="leeg" data-goals="2.3.4">leeg</span>
+                        <span class="word-tag" data-word="zwaar" data-goals="2.3.7">zwaar</span>
+                        <span class="word-tag" data-word="licht" data-goals="2.3.7">licht</span>
+                    </div>
+                </div>
+                <!-- Tijd 2.3.16, 2.3.17 -->
+                <div class="category-card time" data-category="time" data-goals="2.3.16,2.3.17,2.3.18">
+                    <h3>⏰ Tijd</h3>
+                    <div class="goal-codes">2.3.16-18 - Dagen & tijdsbegrippen</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="vandaag" data-goals="2.3.17,2.3.18">vandaag</span>
+                        <span class="word-tag" data-word="gisteren" data-goals="2.3.17,2.3.18">gisteren</span>
+                        <span class="word-tag" data-word="morgen" data-goals="2.3.17,2.3.18">morgen</span>
+                        <span class="word-tag" data-word="eerder" data-goals="2.3.17">eerder</span>
+                        <span class="word-tag" data-word="later" data-goals="2.3.17">later</span>
+                        <span class="word-tag" data-word="eerst" data-goals="2.3.17">eerst</span>
+                        <span class="word-tag" data-word="daarna" data-goals="2.3.17">daarna</span>
+                        <span class="word-tag" data-word="dag" data-goals="2.3.17">dag</span>
+                        <span class="word-tag" data-word="week" data-goals="2.3.17">week</span>
+                    </div>
+                </div>
+                <!-- Dagen 2.3.16 -->
+                <div class="category-card time" data-category="time" data-goals="2.3.16">
+                    <h3>📅 Dagen van de week</h3>
+                    <div class="goal-codes">2.3.16 - Dagen kennen</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="maandag" data-goals="2.3.16">maandag</span>
+                        <span class="word-tag" data-word="dinsdag" data-goals="2.3.16">dinsdag</span>
+                        <span class="word-tag" data-word="woensdag" data-goals="2.3.16">woensdag</span>
+                        <span class="word-tag" data-word="donderdag" data-goals="2.3.16">donderdag</span>
+                        <span class="word-tag" data-word="vrijdag" data-goals="2.3.16">vrijdag</span>
+                        <span class="word-tag" data-word="zaterdag" data-goals="2.3.16">zaterdag</span>
+                        <span class="word-tag" data-word="zondag" data-goals="2.3.16">zondag</span>
+                    </div>
+                </div>
+                <!-- Emoties 9.3.1 -->
+                <div class="category-card art" data-category="art" data-goals="9.3.1">
+                    <h3>😊 Gevoelens</h3>
+                    <div class="goal-codes">9.3.1 - Emoties herkennen & benoemen</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="blij" data-goals="9.3.1">blij</span>
+                        <span class="word-tag" data-word="verdrietig" data-goals="9.3.1">verdrietig</span>
+                        <span class="word-tag" data-word="boos" data-goals="9.3.1">boos</span>
+                        <span class="word-tag" data-word="bang" data-goals="9.3.1">bang</span>
+                        <span class="word-tag" data-word="moe" data-goals="9.3.1">moe</span>
+                        <span class="word-tag" data-word="verbaasd" data-goals="9.3.1">verbaasd</span>
+                        <span class="word-tag" data-word="trots" data-goals="9.3.1">trots</span>
+                    </div>
+                </div>
+                <!-- Taal 1.4.4 -->
+                <div class="category-card art" data-category="art" data-goals="1.1.1,1.4.4,1.4.5">
+                    <h3>📖 Taal & Rijm</h3>
+                    <div class="goal-codes">1.1.1, 1.4.4, 1.4.5 - Fonologisch bewustzijn</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="woord" data-goals="1.4.4">woord</span>
+                        <span class="word-tag" data-word="rijm" data-goals="1.1.1,1.4.4">rijm</span>
+                        <span class="word-tag" data-word="klank" data-goals="1.4.4,1.4.5">klank</span>
+                        <span class="word-tag" data-word="letter" data-goals="1.4.4,1.1.4">letter</span>
+                        <span class="word-tag" data-word="klankgroep" data-goals="1.1.1,1.4.4">klankgroep</span>
+                    </div>
+                </div>
+                <!-- Schrijven 1.2.1 - 1.2.7 -->
+                <div class="category-card writing" data-category="writing" data-goals="1.2.1,1.2.2,1.2.3,1.2.4,1.2.5,1.2.6,1.2.7">
+                    <h3>✏️ Schrijfvaardigheden</h3>
+                    <div class="goal-codes">1.2.1-7 - Handschrift & voorbereidend schrijven</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="pengreep" data-goals="1.2.1">pengreep</span>
+                        <span class="word-tag" data-word="schrijfhouding" data-goals="1.2.2">schrijfhouding</span>
+                        <span class="word-tag" data-word="rechte lijn" data-goals="1.2.3">rechte lijn</span>
+                        <span class="word-tag" data-word="gebogen lijn" data-goals="1.2.3">gebogen lijn</span>
+                        <span class="word-tag" data-word="schrijfpatroon" data-goals="1.2.4">schrijfpatroon</span>
+                        <span class="word-tag" data-word="kleuren" data-goals="1.2.5">kleuren</span>
+                        <span class="word-tag" data-word="arceren" data-goals="1.2.6">arceren</span>
+                        <span class="word-tag" data-word="schrijfrichting" data-goals="1.2.7">schrijfrichting</span>
+                    </div>
+                </div>
+                <!-- Muziek 6.2.1, 6.2.5 -->
+                <div class="category-card music" data-category="art" data-goals="6.2.1,6.2.5">
+                    <h3>🎵 Muziek</h3>
+                    <div class="goal-codes">6.2.1, 6.2.5 - Muziek bouwstenen</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="klank" data-goals="6.2.1">klank</span>
+                        <span class="word-tag" data-word="toon" data-goals="6.2.1">toon</span>
+                        <span class="word-tag" data-word="snel" data-goals="6.2.1">snel</span>
+                        <span class="word-tag" data-word="langzaam" data-goals="6.2.1">langzaam</span>
+                        <span class="word-tag" data-word="hard" data-goals="6.2.1">hard</span>
+                        <span class="word-tag" data-word="zacht" data-goals="6.2.1">zacht</span>
+                        <span class="word-tag" data-word="lied" data-goals="6.2.5">lied</span>
+                        <span class="word-tag" data-word="triangel" data-goals="6.2.5">triangel</span>
+                        <span class="word-tag" data-word="tamboerijn" data-goals="6.2.5">tamboerijn</span>
+                    </div>
+                </div>
+                <!-- Verkeer 9.1.1, 9.1.2 -->
+                <div class="category-card location" data-category="location" data-goals="9.1.1,9.1.2">
+                    <h3>🚦 Verkeer</h3>
+                    <div class="goal-codes">9.1.1, 9.1.2 - Verkeersregels & veiligheid</div>
+                    <div class="word-list">
+                        <span class="word-tag" data-word="zebrapad" data-goals="9.1.1">zebrapad</span>
+                        <span class="word-tag" data-word="verkeerslichten" data-goals="9.1.1">verkeerslichten</span>
+                        <span class="word-tag" data-word="stopbord" data-goals="9.1.1">stopbord</span>
+                        <span class="word-tag" data-word="voetpad" data-goals="9.1.1">voetpad</span>
+                        <span class="word-tag" data-word="oversteken" data-goals="9.1.1">oversteken</span>
+                        <span class="word-tag" data-word="fietshelm" data-goals="9.1.2">fietshelm</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- GAMES TAB -->
+        <div id="games" class="tab-content">
+            <h2 class="section-title">🎮 Kies een spelletje</h2>
+            <div class="games-grid">
+                <div class="game-card colors" onclick="openGame('colors')">
+                    <span class="game-emoji">🎨</span>
+                    <h3>Kleuren Raden</h3>
+                    <p>15 vragen over kleuren</p>
+                    <span class="goal-tag">📚 6.3.1, 6.3.4</span>
+                </div>
+                <div class="game-card counting" onclick="openGame('counting')">
+                    <span class="game-emoji">🔢</span>
+                    <h3>Tellen</h3>
+                    <p>20 telvragen tot 10</p>
+                    <span class="goal-tag">📚 2.1.1, 2.1.8</span>
+                </div>
+                <div class="game-card shapes" onclick="openGame('shapes')">
+                    <span class="game-emoji">🔷</span>
+                    <h3>Vormen Herkennen</h3>
+                    <p>12 vormvragen</p>
+                    <span class="goal-tag">📚 2.4.1, 2.4.2</span>
+                </div>
+                <div class="game-card animals" onclick="openGame('animals')">
+                    <span class="game-emoji">🐾</span>
+                    <h3>Dieren Quiz</h3>
+                    <p>15 vragen over diersoorten</p>
+                    <span class="goal-tag">📚 3.1.1, 3.1.2</span>
+                </div>
+                <div class="game-card body" onclick="openGame('body')">
+                    <span class="game-emoji">🦶</span>
+                    <h3>Lichaamsdelen</h3>
+                    <p>12 vragen over het lichaam</p>
+                    <span class="goal-tag">📚 3.3.1, 3.3.2, 3.3.3</span>
+                </div>
+                <div class="game-card weather" onclick="openGame('weather')">
+                    <span class="game-emoji">🌤️</span>
+                    <h3>Weer Woorden</h3>
+                    <p>10 weervragen</p>
+                    <span class="goal-tag">📚 4.2.4, 4.3.3</span>
+                </div>
+                <div class="game-card position" onclick="openGame('position')">
+                    <span class="game-emoji">📍</span>
+                    <h3>Positie Woorden</h3>
+                    <p>15 plaatsvragen met 3D beelden</p>
+                    <span class="goal-tag">📚 4.1.3, 2.4.5</span>
+                </div>
+                <div class="game-card rhyme" onclick="openGame('rhyme')">
+                    <span class="game-emoji">🎵</span>
+                    <h3>Rijmen</h3>
+                    <p>15 rijmvragen</p>
+                    <span class="goal-tag">📚 1.1.1, 1.4.4</span>
+                </div>
+                <div class="game-card emotions" onclick="openGame('emotions')">
+                    <span class="game-emoji">😊</span>
+                    <h3>Gevoelens</h3>
+                    <p>12 emotievragen</p>
+                    <span class="goal-tag">📚 9.3.1</span>
+                </div>
+                <div class="game-card sorting" onclick="openGame('sorting')">
+                    <span class="game-emoji">📦</span>
+                    <h3>Vergelijken</h3>
+                    <p>15 vergelijkingsvragen</p>
+                    <span class="goal-tag">📚 2.3.4, 2.3.5, 2.3.7</span>
+                </div>
+                <div class="game-card days" onclick="openGame('days')">
+                    <span class="game-emoji">📅</span>
+                    <h3>Dagen van de Week</h3>
+                    <p>10 vragen over dagen</p>
+                    <span class="goal-tag">📚 2.3.16, 2.3.17, 2.3.18</span>
+                </div>
+                <div class="game-card letters" onclick="openGame('letters')">
+                    <span class="game-emoji">🔤</span>
+                    <h3>Letters Herkennen</h3>
+                    <p>15 lettervragen</p>
+                    <span class="goal-tag">📚 1.1.4, 1.4.4</span>
+                </div>
+                <div class="game-card body" onclick="openGame('senses')">
+                    <span class="game-emoji">👁️</span>
+                    <h3>Zintuigen</h3>
+                    <p>10 vragen over zintuigen</p>
+                    <span class="goal-tag">📚 3.3.1</span>
+                </div>
+                <div class="game-card animals" onclick="openGame('lifecycle')">
+                    <span class="game-emoji">🔄</span>
+                    <h3>Levenscyclus</h3>
+                    <p>10 vragen over groeien</p>
+                    <span class="goal-tag">📚 3.1.3, 3.1.4</span>
+                </div>
+                <div class="game-card shapes" onclick="openGame('patterns')">
+                    <span class="game-emoji">🔶</span>
+                    <h3>Patronen</h3>
+                    <p>10 patroonvragen</p>
+                    <span class="goal-tag">📚 2.4.4</span>
+                </div>
+                <div class="game-card weather" onclick="openGame('seasons')">
+                    <span class="game-emoji">🍂</span>
+                    <h3>Seizoenen</h3>
+                    <p>10 seizoenvragen</p>
+                    <span class="goal-tag">📚 4.2.7</span>
+                </div>
+                <div class="game-card nature" onclick="openGame('geography')">
+                    <span class="game-emoji">🌍</span>
+                    <h3>Aardrijkskunde</h3>
+                    <p>12 vragen over de wereld</p>
+                    <span class="goal-tag">📚 4.1.1, 4.1.2, 4.2.6</span>
+                </div>
+                <div class="game-card counting" onclick="openGame('ranking')">
+                    <span class="game-emoji">🏆</span>
+                    <h3>Rangorde</h3>
+                    <p>10 vragen over eerste/laatste</p>
+                    <span class="goal-tag">📚 2.1.2, 2.1.3</span>
+                </div>
+                <div class="game-card counting" onclick="openGame('subitize')">
+                    <span class="game-emoji">👀</span>
+                    <h3>Flitsen</h3>
+                    <p>12 subiteer-vragen</p>
+                    <span class="goal-tag">📚 2.1.9</span>
+                </div>
+                <div class="game-card counting" onclick="openGame('money')">
+                    <span class="game-emoji">💶</span>
+                    <h3>Geld</h3>
+                    <p>10 vragen over betalen</p>
+                    <span class="goal-tag">📚 2.3.10, 2.3.11</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- WRITING TAB -->
+        <div id="writing" class="tab-content">
+            <h2 class="section-title">✏️ Schrijfvaardigheden</h2>
+            <p style="text-align:center; margin-bottom:1.5rem; color:#666;">Oefen voorbereidende schrijfvaardigheden voor kleuters (Doelen 1.2.1 - 1.2.7)</p>
+            
+            <div class="category-grid">
+                <!-- Pengreep 1.2.1 -->
+                <div class="category-card writing" data-goals="1.2.1">
+                    <h3>✋ Pengreep (1.2.1)</h3>
+                    <div class="goal-codes">Dynamische pengreep hanteren</div>
+                    <p style="font-size:0.9rem; margin:0.5rem 0;">De driepuntsgreep: duim, wijsvinger en middenvinger houden het potlood vast.</p>
+                    <div style="font-size:3rem; text-align:center; margin:1rem 0;">✍️</div>
+                    <ul style="font-size:0.85rem; margin-left:1rem; color:#555;">
+                        <li>Duim en wijsvinger tegenover elkaar</li>
+                        <li>Middenvinger ondersteunt</li>
+                        <li>Ontspannen vingers, niet knijpen</li>
+                    </ul>
+                </div>
+
+                <!-- Schrijfhouding 1.2.2 -->
+                <div class="category-card writing" data-goals="1.2.2">
+                    <h3>🪑 Schrijfhouding (1.2.2)</h3>
+                    <div class="goal-codes">Correcte schrijfhouding zitten</div>
+                    <p style="font-size:0.9rem; margin:0.5rem 0;">Goed zitten is belangrijk voor mooi schrijven!</p>
+                    <div style="font-size:3rem; text-align:center; margin:1rem 0;">🧘</div>
+                    <ul style="font-size:0.85rem; margin-left:1rem; color:#555;">
+                        <li>Rechte rug tegen stoelleuning</li>
+                        <li>Voeten plat op de grond</li>
+                        <li>Tafel op goede hoogte</li>
+                        <li>Papier schuin voor rechtshandig/linkshandig</li>
+                    </ul>
+                </div>
+
+                <!-- Lijnen 1.2.3 -->
+                <div class="category-card writing" data-goals="1.2.3">
+                    <h3>📐 Lijnen maken (1.2.3)</h3>
+                    <div class="goal-codes">Rechte en gebogen lijnen binnen liniatuur</div>
+                    <p style="font-size:0.9rem; margin:0.5rem 0;">Oefen met verschillende lijnsoorten:</p>
+                    <div style="font-family:monospace; font-size:1.5rem; text-align:center; margin:1rem 0; line-height:2;">
+                        | | | | | (rechte lijnen)<br>
+                        ∼ ∼ ∼ ∼ (golvende lijnen)<br>
+                        ○ ○ ○ ○ (cirkels)<br>
+                        ⌒ ⌒ ⌒ ⌒ (bogen)
+                    </div>
+                </div>
+
+                <!-- Schrijfpatronen 1.2.4 -->
+                <div class="category-card writing" data-goals="1.2.4">
+                    <h3>〰️ Schrijfpatronen (1.2.4)</h3>
+                    <div class="goal-codes">Schrijfpatronen maken binnen liniatuur</div>
+                    <p style="font-size:0.9rem; margin:0.5rem 0;">Herhaal deze patronen:</p>
+                    <div style="font-family:monospace; font-size:1.2rem; text-align:center; margin:1rem 0; line-height:2.5; letter-spacing:0.5rem;">
+                        ∩∩∩∩∩∩<br>
+                        ∪∪∪∪∪∪<br>
+                        ∧∧∧∧∧∧<br>
+                        ⌒⌒⌒⌒⌒<br>
+                        ~~~<br>
+                        eeeee
+                    </div>
+                </div>
+
+                <!-- Kleuren 1.2.5 -->
+                <div class="category-card writing" data-goals="1.2.5">
+                    <h3>🖍️ Kleuren (1.2.5)</h3>
+                    <div class="goal-codes">Egaal binnen de lijntjes kleuren</div>
+                    <p style="font-size:0.9rem; margin:0.5rem 0;">Tips voor mooi kleuren:</p>
+                    <div style="font-size:3rem; text-align:center; margin:1rem 0;">🎨</div>
+                    <ul style="font-size:0.85rem; margin-left:1rem; color:#555;">
+                        <li>Begin bij de rand</li>
+                        <li>Kleur in dezelfde richting</li>
+                        <li>Niet te hard drukken</li>
+                        <li>Geen witte vlekken laten</li>
+                    </ul>
+                </div>
+
+                <!-- Arceren 1.2.6 -->
+                <div class="category-card writing" data-goals="1.2.6">
+                    <h3>📏 Arceren (1.2.6)</h3>
+                    <div class="goal-codes">Arceren met rechte lijnen</div>
+                    <p style="font-size:0.9rem; margin:0.5rem 0;">Arceren = opvullen met evenwijdige lijnen:</p>
+                    <div style="font-family:monospace; font-size:1.5rem; text-align:center; margin:1rem 0; line-height:1.5;">
+                        ||||||||<br>
+                        ////////<br>
+                        \\\\\\\\<br>
+                        ========
+                    </div>
+                </div>
+
+                <!-- Schrijfrichting 1.2.7 -->
+                <div class="category-card writing" data-goals="1.2.7">
+                    <h3>➡️ Schrijfrichting (1.2.7)</h3>
+                    <div class="goal-codes">De schrijfrichting hanteren</div>
+                    <p style="font-size:0.9rem; margin:0.5rem 0;">We schrijven van links naar rechts en van boven naar beneden:</p>
+                    <div style="font-size:2rem; text-align:center; margin:1rem 0;">
+                        ⬅️ START ➡️ EINDE<br>
+                        ⬇️<br>
+                        volgende regel
+                    </div>
+                </div>
+
+                <!-- Vastleggen 1.2.8 -->
+                <div class="category-card writing" data-goals="1.2.8">
+                    <h3>💭 Ideeën vastleggen (1.2.8)</h3>
+                    <div class="goal-codes">Tekenen, krabbels, symbolen gebruiken</div>
+                    <p style="font-size:0.9rem; margin:0.5rem 0;">Manieren om iets vast te leggen:</p>
+                    <div style="font-size:2rem; text-align:center; margin:1rem 0;">
+                        🖼️ Tekening<br>
+                        ✏️ Krabbels<br>
+                        ⭐ Symbolen<br>
+                        ABC Letters
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-title" style="margin-top:2rem;">🎮 Schrijfoefening Spelletjes</h2>
+            <div class="games-grid">
+                <div class="game-card writing" onclick="openGame('lines')">
+                    <span class="game-emoji">📐</span>
+                    <h3>Lijn Herkennen</h3>
+                    <p>Welke lijn is dit?</p>
+                    <span class="goal-tag">📚 1.2.3, 6.3.2</span>
+                </div>
+                <div class="game-card writing" onclick="openGame('direction')">
+                    <span class="game-emoji">➡️</span>
+                    <h3>Richting Quiz</h3>
+                    <p>Links of rechts?</p>
+                    <span class="goal-tag">📚 1.2.7, 1.1.10</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- GOALS TAB -->
+        <div id="goals" class="tab-content">
+            <h2 class="section-title">🎯 Onderwijsdoelen Voortgang</h2>
+            <div class="stats-bar">
+                <div class="stat-item"><span>📊</span> Totaal doelen: <span class="stat-value" id="goals-total">0</span></div>
+                <div class="stat-item"><span>⭐</span> Meest geoefend: <span class="stat-value" id="top-goal">-</span></div>
+                <button class="export-btn" onclick="openExport()">📋 Exporteer Rapport</button>
+            </div>
+            <div style="display:flex; gap:0.75rem; margin-bottom:1rem; flex-wrap:wrap; align-items:center;">
+                <input type="text" id="goals-search" placeholder="🔍 Zoek op doelcode of titel..." style="flex:1; min-width:200px; padding:0.6rem 1rem; border-radius:20px; border:2px solid #eee; font-size:0.9rem;">
+                <select id="goals-sort" style="padding:0.6rem 1rem; border-radius:20px; border:2px solid #eee; font-size:0.9rem; background:white; cursor:pointer;">
+                    <option value="code">Sorteer op doelnummer</option>
+                    <option value="count-desc">Meest geoefend eerst</option>
+                    <option value="count-asc">Minst geoefend eerst</option>
+                    <option value="title">Alfabetisch op titel</option>
+                </select>
+            </div>
+            <div class="goal-filter">
+                <button class="goal-filter-btn active" data-domain="all">Alle</button>
+                <button class="goal-filter-btn" data-domain="1">📖 Nederlands</button>
+                <button class="goal-filter-btn" data-domain="2">🔢 Wiskunde</button>
+                <button class="goal-filter-btn" data-domain="3">🔬 Wetenschap</button>
+                <button class="goal-filter-btn" data-domain="4">🌍 Aardrijkskunde</button>
+                <button class="goal-filter-btn" data-domain="5">📜 Geschiedenis</button>
+                <button class="goal-filter-btn" data-domain="6">🎨 Muzische vorming</button>
+                <button class="goal-filter-btn" data-domain="7">🏃 Lichamelijke opvoeding</button>
+                <button class="goal-filter-btn" data-domain="9">💚 Attitudes</button>
+            </div>
+            <div id="goals-list"></div>
+        </div>
+
+        <!-- TASKS TAB (Doe-opdrachten) -->
+        <div id="tasks" class="tab-content">
+            <h2 class="section-title">✋ Doe-opdrachten</h2>
+            <p style="text-align:center; margin-bottom:1rem; color:#666;">Fysieke oefeningen om samen met de kleuter te doen. Klik om af te vinken!</p>
+            
+            <div class="task-filter">
+                <button class="task-filter-btn active" data-taskfilter="all">Alle</button>
+                <button class="task-filter-btn" data-taskfilter="todo">⬜ Te doen</button>
+                <button class="task-filter-btn" data-taskfilter="done">✅ Gedaan</button>
+                <button class="task-filter-btn" data-taskfilter="1">📖 Nederlands</button>
+                <button class="task-filter-btn" data-taskfilter="2">🔢 Wiskunde</button>
+                <button class="task-filter-btn" data-taskfilter="3">🔬 Wetenschap</button>
+                <button class="task-filter-btn" data-taskfilter="5">📜 Geschiedenis</button>
+                <button class="task-filter-btn" data-taskfilter="6">🎨 Muzisch</button>
+                <button class="task-filter-btn" data-taskfilter="7">🏃 Beweging</button>
+                <button class="task-filter-btn" data-taskfilter="9">💚 Attitudes</button>
+            </div>
+
+            <div id="tasks-list">
+                <!-- Nederlands -->
+                <div class="task-card" data-task="listen1" data-domain="1" data-goals="1.3.1" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🎧 Luisteroefening</div>
+                        <div class="task-desc">Lees een kort verhaaltje voor en stel 3 vragen over wat er gebeurde.</div>
+                        <div class="task-goals">📚 1.3.1 - Met aandacht luisteren</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="speak1" data-domain="1" data-goals="1.3.5" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🗣️ Vertellen</div>
+                        <div class="task-desc">Laat de kleuter vertellen wat hij/zij in het weekend deed. Let op duidelijke uitspraak.</div>
+                        <div class="task-goals">📚 1.3.5 - Verstaanbaar spreken</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="phoneme1" data-domain="1" data-goals="1.1.2,1.1.3" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">👂 Klanken zoeken</div>
+                        <div class="task-desc">Zoek samen 5 voorwerpen die beginnen met de /m/ klank (of andere klank).</div>
+                        <div class="task-goals">📚 1.1.2, 1.1.3 - Fonemisch bewustzijn</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="book1" data-domain="1" data-goals="1.5.1" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">📚 Boek verkennen</div>
+                        <div class="task-desc">Bekijk een prentenboek: wie is de auteur? Wie maakte de tekeningen (illustrator)? Wat is de titel?</div>
+                        <div class="task-goals">📚 1.5.1 - Auteur, illustrator, titel, kaft</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="visual1" data-domain="1" data-goals="1.1.5" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🚸 Pictogrammen lezen</div>
+                        <div class="task-desc">Bekijk verkeersborden of pictogrammen: wat betekent dit plaatje?</div>
+                        <div class="task-goals">📚 1.1.5 - Visuele boodschappen begrijpen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+
+                <!-- Wiskunde -->
+                <div class="task-card" data-task="ordinal1" data-domain="2" data-goals="2.1.2,2.1.3" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🏆 Rangorde oefenen</div>
+                        <div class="task-desc">Zet speelgoed op een rij: wie is eerste? Tweede? Derde? Wie staat laatste?</div>
+                        <div class="task-goals">📚 2.1.2, 2.1.3 - Rangtelwoorden eerste tot tiende</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="subitize1" data-domain="2" data-goals="2.1.9" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">👀 Flitsend tellen</div>
+                        <div class="task-desc">Toon kort (1 sec) 1-5 vingers of blokjes. Hoeveel waren het? Niet tellen!</div>
+                        <div class="task-goals">📚 2.1.9 - Subiteren (aantallen herkennen zonder tellen)</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="money1" data-domain="2" data-goals="2.3.10,2.3.11" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">💶 Winkeltje spelen</div>
+                        <div class="task-desc">Speel winkeltje met echte/nep muntjes. Wat kost dit? Kun je betalen?</div>
+                        <div class="task-goals">📚 2.3.10, 2.3.11 - Geld, betalen, kopen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="calc1" data-domain="2" data-goals="2.2.1" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">➕ Erbij en eraf</div>
+                        <div class="task-desc">Met blokjes: "Je hebt 3 blokjes, ik geef er 2 bij. Hoeveel nu?" Ook met wegnemen.</div>
+                        <div class="task-goals">📚 2.2.1 - Bijdoen, erbij, wegnemen, splitsen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="mirror1" data-domain="2" data-goals="2.4.11,2.4.16" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🪞 Spiegelen</div>
+                        <div class="task-desc">Leg een spiegel naast een tekening. Wat zie je? Maak zelf een symmetrische vlinder.</div>
+                        <div class="task-goals">📚 2.4.11, 2.4.16 - Spiegelbeelden, symmetrie</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="sort1" data-domain="2" data-goals="2.4.18" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">📦 Sorteren</div>
+                        <div class="task-desc">Sorteer voorwerpen op kleur, grootte of vorm. Leg uit waarom ze bij elkaar horen.</div>
+                        <div class="task-goals">📚 2.4.18 - Objecten sorteren op eigenschap</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="chance1" data-domain="2" data-goals="2.5.1" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🎲 Kan dat?</div>
+                        <div class="task-desc">Bespreek: kan een vis vliegen? Kan het morgen regenen? (kan/kan niet/misschien)</div>
+                        <div class="task-goals">📚 2.5.1 - Kansbegrippen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="chrono1" data-domain="2" data-goals="2.3.19" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">⏰ Dagritme</div>
+                        <div class="task-desc">Leg plaatjes in de juiste volgorde: opstaan, ontbijt, school, avondeten, slapen.</div>
+                        <div class="task-goals">📚 2.3.19 - Gebeurtenissen chronologisch ordenen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="orient1" data-domain="2" data-goals="2.4.6" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🧭 Schatzoeken</div>
+                        <div class="task-desc">Verstop iets en geef aanwijzingen: "Ga 3 stappen naar voren, draai naar links..."</div>
+                        <div class="task-goals">📚 2.4.6 - Oriënteren in ruimte</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="transform1" data-domain="2" data-goals="2.4.10" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🔄 Draaien en schuiven</div>
+                        <div class="task-desc">Draai een vorm (vierkant, driehoek). Schuif hem op. Is het nog dezelfde vorm?</div>
+                        <div class="task-goals">📚 2.4.10 - Verschuiven, draaien, spiegelen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+
+                <!-- Wetenschap -->
+                <div class="task-card" data-task="food1" data-domain="3" data-goals="3.2.1,3.2.2" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🥕 Voedselketen</div>
+                        <div class="task-desc">Bespreek: wat eet een konijn? En wat eet een vos? Wie eet wie?</div>
+                        <div class="task-goals">📚 3.2.1, 3.2.2 - Voedselketen, voedingsmiddelen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="matter1" data-domain="3" data-goals="3.4.1" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🧱 Materialen sorteren</div>
+                        <div class="task-desc">Verzamel spullen: wat is hard/zacht? Wat is glad/ruw? Sorteer op eigenschap.</div>
+                        <div class="task-goals">📚 3.4.1 - Materie sorteren op eigenschappen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="sound1" data-domain="3" data-goals="3.5.3" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🔊 Geluiden maken</div>
+                        <div class="task-desc">Maak verschillende geluiden: hard klappen, zacht fluisteren. Wat is het verschil?</div>
+                        <div class="task-goals">📚 3.5.3 - Geluid: hard en zacht</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="cause1" data-domain="3" data-goals="3.6.1" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🔗 Oorzaak en gevolg</div>
+                        <div class="task-desc">Wat gebeurt er als je een bal loslaat? Als je water morst? Bespreek oorzaak → gevolg.</div>
+                        <div class="task-goals">📚 3.6.1 - Relatie oorzaak en gevolg</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+
+                <!-- Geschiedenis -->
+                <div class="task-card" data-task="prehist1" data-domain="5" data-goals="5.1.1" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🦴 Prehistorie ontdekken</div>
+                        <div class="task-desc">Bekijk plaatjes/video over holbewoners. Hoe maakten ze vuur? Hoe jaagden ze?</div>
+                        <div class="task-goals">📚 5.1.1 - Prehistorie: vuur, jagen, werktuigen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="egypt1" data-domain="5" data-goals="5.1.2" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🏛️ Egypte verkennen</div>
+                        <div class="task-desc">Bekijk plaatjes van piramides en farao's. Bouw zelf een piramide van blokken!</div>
+                        <div class="task-goals">📚 5.1.2 - Oudheid: Egypte, piramides, farao</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="sources1" data-domain="5" data-goals="5.2.1" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🔍 Bronnen bekijken</div>
+                        <div class="task-desc">Bekijk oude foto's van opa/oma. Dit is een bron! Wat vertelt het ons over vroeger?</div>
+                        <div class="task-goals">📚 5.2.1 - Bronnen: foto's, voorwerpen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="past1" data-domain="5" data-goals="5.2.2,5.2.3" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">⏳ Vroeger en nu</div>
+                        <div class="task-desc">Vergelijk: hoe speelden kinderen vroeger? En nu? Wat is veranderd?</div>
+                        <div class="task-goals">📚 5.2.2, 5.2.3 - Veranderingen, chronologie</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+
+                <!-- Muzische vorming -->
+                <div class="task-card" data-task="rhythm1" data-domain="6" data-goals="6.2.2" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🥁 Ritme klappen</div>
+                        <div class="task-desc">Klap een ritme voor: kort-kort-lang. Kan de kleuter het nadoen?</div>
+                        <div class="task-goals">📚 6.2.2 - Geluidspatronen lang/kort</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="pitch1" data-domain="6" data-goals="6.2.4" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🎵 Hoog en laag zingen</div>
+                        <div class="task-desc">Zing hoge tonen (piep piep) en lage tonen (brom brom). Zing een liedje samen!</div>
+                        <div class="task-goals">📚 6.2.4 - Hoog/laag tonen herkennen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="texture1" data-domain="6" data-goals="6.3.3" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">✋ Texturen voelen</div>
+                        <div class="task-desc">Voel verschillende materialen met ogen dicht: glad, ruw, zacht, hard. Wat is het?</div>
+                        <div class="task-goals">📚 6.3.3 - Texturen onderscheiden</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="drama1" data-domain="6" data-goals="6.4.1,6.4.2" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🎭 Toneelspelen</div>
+                        <div class="task-desc">Speel samen een kort verhaaltje na. Wie ben jij? Wat is je kostuum?</div>
+                        <div class="task-goals">📚 6.4.1, 6.4.2 - Drama, rollen spelen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="dance1" data-domain="6" data-goals="6.5.1,6.5.2" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">💃 Dansen</div>
+                        <div class="task-desc">Dans op muziek: snel/langzaam, grote/kleine bewegingen. Volg het ritme!</div>
+                        <div class="task-goals">📚 6.5.1, 6.5.2 - Dans, ritme en tempo</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="media1" data-domain="6" data-goals="6.6.1" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">📸 Foto maken</div>
+                        <div class="task-desc">Laat de kleuter een foto maken. Wat staat in beeld? Wat staat buiten beeld?</div>
+                        <div class="task-goals">📚 6.6.1 - Media: foto, camera, in/buiten beeld</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+
+                <!-- Lichamelijke opvoeding -->
+                <div class="task-card" data-task="motor1" data-domain="7" data-goals="7.1.1,7.1.2" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🤸 Bewegen</div>
+                        <div class="task-desc">Doe een parcours: klimmen, springen, balanceren, kruipen. Wie kan het?</div>
+                        <div class="task-goals">📚 7.1.1, 7.1.2 - Motorische basisvaardigheden</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="throw1" data-domain="7" data-goals="7.1.2" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🎾 Gooien en vangen</div>
+                        <div class="task-desc">Gooi een bal naar elkaar. Probeer te vangen! Begin dichtbij, dan verder weg.</div>
+                        <div class="task-goals">📚 7.1.2 - Werpen en vangen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="hand1" data-domain="7" data-goals="7.1.5" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">✋ Voorkeurshand</div>
+                        <div class="task-desc">Met welke hand teken je? Gooi je? Dat is je voorkeurshand!</div>
+                        <div class="task-goals">📚 7.1.5 - Voorkeurslichaamszijde kennen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="rhythm2" data-domain="7" data-goals="7.1.6" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🎶 Bewegen op muziek</div>
+                        <div class="task-desc">Beweeg op het ritme van de muziek: snel bij snelle muziek, langzaam bij rustige.</div>
+                        <div class="task-goals">📚 7.1.6 - Beweging afstemmen op tijd</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="space1" data-domain="7" data-goals="7.1.7" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🏃 Ruimte gebruiken</div>
+                        <div class="task-desc">Loop door de ruimte zonder anderen aan te raken. Stop precies bij de lijn!</div>
+                        <div class="task-goals">📚 7.1.7 - Beweging afstemmen op ruimte</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="rules1" data-domain="7" data-goals="7.2.1" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🎮 Spelregels volgen</div>
+                        <div class="task-desc">Speel een eenvoudig spel met 1-2 regels: stoelendans, verstoppertje, tikkertje.</div>
+                        <div class="task-goals">📚 7.2.1 - Spelregels opvolgen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+
+                <!-- Attitudes -->
+                <div class="task-card" data-task="emergency1" data-domain="9" data-goals="9.1.3" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🚨 Noodgeval oefenen</div>
+                        <div class="task-desc">Wat doe je als er iets ergs gebeurt? Altijd een volwassene roepen! Oefen dit.</div>
+                        <div class="task-goals">📚 9.1.3 - Noodsituatie: volwassene verwittigen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="hygiene1" data-domain="9" data-goals="9.1.4" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🧼 Handen wassen</div>
+                        <div class="task-desc">Oefen goed handen wassen: nat, zeep, wrijven (20 sec), spoelen, drogen.</div>
+                        <div class="task-goals">📚 9.1.4 - Hygiëne: handen wassen, tanden poetsen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="unique1" data-domain="9" data-goals="9.1.5,9.1.6" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🌈 Iedereen is anders</div>
+                        <div class="task-desc">Bespreek: wat maakt jou speciaal? Hoe zijn andere kinderen anders? Dat is mooi!</div>
+                        <div class="task-goals">📚 9.1.5, 9.1.6 - Iedereen uniek, verschillen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="help1" data-domain="9" data-goals="9.3.2" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🙋 Hulp vragen</div>
+                        <div class="task-desc">Oefen: hoe vraag je netjes om hulp? "Kunt u mij helpen met...?"</div>
+                        <div class="task-goals">📚 9.3.2 - Hulp vragen aan volwassene</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="together1" data-domain="9" data-goals="9.3.3" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">🤝 Samenwerken</div>
+                        <div class="task-desc">Bouw samen een toren of maak samen een tekening. Verdeel de taken!</div>
+                        <div class="task-goals">📚 9.3.3 - Samen werken en spelen</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+                <div class="task-card" data-task="turn1" data-domain="9" data-goals="9.3.5" onclick="toggleTask(this)">
+                    <div class="task-check">✓</div>
+                    <div class="task-info">
+                        <div class="task-title">⏳ Beurt afwachten</div>
+                        <div class="task-desc">Speel een spel waarbij je moet wachten op je beurt. Goed wachten = compliment!</div>
+                        <div class="task-goals">📚 9.3.5 - Beurt afwachten</div>
+                    </div>
+                    <div class="task-count">0x</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Game Modal -->
+    <div id="game-modal" class="game-modal">
+        <div class="game-content">
+            <button class="close-btn" onclick="closeGame()">×</button>
+            <div id="game-area" class="game-area"></div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="export-modal" class="export-modal" onclick="if(event.target===this)closeExport()">
+        <div class="export-content">
+            <h3>📋 Voortgangsrapport Exporteren</h3>
+            <textarea id="export-text" readonly></textarea>
+            <div class="btn-row">
+                <button class="export-btn" onclick="copyExport()">📋 Kopiëren</button>
+                <button class="reset-btn" onclick="closeExport()">Sluiten</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="tooltip" style="position:fixed;background:#333;color:#fff;padding:0.5rem 0.75rem;border-radius:8px;font-size:0.75rem;max-width:250px;z-index:9999;pointer-events:none;opacity:0;transition:opacity 0.2s;white-space:pre-line;"></div>
+    <script>
+        // Complete goals database from Excel (208 goals)
+        const goalsDatabase = {
+            // Nederlands (1.x.x)
+            '1.1.1': { code: '1.1.1', domain: '1', subject: 'Nederlands', title: 'Fonologisch bewustzijn', description: 'De kleuters kunnen rijm herkennen, rijmwoorden bedenken en woorden in klankgroepen verdelen.' },
+            '1.1.2': { code: '1.1.2', domain: '1', subject: 'Nederlands', title: 'Fonemisch bewustzijn', description: 'De kleuters kunnen een bepaalde klank in gesproken woorden op verschillende posities herkennen.' },
+            '1.1.3': { code: '1.1.3', domain: '1', subject: 'Nederlands', title: 'Klanken onderscheiden', description: 'De kleuters kunnen klanken in mk-, km- en mkm-woorden onderscheiden.' },
+            '1.1.4': { code: '1.1.4', domain: '1', subject: 'Nederlands', title: 'Letters herkennen', description: 'De kleuters kunnen minimum 15 letters herkennen door de bijbehorende klank uit te spreken.' },
+            '1.1.5': { code: '1.1.5', domain: '1', subject: 'Nederlands', title: 'Visuele boodschappen', description: 'De kleuters kunnen de betekenis van eenvoudige visuele boodschappen begrijpen.' },
+            '1.1.6': { code: '1.1.6', domain: '1', subject: 'Nederlands', title: 'Tekstbegrip', description: 'De kleuters kunnen expliciete informatie uit voorgelezen teksten halen.' },
+            '1.1.7': { code: '1.1.7', domain: '1', subject: 'Nederlands', title: 'Verbanden in tekst', description: 'De kleuters kunnen expliciete verbanden binnen een tekst verwoorden: oorzaak, gevolg, probleem en oplossing.' },
+            '1.1.10': { code: '1.1.10', domain: '1', subject: 'Nederlands', title: 'Tekstconventies', description: 'De kleuters begrijpen leesrichting, onderscheid tekst en beeld.' },
+            '1.2.1': { code: '1.2.1', domain: '1', subject: 'Nederlands', title: 'Pengreep', description: 'De kleuters kunnen een dynamische pengreep hanteren.' },
+            '1.2.2': { code: '1.2.2', domain: '1', subject: 'Nederlands', title: 'Schrijfhouding', description: 'De kleuters kunnen in een correcte schrijfhouding zitten.' },
+            '1.2.3': { code: '1.2.3', domain: '1', subject: 'Nederlands', title: 'Lijnen maken', description: 'De kleuters kunnen rechte en gebogen lijnen maken binnen liniatuur.' },
+            '1.2.4': { code: '1.2.4', domain: '1', subject: 'Nederlands', title: 'Schrijfpatronen', description: 'De kleuters kunnen schrijfpatronen maken binnen liniatuur.' },
+            '1.2.5': { code: '1.2.5', domain: '1', subject: 'Nederlands', title: 'Kleuren', description: 'De kleuters kunnen egaal binnen de lijntjes kleuren.' },
+            '1.2.6': { code: '1.2.6', domain: '1', subject: 'Nederlands', title: 'Arceren', description: 'De kleuters kunnen arceren met rechte lijnen.' },
+            '1.2.7': { code: '1.2.7', domain: '1', subject: 'Nederlands', title: 'Schrijfrichting', description: 'De kleuters kunnen de schrijfrichting hanteren.' },
+            '1.2.8': { code: '1.2.8', domain: '1', subject: 'Nederlands', title: 'Ideeën vastleggen', description: 'De kleuters kunnen door middel van tekenen, krabbels, symbolen ideeën vastleggen.' },
+            '1.3.1': { code: '1.3.1', domain: '1', subject: 'Nederlands', title: 'Luisteren', description: 'De kleuters kunnen met aandacht luisteren.' },
+            '1.3.5': { code: '1.3.5', domain: '1', subject: 'Nederlands', title: 'Verstaanbaar spreken', description: 'De kleuters kunnen verstaanbaar spreken met aandacht voor uitspraak.' },
+            '1.4.1': { code: '1.4.1', domain: '1', subject: 'Nederlands', title: 'Basiswoordenschat', description: 'De kleuters kunnen basiswoordenschat inzetten met betrekking tot de leefomgeving en school.' },
+            '1.4.4': { code: '1.4.4', domain: '1', subject: 'Nederlands', title: 'Taalsysteem', description: 'De kleuters kennen woord, woorddeel, klankgroep, rijm, klank, letter.' },
+            '1.4.5': { code: '1.4.5', domain: '1', subject: 'Nederlands', title: 'Taalspel', description: 'De kleuters kunnen basiselementen van het taalsysteem toepassen in taalspel.' },
+            '1.5.1': { code: '1.5.1', domain: '1', subject: 'Nederlands', title: 'Literatuur begrippen', description: 'De kleuters kennen auteur, illustrator, titel, kaft.' },
+            // Wiskunde (2.x.x)
+            '2.1.1': { code: '2.1.1', domain: '2', subject: 'Wiskunde', title: 'Telrij', description: 'De kleuters kennen de telrij van 0 tot en met 20 (akoestisch tellen).' },
+            '2.1.2': { code: '2.1.2', domain: '2', subject: 'Wiskunde', title: 'Getallen begrip', description: 'De kleuters kennen natuurlijke getallen als aantal en als rangorde.' },
+            '2.1.3': { code: '2.1.3', domain: '2', subject: 'Wiskunde', title: 'Rangtelwoorden', description: 'De kleuters kennen de rangtelwoorden van eerste tot en met tiende.' },
+            '2.1.7': { code: '2.1.7', domain: '2', subject: 'Wiskunde', title: 'Vergelijkingsbegrippen', description: 'De kleuters kennen begrippen: evenveel, veel/weinig, meer/minder, eerste/laatste, hoeveel.' },
+            '2.1.8': { code: '2.1.8', domain: '2', subject: 'Wiskunde', title: 'Aantallen vergelijken', description: 'De kleuters kunnen aantallen tot en met 10 vergelijken, sorteren, tellen en ordenen.' },
+            '2.1.9': { code: '2.1.9', domain: '2', subject: 'Wiskunde', title: 'Subiteren', description: 'De kleuters kunnen aantallen tot en met 5 herkennen zonder te tellen.' },
+            '2.2.1': { code: '2.2.1', domain: '2', subject: 'Wiskunde', title: 'Rekenbegrippen', description: 'De kleuters kennen begrippen: bijdoen, erbij, samen, wegnemen, splitsen, verdelen.' },
+            '2.3.4': { code: '2.3.4', domain: '2', subject: 'Wiskunde', title: 'Lengte begrippen', description: 'De kleuters kennen begrippen: lang/kort, hoog/laag, breed/smal, groot/klein, vol/leeg.' },
+            '2.3.5': { code: '2.3.5', domain: '2', subject: 'Wiskunde', title: 'Kwalitatief vergelijken', description: 'De kleuters kunnen lengte, oppervlakte en inhoud kwalitatief vergelijken en ordenen.' },
+            '2.3.7': { code: '2.3.7', domain: '2', subject: 'Wiskunde', title: 'Massa begrippen', description: 'De kleuters kennen begrippen: zwaar/licht, zwaarder/lichter, zwaarste/lichtste.' },
+            '2.3.10': { code: '2.3.10', domain: '2', subject: 'Wiskunde', title: 'Geld kennen', description: 'De kleuters kennen munten en biljetten om dingen te kopen.' },
+            '2.3.11': { code: '2.3.11', domain: '2', subject: 'Wiskunde', title: 'Geldbegrippen', description: 'De kleuters kennen begrippen: betalen, kopen, ruilen, prijs, euro.' },
+            '2.3.16': { code: '2.3.16', domain: '2', subject: 'Wiskunde', title: 'Dagen van de week', description: 'De kleuters kennen de dagen van de week.' },
+            '2.3.17': { code: '2.3.17', domain: '2', subject: 'Wiskunde', title: 'Tijdsbegrippen', description: 'De kleuters kennen begrippen: eerder/later, vandaag/gisteren/morgen, dag/week/jaar.' },
+            '2.3.18': { code: '2.3.18', domain: '2', subject: 'Wiskunde', title: 'Dagen benoemen', description: 'De kleuters kunnen zeggen welke dag het vandaag is, gisteren was en morgen zal zijn.' },
+            '2.3.19': { code: '2.3.19', domain: '2', subject: 'Wiskunde', title: 'Chronologisch ordenen', description: 'De kleuters kunnen gebeurtenissen tijdens de dag chronologisch ordenen.' },
+            '2.4.1': { code: '2.4.1', domain: '2', subject: 'Wiskunde', title: 'Vormbegrippen', description: 'De kleuters kennen begrippen: punt, lijn, hoek, driehoek, rechthoek, vierkant, cirkel, kubus, bol, piramide.' },
+            '2.4.2': { code: '2.4.2', domain: '2', subject: 'Wiskunde', title: 'Vormen herkennen', description: 'De kleuters kunnen meetkundige objecten herkennen, benoemen en sorteren.' },
+            '2.4.4': { code: '2.4.4', domain: '2', subject: 'Wiskunde', title: 'Patronen', description: 'De kleuters kunnen herhalende patronen herkennen, namaken en verderzetten.' },
+            '2.4.5': { code: '2.4.5', domain: '2', subject: 'Wiskunde', title: 'Plaatsbegrippen', description: 'De kleuters kennen begrippen: in, tussen, uit, voor, achter, onder, boven, naast, ver, dichtbij.' },
+            '2.4.6': { code: '2.4.6', domain: '2', subject: 'Wiskunde', title: 'Oriënteren', description: 'De kleuters kunnen zichzelf oriënteren in een ruimte op basis van positie, afstand en richting.' },
+            '2.4.10': { code: '2.4.10', domain: '2', subject: 'Wiskunde', title: 'Transformatiebegrippen', description: 'De kleuters kennen begrippen: verschuiven, draaien, spiegelen, vergroten, verkleinen.' },
+            '2.4.11': { code: '2.4.11', domain: '2', subject: 'Wiskunde', title: 'Spiegelbeelden', description: 'De kleuters kunnen spiegelbeelden ontdekken met een (geo)spiegel.' },
+            '2.4.16': { code: '2.4.16', domain: '2', subject: 'Wiskunde', title: 'Symmetrie', description: 'De kleuters kunnen symmetrie in eenvoudige figuren herkennen.' },
+            '2.4.18': { code: '2.4.18', domain: '2', subject: 'Wiskunde', title: 'Sorteren', description: 'De kleuters kunnen objecten sorteren op basis van gemeenschappelijke eigenschap.' },
+            '2.5.1': { code: '2.5.1', domain: '2', subject: 'Wiskunde', title: 'Kansbegrippen', description: 'De kleuters kennen begrippen: kan, kan niet, altijd, nooit, misschien.' },
+            // Wetenschap (3.x.x)
+            '3.1.1': { code: '3.1.1', domain: '3', subject: 'Wetenschap', title: 'Classificatie organismen', description: 'De kleuters kennen begrippen: fauna, zoogdieren, vogels, vissen, insecten, flora.' },
+            '3.1.2': { code: '3.1.2', domain: '3', subject: 'Wetenschap', title: 'Kenmerken organismen', description: 'De kleuters kunnen organismen beschrijven op basis van waarneembare kenmerken en voortplantingswijze.' },
+            '3.1.3': { code: '3.1.3', domain: '3', subject: 'Wetenschap', title: 'Levenscyclus begrippen', description: 'De kleuters kennen begrippen: geboren worden, kiemen, groeien, sterven.' },
+            '3.1.4': { code: '3.1.4', domain: '3', subject: 'Wetenschap', title: 'Levensfasen', description: 'De kleuters kennen de fasen van de levenscyclus: geboorte, groei, voortplanting, dood.' },
+            '3.2.1': { code: '3.2.1', domain: '3', subject: 'Wetenschap', title: 'Voedselketen', description: 'De kleuters kennen het principe van eten en gegeten worden.' },
+            '3.2.2': { code: '3.2.2', domain: '3', subject: 'Wetenschap', title: 'Voedingsmiddelen', description: 'De kleuters kennen verschillende voedingsmiddelen.' },
+            '3.2.4': { code: '3.2.4', domain: '3', subject: 'Wetenschap', title: 'Honger en dorst', description: 'De kleuters kunnen aangeven dat je moet eten bij honger en drinken bij dorst.' },
+            '3.3.1': { code: '3.3.1', domain: '3', subject: 'Wetenschap', title: 'Lichaamsdelen & functies', description: 'De kleuters kennen lichaamsdelen en zintuigen: spieren, botten, hart, ogen, oren, zien, horen, voelen.' },
+            '3.3.2': { code: '3.3.2', domain: '3', subject: 'Wetenschap', title: 'Lichaamsdelen functie', description: 'De kleuters kennen lichaamsdelen en hun functie.' },
+            '3.3.3': { code: '3.3.3', domain: '3', subject: 'Wetenschap', title: 'Lichaamsdelen aanduiden', description: 'De kleuters kunnen lichaamsdelen op het eigen lichaam aanduiden en benoemen.' },
+            '3.4.1': { code: '3.4.1', domain: '3', subject: 'Wetenschap', title: 'Materie sorteren', description: 'De kleuters kunnen materie sorteren op basis van waarneembare eigenschappen.' },
+            '3.5.1': { code: '3.5.1', domain: '3', subject: 'Wetenschap', title: 'Natuurkundige begrippen', description: 'De kleuters kennen begrippen: zon, lamp, licht, donker, schaduw, spiegel, magneet, aantrekken, afstoten.' },
+            '3.5.2': { code: '3.5.2', domain: '3', subject: 'Wetenschap', title: 'Licht', description: 'De kleuters kennen licht: de lichtbron, de reflectie.' },
+            '3.5.3': { code: '3.5.3', domain: '3', subject: 'Wetenschap', title: 'Geluid', description: 'De kleuters kennen geluid: hard, zacht.' },
+            '3.5.4': { code: '3.5.4', domain: '3', subject: 'Wetenschap', title: 'Magnetisme', description: 'De kleuters kennen magnetisme: eigenschappen van magneten (aantrekken, afstoten).' },
+            '3.6.1': { code: '3.6.1', domain: '3', subject: 'Wetenschap', title: 'Oorzaak en gevolg', description: 'De kleuters kennen de relatie tussen oorzaak en gevolg.' },
+            // Aardrijkskunde (4.x.x)
+            '4.1.1': { code: '4.1.1', domain: '4', subject: 'Aardrijkskunde', title: 'Topografie namen', description: 'De kleuters kennen de naam van België, een plaatselijke rivier, de rivier de Nijl.' },
+            '4.1.2': { code: '4.1.2', domain: '4', subject: 'Aardrijkskunde', title: 'Wereldbol', description: 'De kleuters kunnen water, land en de polen op de wereldbol aanduiden.' },
+            '4.1.3': { code: '4.1.3', domain: '4', subject: 'Aardrijkskunde', title: 'Relatieve ligging', description: 'De kleuters kennen begrippen: dichtbij, veraf, voor, achter, opzij, boven, onder, tussen, binnen, buiten.' },
+            '4.2.1': { code: '4.2.1', domain: '4', subject: 'Aardrijkskunde', title: 'Kenmerken aarde', description: 'De kleuters kennen begrippen: het land, het water, de lucht, de rots, de grot, het zand.' },
+            '4.2.2': { code: '4.2.2', domain: '4', subject: 'Aardrijkskunde', title: 'Landschappen', description: 'De kleuters kennen begrippen over reliëf, water en vegetatie in landschappen.' },
+            '4.2.3': { code: '4.2.3', domain: '4', subject: 'Aardrijkskunde', title: 'Infrastructuur', description: 'De kleuters kennen begrippen over wonen, transport, landbouw, handel en recreatie.' },
+            '4.2.4': { code: '4.2.4', domain: '4', subject: 'Aardrijkskunde', title: 'Weersverschijnselen', description: 'De kleuters kennen begrippen: temperatuur, neerslag, bewolking, wind.' },
+            '4.2.5': { code: '4.2.5', domain: '4', subject: 'Aardrijkskunde', title: 'Bewolking en neerslag', description: 'De kleuters kunnen de relatie tussen bewolking en neerslag beschrijven.' },
+            '4.2.6': { code: '4.2.6', domain: '4', subject: 'Aardrijkskunde', title: 'Kosmografie', description: 'De kleuters kennen begrippen: de aarde, de maan, de zon, de sterren, de dag en de nacht.' },
+            '4.2.7': { code: '4.2.7', domain: '4', subject: 'Aardrijkskunde', title: 'Seizoenen', description: 'De kleuters kunnen het ritme van de seizoenen in de directe omgeving herkennen.' },
+            '4.3.1': { code: '4.3.1', domain: '4', subject: 'Aardrijkskunde', title: 'Ruimte beschrijven', description: 'De kleuters kunnen een ruimtelijke indeling van een kamer beschrijven.' },
+            '4.3.3': { code: '4.3.3', domain: '4', subject: 'Aardrijkskunde', title: 'Neerslagvormen', description: 'De kleuters kunnen een neerslagvorm observeren: regen, sneeuw, hagel, mist.' },
+            // Geschiedenis (5.x.x)
+            '5.1.1': { code: '5.1.1', domain: '5', subject: 'Geschiedenis', title: 'Prehistorie', description: 'De kleuters weten hoe mensen tijdens de prehistorie overleefden: vuur, jagen, werktuigen.' },
+            '5.1.2': { code: '5.1.2', domain: '5', subject: 'Geschiedenis', title: 'Oudheid', description: 'De kleuters weten hoe mensen tijdens de oudheid samenleefden: Egypte, piramides, farao.' },
+            '5.2.1': { code: '5.2.1', domain: '5', subject: 'Geschiedenis', title: 'Bronnen benoemen', description: 'De kleuters kunnen soorten bronnen benoemen: beenderen, fossielen, foto, brief.' },
+            '5.2.2': { code: '5.2.2', domain: '5', subject: 'Geschiedenis', title: 'Veranderingen', description: 'De kleuters kunnen enkele veranderingen tussen verleden en heden opnoemen.' },
+            '5.2.3': { code: '5.2.3', domain: '5', subject: 'Geschiedenis', title: 'Chronologisch bewustzijn', description: 'De kleuters kennen begrippen: heel lang geleden, lang geleden, nu, later, oud, nieuw.' },
+            '5.3.1': { code: '5.3.1', domain: '5', subject: 'Geschiedenis', title: 'Burgerschap begrippen', description: 'De kleuters kennen begrippen: mening, overleg, stemmen.' },
+            // Muzische vorming (6.x.x)
+            '6.1.1': { code: '6.1.1', domain: '6', subject: 'Muzische vorming', title: 'Technieken verkennen', description: 'De kleuters kunnen technieken/vaardigheden van de vijf muzische domeinen verkennen.' },
+            '6.2.1': { code: '6.2.1', domain: '6', subject: 'Muzische vorming', title: 'Muziek bouwstenen', description: 'De kleuters kennen begrippen: kort/lang, hoog/laag, snel/langzaam, hard/zacht, klank, toon.' },
+            '6.2.2': { code: '6.2.2', domain: '6', subject: 'Muzische vorming', title: 'Geluidspatronen', description: 'De kleuters kunnen patronen van lange en korte geluiden onderscheiden.' },
+            '6.2.4': { code: '6.2.4', domain: '6', subject: 'Muzische vorming', title: 'Hoog en laag', description: 'De kleuters kunnen hoge en lage tonen herkennen en melodieën zingen.' },
+            '6.2.5': { code: '6.2.5', domain: '6', subject: 'Muzische vorming', title: 'Muziekinstrumenten', description: 'De kleuters kennen begrippen: de stem, het lied, de handtrom, de triangel, de tamboerijn, de fluit.' },
+            '6.3.1': { code: '6.3.1', domain: '6', subject: 'Muzische vorming', title: 'Beeld bouwstenen', description: 'De kleuters kennen kleuren, vormen en texturen: rood, geel, blauw, rond, recht, glad, ruw.' },
+            '6.3.2': { code: '6.3.2', domain: '6', subject: 'Muzische vorming', title: 'Lijnsoorten', description: 'De kleuters kunnen lijnsoorten onderscheiden en maken.' },
+            '6.3.3': { code: '6.3.3', domain: '6', subject: 'Muzische vorming', title: 'Texturen', description: 'De kleuters kunnen verschillende texturen onderscheiden.' },
+            '6.3.4': { code: '6.3.4', domain: '6', subject: 'Muzische vorming', title: 'Kleuren herkennen', description: 'De kleuters kunnen primaire en secundaire kleuren herkennen.' },
+            '6.4.1': { code: '6.4.1', domain: '6', subject: 'Muzische vorming', title: 'Drama begrippen', description: 'De kleuters kennen begrippen: verzinnen, de rol, het decor, het kostuum, de acteur.' },
+            '6.4.2': { code: '6.4.2', domain: '6', subject: 'Muzische vorming', title: 'Rollen spelen', description: 'De kleuters kunnen eenvoudige rollen spelen.' },
+            '6.5.1': { code: '6.5.1', domain: '6', subject: 'Muzische vorming', title: 'Dans bewegingen', description: 'De kleuters kennen begrippen: snelle/trage, grote/kleine, zware/lichte bewegingen.' },
+            '6.5.2': { code: '6.5.2', domain: '6', subject: 'Muzische vorming', title: 'Ritme dansen', description: 'De kleuters kunnen in een bepaald ritme en tempo dansen.' },
+            '6.6.1': { code: '6.6.1', domain: '6', subject: 'Muzische vorming', title: 'Media begrippen', description: 'De kleuters kennen begrippen: de foto, de film, het geluid, de camera, in/buiten beeld.' },
+            // Lichamelijke opvoeding (7.x.x)
+            '7.1.1': { code: '7.1.1', domain: '7', subject: 'Lichamelijke opvoeding', title: 'Motorische basisvaardigheden', description: 'De kleuters kunnen in bewegingscontexten motorische basisvaardigheden inzetten.' },
+            '7.1.2': { code: '7.1.2', domain: '7', subject: 'Lichamelijke opvoeding', title: 'Grootmotorische vaardigheden', description: 'De kleuters kunnen klimmen, klauteren, springen, werpen, vangen, balanceren.' },
+            '7.1.5': { code: '7.1.5', domain: '7', subject: 'Lichamelijke opvoeding', title: 'Voorkeurshand', description: 'De kleuters kennen hun voorkeurslichaamszijde.' },
+            '7.1.6': { code: '7.1.6', domain: '7', subject: 'Lichamelijke opvoeding', title: 'Beweging en tijd', description: 'De kleuters kunnen bewegingen afstemmen op tijd (duur, tempo, ritme).' },
+            '7.1.7': { code: '7.1.7', domain: '7', subject: 'Lichamelijke opvoeding', title: 'Beweging en ruimte', description: 'De kleuters kunnen bewegingen afstemmen op de ruimte (positie, afstand, richting).' },
+            '7.2.1': { code: '7.2.1', domain: '7', subject: 'Lichamelijke opvoeding', title: 'Spelregels', description: 'De kleuters kunnen binnen een spelvorm één tot twee spelregels opvolgen.' },
+            // Attitudes (9.x.x)
+            '9.1.1': { code: '9.1.1', domain: '9', subject: 'Attitudes', title: 'Verkeersregels', description: 'De kleuters kennen de betekenis van verkeersregels: zebrapad, verkeerslichten, stopbord.' },
+            '9.1.2': { code: '9.1.2', domain: '9', subject: 'Attitudes', title: 'Veilige uitrusting', description: 'De kleuters kennen het belang van veilige uitrusting: fluorescerende kledij en fietshelm.' },
+            '9.1.3': { code: '9.1.3', domain: '9', subject: 'Attitudes', title: 'Noodsituatie', description: 'De kleuters weten dat ze in een noodsituatie meteen een volwassene moeten verwittigen.' },
+            '9.1.4': { code: '9.1.4', domain: '9', subject: 'Attitudes', title: 'Hygiëne', description: 'De kleuters kunnen basis hygiëneregels uitvoeren: tanden poetsen, handen wassen.' },
+            '9.1.5': { code: '9.1.5', domain: '9', subject: 'Attitudes', title: 'Iedereen uniek', description: 'De kleuters weten dat iedereen meetelt en uniek is, met eigen sterktes en talenten.' },
+            '9.1.6': { code: '9.1.6', domain: '9', subject: 'Attitudes', title: 'Verschillen', description: 'De kleuters weten dat mensen kunnen verschillen in sekse, etniciteit, geloof, uiterlijk.' },
+            '9.2.1': { code: '9.2.1', domain: '9', subject: 'Attitudes', title: 'Over leren praten', description: 'De kleuters kunnen zich in eenvoudige taal uitdrukken over leren.' },
+            '9.2.2': { code: '9.2.2', domain: '9', subject: 'Attitudes', title: 'Leerstrategieën', description: 'De kleuters kunnen cognitieve leerstrategieën inzetten om informatie te verwerken.' },
+            '9.3.1': { code: '9.3.1', domain: '9', subject: 'Attitudes', title: 'Emoties', description: 'De kleuters kennen een ruime woordenschat om emoties te herkennen, te uiten en te benoemen.' },
+            '9.3.2': { code: '9.3.2', domain: '9', subject: 'Attitudes', title: 'Hulp vragen', description: 'De kleuters kunnen een volwassene hulp vragen wanneer nodig.' },
+            '9.3.3': { code: '9.3.3', domain: '9', subject: 'Attitudes', title: 'Samenwerken', description: 'De kleuters kunnen zelfstandig en samen werken en spelen.' },
+            '9.3.5': { code: '9.3.5', domain: '9', subject: 'Attitudes', title: 'Beurt afwachten', description: 'De kleuters kunnen hun beurt afwachten.' }
+        };
+        // Game data with improved position questions using z-index visuals
+        const gameData = {
+            colors: {
+                title: '🎨 Kleuren Raden',
+                goals: ['6.3.1', '6.3.4'],
+                items: [
+                    { color: '#FF6B6B', answer: 'rood', options: ['rood', 'blauw', 'groen', 'geel'] },
+                    { color: '#4ECDC4', answer: 'blauw', options: ['geel', 'blauw', 'oranje', 'groen'] },
+                    { color: '#FFE66D', answer: 'geel', options: ['geel', 'groen', 'paars', 'oranje'] },
+                    { color: '#95E1A3', answer: 'groen', options: ['rood', 'groen', 'wit', 'blauw'] },
+                    { color: '#FFB347', answer: 'oranje', options: ['oranje', 'bruin', 'geel', 'rood'] },
+                    { color: '#C9B1FF', answer: 'paars', options: ['blauw', 'paars', 'roze', 'grijs'] },
+                    { color: '#FFFFFF', answer: 'wit', options: ['wit', 'grijs', 'geel', 'blauw'], border: true },
+                    { color: '#2D3436', answer: 'zwart', options: ['zwart', 'grijs', 'bruin', 'blauw'] },
+                    { color: '#A0522D', answer: 'bruin', options: ['bruin', 'oranje', 'rood', 'zwart'] },
+                    { color: '#FFB6C1', answer: 'roze', options: ['roze', 'rood', 'paars', 'oranje'] },
+                    { color: '#808080', answer: 'grijs', options: ['grijs', 'wit', 'zwart', 'blauw'] },
+                    { color: '#FF4500', answer: 'oranje', options: ['rood', 'oranje', 'geel', 'bruin'] },
+                    { color: '#006400', answer: 'groen', options: ['blauw', 'groen', 'zwart', 'bruin'] },
+                    { color: '#4169E1', answer: 'blauw', options: ['paars', 'blauw', 'groen', 'grijs'] },
+                    { color: '#FFD700', answer: 'geel', options: ['oranje', 'geel', 'wit', 'groen'] }
+                ]
+            },
+            counting: {
+                title: '🔢 Tellen',
+                goals: ['2.1.1', '2.1.8'],
+                items: [
+                    { visual: '🍎', answer: '1', options: ['1', '2', '3'] },
+                    { visual: '🍎🍎', answer: '2', options: ['1', '2', '3'] },
+                    { visual: '🍎🍎🍎', answer: '3', options: ['2', '3', '4'] },
+                    { visual: '⭐⭐⭐⭐', answer: '4', options: ['3', '4', '5'] },
+                    { visual: '⭐⭐⭐⭐⭐', answer: '5', options: ['4', '5', '6'] },
+                    { visual: '🌸🌸🌸🌸🌸🌸', answer: '6', options: ['5', '6', '7'] },
+                    { visual: '🐱🐱🐱🐱🐱🐱🐱', answer: '7', options: ['6', '7', '8'] },
+                    { visual: '🎈🎈🎈🎈🎈🎈🎈🎈', answer: '8', options: ['7', '8', '9'] },
+                    { visual: '🦋🦋🦋🦋🦋🦋🦋🦋🦋', answer: '9', options: ['8', '9', '10'] },
+                    { visual: '🌻🌻🌻🌻🌻🌻🌻🌻🌻🌻', answer: '10', options: ['9', '10', '11'] },
+                    { visual: '🐸🐸🐸', answer: '3', options: ['2', '3', '4'] },
+                    { visual: '🍌🍌🍌🍌🍌', answer: '5', options: ['4', '5', '6'] },
+                    { visual: '🚗🚗', answer: '2', options: ['1', '2', '3'] },
+                    { visual: '🎀🎀🎀🎀🎀🎀🎀', answer: '7', options: ['6', '7', '8'] },
+                    { visual: '🐶🐶🐶🐶', answer: '4', options: ['3', '4', '5'] },
+                    { visual: '🍓🍓🍓🍓🍓🍓🍓🍓🍓', answer: '9', options: ['8', '9', '10'] },
+                    { visual: '🌈🌈🌈🌈🌈🌈', answer: '6', options: ['5', '6', '7'] },
+                    { visual: '🎁🎁🎁🎁🎁🎁🎁🎁', answer: '8', options: ['7', '8', '9'] },
+                    { visual: '🐢', answer: '1', options: ['0', '1', '2'] },
+                    { visual: '🍪🍪🍪🍪🍪🍪🍪🍪🍪🍪', answer: '10', options: ['9', '10', '11'] }
+                ]
+            },
+            shapes: {
+                title: '🔷 Vormen Herkennen',
+                goals: ['2.4.1', '2.4.2'],
+                items: [
+                    { visual: '⬜', answer: 'vierkant', options: ['vierkant', 'cirkel', 'driehoek', 'rechthoek'] },
+                    { visual: '🔵', answer: 'cirkel', options: ['vierkant', 'cirkel', 'rechthoek', 'driehoek'] },
+                    { visual: '🔺', answer: 'driehoek', options: ['cirkel', 'driehoek', 'vierkant', 'ruit'] },
+                    { visual: '⬛', answer: 'vierkant', options: ['rechthoek', 'driehoek', 'vierkant', 'cirkel'] },
+                    { visual: '🟡', answer: 'cirkel', options: ['cirkel', 'driehoek', 'vierkant', 'ovaal'] },
+                    { visual: '🔷', answer: 'ruit', options: ['vierkant', 'ruit', 'driehoek', 'cirkel'] },
+                    { visual: '🟢', answer: 'cirkel', options: ['ovaal', 'cirkel', 'vierkant', 'driehoek'] },
+                    { visual: '🔶', answer: 'ruit', options: ['driehoek', 'ruit', 'vierkant', 'rechthoek'] },
+                    { visual: '🔻', answer: 'driehoek', options: ['driehoek', 'cirkel', 'ruit', 'vierkant'] },
+                    { visual: '🟠', answer: 'cirkel', options: ['vierkant', 'driehoek', 'cirkel', 'rechthoek'] },
+                    { visual: '⚫', answer: 'cirkel', options: ['cirkel', 'vierkant', 'ruit', 'ovaal'] },
+                    { visual: '🟣', answer: 'cirkel', options: ['driehoek', 'cirkel', 'rechthoek', 'ruit'] }
+                ]
+            },
+            animals: {
+                title: '🐾 Dieren Quiz',
+                goals: ['3.1.1', '3.1.2'],
+                items: [
+                    { visual: '🐄', question: 'De koe is een...', answer: 'zoogdier', options: ['zoogdier', 'vogel', 'vis', 'insect'] },
+                    { visual: '🐦', question: 'De vogel is een...', answer: 'vogel', options: ['zoogdier', 'vogel', 'vis', 'insect'] },
+                    { visual: '🐟', question: 'De vis is een...', answer: 'vis', options: ['zoogdier', 'vogel', 'vis', 'insect'] },
+                    { visual: '🐘', question: 'De olifant is een...', answer: 'zoogdier', options: ['zoogdier', 'vogel', 'insect', 'vis'] },
+                    { visual: '🦋', question: 'De vlinder is een...', answer: 'insect', options: ['vogel', 'vis', 'insect', 'zoogdier'] },
+                    { visual: '🐧', question: 'De pinguïn is een...', answer: 'vogel', options: ['vis', 'vogel', 'zoogdier', 'insect'] },
+                    { visual: '🐕', question: 'De hond is een...', answer: 'zoogdier', options: ['zoogdier', 'vogel', 'vis', 'insect'] },
+                    { visual: '🦅', question: 'De adelaar is een...', answer: 'vogel', options: ['insect', 'vogel', 'zoogdier', 'vis'] },
+                    { visual: '🐠', question: 'De tropische vis is een...', answer: 'vis', options: ['vis', 'vogel', 'zoogdier', 'insect'] },
+                    { visual: '🐝', question: 'De bij is een...', answer: 'insect', options: ['vogel', 'insect', 'zoogdier', 'vis'] },
+                    { visual: '🐈', question: 'De kat is een...', answer: 'zoogdier', options: ['zoogdier', 'vogel', 'vis', 'insect'] },
+                    { visual: '🦆', question: 'De eend is een...', answer: 'vogel', options: ['vis', 'vogel', 'zoogdier', 'insect'] },
+                    { visual: '🦈', question: 'De haai is een...', answer: 'vis', options: ['zoogdier', 'vogel', 'vis', 'insect'] },
+                    { visual: '🐛', question: 'De rups is een...', answer: 'insect', options: ['insect', 'vogel', 'vis', 'zoogdier'] },
+                    { visual: '🐴', question: 'Het paard is een...', answer: 'zoogdier', options: ['zoogdier', 'vogel', 'vis', 'insect'] }
+                ]
+            },
+            body: {
+                title: '🦶 Lichaamsdelen',
+                goals: ['3.3.1', '3.3.2', '3.3.3'],
+                items: [
+                    { visual: '👀', answer: 'ogen', options: ['oren', 'ogen', 'neus', 'mond'] },
+                    { visual: '👂', answer: 'oren', options: ['oren', 'mond', 'ogen', 'neus'] },
+                    { visual: '👃', answer: 'neus', options: ['neus', 'oren', 'mond', 'ogen'] },
+                    { visual: '👄', answer: 'mond', options: ['neus', 'ogen', 'mond', 'oren'] },
+                    { visual: '🫀', answer: 'hart', options: ['maag', 'hart', 'longen', 'nieren'] },
+                    { visual: '🫁', answer: 'longen', options: ['longen', 'hart', 'maag', 'lever'] },
+                    { visual: '🧠', answer: 'hersenen', options: ['hart', 'hersenen', 'maag', 'longen'] },
+                    { visual: '✋', answer: 'hand', options: ['voet', 'hand', 'arm', 'been'] },
+                    { visual: '🦶', answer: 'voet', options: ['hand', 'voet', 'been', 'arm'] },
+                    { visual: '💪', answer: 'arm', options: ['been', 'arm', 'hand', 'voet'] },
+                    { visual: '🦵', answer: 'been', options: ['arm', 'been', 'voet', 'hand'] },
+                    { visual: '👅', answer: 'tong', options: ['mond', 'tong', 'tanden', 'lippen'] }
+                ]
+            },
+            weather: {
+                title: '🌤️ Weer Woorden',
+                goals: ['4.2.4', '4.3.3'],
+                items: [
+                    { visual: '☀️', answer: 'zon', options: ['zon', 'regen', 'sneeuw', 'wind'] },
+                    { visual: '🌧️', answer: 'regen', options: ['wind', 'regen', 'zon', 'sneeuw'] },
+                    { visual: '❄️', answer: 'sneeuw', options: ['sneeuw', 'hagel', 'regen', 'mist'] },
+                    { visual: '🌫️', answer: 'mist', options: ['mist', 'wind', 'zon', 'regen'] },
+                    { visual: '💨', answer: 'wind', options: ['regen', 'sneeuw', 'wind', 'zon'] },
+                    { visual: '☁️', answer: 'bewolking', options: ['zon', 'bewolking', 'regen', 'mist'] },
+                    { visual: '⛈️', answer: 'onweer', options: ['regen', 'onweer', 'wind', 'sneeuw'] },
+                    { visual: '🌈', answer: 'regenboog', options: ['zon', 'regenboog', 'regen', 'wind'] },
+                    { visual: '🌡️', answer: 'temperatuur', options: ['temperatuur', 'zon', 'warmte', 'koude'] },
+                    { visual: '🌨️', answer: 'hagel', options: ['sneeuw', 'hagel', 'regen', 'mist'] }
+                ]
+            },
+            // IMPROVED POSITION GAME with proper z-index layered visuals
+            position: {
+                title: '📍 Positie Woorden',
+                goals: ['4.1.3', '2.4.5'],
+                items: [
+                    { type: 'position', catPos: 'under', question: 'De kat zit...de doos', answer: 'onder', options: ['boven', 'onder', 'naast', 'in'] },
+                    { type: 'position', catPos: 'on', question: 'De kat zit...de doos', answer: 'op', options: ['boven', 'onder', 'op', 'naast'] },
+                    { type: 'position', catPos: 'in', question: 'De kat zit...de doos', answer: 'in', options: ['op', 'in', 'onder', 'naast'] },
+                    { type: 'position', catPos: 'next', question: 'De kat zit...de doos', answer: 'naast', options: ['in', 'naast', 'onder', 'boven'] },
+                    { type: 'position', catPos: 'front', question: 'De kat zit...de doos', answer: 'voor', options: ['achter', 'voor', 'in', 'naast'] },
+                    { type: 'position', catPos: 'behind', question: 'De kat zit...de doos', answer: 'achter', options: ['voor', 'achter', 'in', 'naast'] },
+                    { visual: '🏠 ← 🚗', question: 'De auto rijdt...het huis', answer: 'naar', options: ['van', 'naar', 'in', 'uit'] },
+                    { visual: '🌳 🐿️ 🌳', question: 'De eekhoorn zit...de bomen', answer: 'tussen', options: ['naast', 'voor', 'tussen', 'achter'] },
+                    { visual: '⬅️ 🐕', question: 'De hond loopt naar...', answer: 'links', options: ['links', 'rechts', 'boven', 'onder'] },
+                    { visual: '🐕 ➡️', question: 'De hond loopt naar...', answer: 'rechts', options: ['links', 'rechts', 'voor', 'achter'] },
+                    { visual: '🏠........🌳', question: 'De boom is...het huis', answer: 'ver van', options: ['dichtbij', 'ver van', 'in', 'boven'] },
+                    { visual: '🏠🌳', question: 'De boom is...het huis', answer: 'dichtbij', options: ['ver van', 'dichtbij', 'in', 'op'] },
+                    { visual: '⬆️ 🎈', question: 'De ballon gaat...', answer: 'omhoog', options: ['omlaag', 'omhoog', 'links', 'rechts'] },
+                    { visual: '🎈 ⬇️', question: 'De ballon gaat...', answer: 'omlaag', options: ['omhoog', 'omlaag', 'links', 'rechts'] },
+                    { visual: '🏠<br>⬇️<br>🐱', question: 'De kat is...het huis', answer: 'buiten', options: ['binnen', 'buiten', 'boven', 'onder'] }
+                ]
+            },
+            rhyme: {
+                title: '🎵 Rijmen',
+                goals: ['1.1.1', '1.4.4'],
+                items: [
+                    { question: 'Wat rijmt op "kat"?', answer: 'mat', options: ['hond', 'mat', 'boom', 'vis'] },
+                    { question: 'Wat rijmt op "muis"?', answer: 'huis', options: ['kat', 'huis', 'deur', 'raam'] },
+                    { question: 'Wat rijmt op "boom"?', answer: 'room', options: ['blad', 'room', 'tak', 'bos'] },
+                    { question: 'Wat rijmt op "bal"?', answer: 'val', options: ['val', 'rond', 'speel', 'goal'] },
+                    { question: 'Wat rijmt op "vis"?', answer: 'lis', options: ['water', 'zee', 'lis', 'boot'] },
+                    { question: 'Wat rijmt op "beer"?', answer: 'peer', options: ['peer', 'bos', 'groot', 'bruin'] },
+                    { question: 'Wat rijmt op "boot"?', answer: 'groot', options: ['klein', 'water', 'groot', 'zee'] },
+                    { question: 'Wat rijmt op "hond"?', answer: 'rond', options: ['kat', 'rond', 'staart', 'blaf'] },
+                    { question: 'Wat rijmt op "zon"?', answer: 'kon', options: ['maan', 'kon', 'warm', 'licht'] },
+                    { question: 'Wat rijmt op "roos"?', answer: 'boos', options: ['bloem', 'boos', 'rood', 'tuin'] },
+                    { question: 'Wat rijmt op "been"?', answer: 'steen', options: ['arm', 'steen', 'voet', 'lopen'] },
+                    { question: 'Wat rijmt op "dak"?', answer: 'tak', options: ['huis', 'tak', 'raam', 'deur'] },
+                    { question: 'Wat rijmt op "maan"?', answer: 'baan', options: ['ster', 'baan', 'nacht', 'zon'] },
+                    { question: 'Wat rijmt op "kip"?', answer: 'schip', options: ['ei', 'schip', 'haan', 'veer'] },
+                    { question: 'Wat rijmt op "neus"?', answer: 'reus', options: ['oog', 'reus', 'mond', 'oor'] }
+                ]
+            },
+            emotions: {
+                title: '😊 Gevoelens',
+                goals: ['9.3.1'],
+                items: [
+                    { visual: '😊', answer: 'blij', options: ['blij', 'boos', 'verdrietig', 'bang'] },
+                    { visual: '😢', answer: 'verdrietig', options: ['blij', 'verdrietig', 'bang', 'boos'] },
+                    { visual: '😠', answer: 'boos', options: ['boos', 'blij', 'moe', 'bang'] },
+                    { visual: '😨', answer: 'bang', options: ['verdrietig', 'boos', 'bang', 'blij'] },
+                    { visual: '😴', answer: 'moe', options: ['blij', 'moe', 'bang', 'boos'] },
+                    { visual: '🤔', answer: 'nadenkend', options: ['boos', 'nadenkend', 'blij', 'bang'] },
+                    { visual: '😮', answer: 'verbaasd', options: ['verbaasd', 'blij', 'bang', 'boos'] },
+                    { visual: '🥰', answer: 'verliefd', options: ['blij', 'verliefd', 'trots', 'bang'] },
+                    { visual: '😎', answer: 'cool', options: ['boos', 'cool', 'blij', 'moe'] },
+                    { visual: '🤗', answer: 'blij', options: ['blij', 'bang', 'boos', 'moe'] },
+                    { visual: '😤', answer: 'gefrustreerd', options: ['blij', 'gefrustreerd', 'moe', 'bang'] },
+                    { visual: '🥺', answer: 'smekend', options: ['boos', 'smekend', 'blij', 'bang'] }
+                ]
+            },
+            sorting: {
+                title: '📦 Vergelijken',
+                goals: ['2.3.4', '2.3.5', '2.3.7'],
+                items: [
+                    { visual: '🐘 🐁', question: 'Welke is groter?', answer: 'olifant', options: ['olifant', 'muis'] },
+                    { visual: '🌳 🌸', question: 'Welke is hoger?', answer: 'boom', options: ['boom', 'bloem'] },
+                    { visual: '🚗 🚲', question: 'Welke is sneller?', answer: 'auto', options: ['auto', 'fiets'] },
+                    { visual: '🍉 🍓', question: 'Welke is groter?', answer: 'watermeloen', options: ['watermeloen', 'aardbei'] },
+                    { visual: '🐌 🐇', question: 'Welke is sneller?', answer: 'konijn', options: ['slak', 'konijn'] },
+                    { visual: '🪶 🪨', question: 'Welke is zwaarder?', answer: 'steen', options: ['veer', 'steen'] },
+                    { visual: '🦒 🐕', question: 'Welke is hoger?', answer: 'giraf', options: ['giraf', 'hond'] },
+                    { visual: '🐋 🐟', question: 'Welke is groter?', answer: 'walvis', options: ['walvis', 'vis'] },
+                    { visual: '🏔️ 🏠', question: 'Welke is hoger?', answer: 'berg', options: ['berg', 'huis'] },
+                    { visual: '🐜 🐕', question: 'Welke is kleiner?', answer: 'mier', options: ['mier', 'hond'] },
+                    { visual: '❄️ 🔥', question: 'Welke is warmer?', answer: 'vuur', options: ['sneeuw', 'vuur'] },
+                    { visual: '🌊 💧', question: 'Welke is groter?', answer: 'zee', options: ['zee', 'druppel'] },
+                    { visual: '🦁 🐈', question: 'Welke is gevaarlijker?', answer: 'leeuw', options: ['leeuw', 'kat'] },
+                    { visual: '🚂 🚁', question: 'Welke vliegt?', answer: 'helikopter', options: ['trein', 'helikopter'] },
+                    { visual: '☀️ 🌙', question: 'Welke zie je overdag?', answer: 'zon', options: ['zon', 'maan'] }
+                ]
+            },
+            days: {
+                title: '📅 Dagen van de Week',
+                goals: ['2.3.16', '2.3.17', '2.3.18'],
+                items: [
+                    { question: 'Welke dag komt NA maandag?', answer: 'dinsdag', options: ['zondag', 'dinsdag', 'woensdag', 'vrijdag'] },
+                    { question: 'Welke dag komt VOOR woensdag?', answer: 'dinsdag', options: ['donderdag', 'dinsdag', 'vrijdag', 'maandag'] },
+                    { question: 'Welke dag is de EERSTE dag van de week?', answer: 'maandag', options: ['zondag', 'maandag', 'zaterdag', 'dinsdag'] },
+                    { question: 'Welke dag is het weekend?', answer: 'zaterdag', options: ['maandag', 'woensdag', 'zaterdag', 'donderdag'] },
+                    { question: 'Welke dag komt NA donderdag?', answer: 'vrijdag', options: ['woensdag', 'vrijdag', 'zaterdag', 'dinsdag'] },
+                    { question: 'Welke dag komt VOOR vrijdag?', answer: 'donderdag', options: ['zaterdag', 'woensdag', 'donderdag', 'maandag'] },
+                    { question: 'Welke dag is de LAATSTE dag van de week?', answer: 'zondag', options: ['zaterdag', 'vrijdag', 'zondag', 'maandag'] },
+                    { question: 'Welke dag komt NA zaterdag?', answer: 'zondag', options: ['vrijdag', 'maandag', 'zondag', 'dinsdag'] },
+                    { question: 'Welke dag is het midden van de week?', answer: 'woensdag', options: ['maandag', 'woensdag', 'vrijdag', 'zondag'] },
+                    { question: 'Welke dag komt NA zondag?', answer: 'maandag', options: ['zaterdag', 'dinsdag', 'maandag', 'vrijdag'] }
+                ]
+            },
+            letters: {
+                title: '🔤 Letters Herkennen',
+                goals: ['1.1.4', '1.4.4'],
+                items: [
+                    { visual: '<span style="font-size:6rem;font-family:serif">A</span>', answer: 'a', options: ['a', 'b', 'c', 'd'] },
+                    { visual: '<span style="font-size:6rem;font-family:serif">B</span>', answer: 'b', options: ['d', 'b', 'p', 'a'] },
+                    { visual: '<span style="font-size:6rem;font-family:serif">M</span>', answer: 'm', options: ['n', 'm', 'w', 'v'] },
+                    { visual: '<span style="font-size:6rem;font-family:serif">S</span>', answer: 's', options: ['z', 's', 'c', 'o'] },
+                    { visual: '<span style="font-size:6rem;font-family:serif">O</span>', answer: 'o', options: ['o', 'c', 'e', 'a'] },
+                    { visual: '<span style="font-size:6rem;font-family:serif">P</span>', answer: 'p', options: ['b', 'd', 'p', 'q'] },
+                    { visual: '<span style="font-size:6rem;font-family:serif">T</span>', answer: 't', options: ['l', 'i', 't', 'f'] },
+                    { visual: '<span style="font-size:6rem;font-family:serif">E</span>', answer: 'e', options: ['e', 'f', 'a', 'c'] },
+                    { visual: '<span style="font-size:6rem;font-family:serif">R</span>', answer: 'r', options: ['p', 'r', 'b', 'k'] },
+                    { visual: '<span style="font-size:6rem;font-family:serif">I</span>', answer: 'i', options: ['l', 'i', 'j', 't'] },
+                    { visual: '<span style="font-size:6rem;font-family:serif">N</span>', answer: 'n', options: ['m', 'n', 'h', 'u'] },
+                    { visual: '<span style="font-size:6rem;font-family:serif">K</span>', answer: 'k', options: ['x', 'k', 'h', 'r'] },
+                    { visual: '<span style="font-size:6rem;font-family:serif">L</span>', answer: 'l', options: ['i', 'l', 't', 'j'] },
+                    { visual: '<span style="font-size:6rem;font-family:serif">D</span>', answer: 'd', options: ['b', 'p', 'd', 'q'] },
+                    { visual: '<span style="font-size:6rem;font-family:serif">G</span>', answer: 'g', options: ['c', 'o', 'g', 'q'] }
+                ]
+            },
+            senses: {
+                title: '👁️ Zintuigen',
+                goals: ['3.3.1'],
+                items: [
+                    { visual: '👀', question: 'Waarmee kun je ZIEN?', answer: 'ogen', options: ['oren', 'ogen', 'neus', 'huid'] },
+                    { visual: '👂', question: 'Waarmee kun je HOREN?', answer: 'oren', options: ['ogen', 'oren', 'mond', 'neus'] },
+                    { visual: '👃', question: 'Waarmee kun je RUIKEN?', answer: 'neus', options: ['neus', 'mond', 'ogen', 'oren'] },
+                    { visual: '👅', question: 'Waarmee kun je PROEVEN?', answer: 'tong', options: ['neus', 'tong', 'ogen', 'oren'] },
+                    { visual: '✋', question: 'Waarmee kun je VOELEN?', answer: 'huid', options: ['ogen', 'oren', 'huid', 'neus'] },
+                    { visual: '🎵', question: 'Welk zintuig gebruik je voor MUZIEK?', answer: 'horen', options: ['zien', 'horen', 'ruiken', 'proeven'] },
+                    { visual: '🌹', question: 'Welk zintuig gebruik je voor een BLOEM ruiken?', answer: 'ruiken', options: ['zien', 'horen', 'ruiken', 'voelen'] },
+                    { visual: '🍭', question: 'Welk zintuig gebruik je om SNOEP te proeven?', answer: 'proeven', options: ['zien', 'proeven', 'ruiken', 'horen'] },
+                    { visual: '📺', question: 'Welk zintuig gebruik je voor TV kijken?', answer: 'zien', options: ['zien', 'horen', 'voelen', 'proeven'] },
+                    { visual: '🧊', question: 'Welk zintuig zegt je dat ijs KOUD is?', answer: 'voelen', options: ['zien', 'proeven', 'voelen', 'horen'] }
+                ]
+            },
+            lifecycle: {
+                title: '🔄 Levenscyclus',
+                goals: ['3.1.3', '3.1.4'],
+                items: [
+                    { visual: '🥒➡️🌱', question: 'Wat doet een zaad?', answer: 'kiemen', options: ['kiemen', 'sterven', 'vliegen', 'zwemmen'] },
+                    { visual: '👶', question: 'Dit is een...', answer: 'baby', options: ['volwassene', 'baby', 'tiener', 'kleuter'] },
+                    { visual: '🌱➡️🌳', question: 'De boom doet...', answer: 'groeien', options: ['krimpen', 'groeien', 'vliegen', 'sterven'] },
+                    { visual: '🐛➡️🦋', question: 'De rups wordt een...', answer: 'vlinder', options: ['bij', 'vlinder', 'vogel', 'spin'] },
+                    { visual: '🥚➡️🐣', question: 'Uit het ei komt een...', answer: 'kuiken', options: ['vis', 'kuiken', 'slang', 'muis'] },
+                    { visual: '👶➡️🧒', question: 'Na baby komt...', answer: 'peuter', options: ['volwassene', 'baby', 'peuter', 'tiener'] },
+                    { visual: '🧒➡️👦', question: 'Na peuter komt...', answer: 'kleuter', options: ['baby', 'kleuter', 'volwassene', 'peuter'] },
+                    { visual: '🌸➡️🍎', question: 'Na de bloem komt de...', answer: 'vrucht', options: ['wortel', 'vrucht', 'blad', 'stengel'] },
+                    { visual: '🐕➡️🐕‍🦺', question: 'De puppy wordt een...', answer: 'volwassen hond', options: ['kat', 'paard', 'volwassen hond', 'vis'] },
+                    { visual: '🌿', question: 'Dit deel van de plant noemen we...', answer: 'blad', options: ['wortel', 'bloem', 'blad', 'stam'] }
+                ]
+            },
+            patterns: {
+                title: '🔶 Patronen',
+                goals: ['2.4.4'],
+                items: [
+                    { visual: '🔴🔵🔴🔵🔴❓', question: 'Wat komt er?', answer: '🔵', options: ['🔴', '🔵', '🟢', '🟡'] },
+                    { visual: '⭐⭐🌙⭐⭐🌙⭐⭐❓', question: 'Wat komt er?', answer: '🌙', options: ['⭐', '🌙', '☀️', '🌟'] },
+                    { visual: '🍎🍎🍌🍎🍎🍌🍎🍎❓', question: 'Wat komt er?', answer: '🍌', options: ['🍎', '🍌', '🍊', '🍇'] },
+                    { visual: '🔺🔺🔻🔺🔺🔻🔺🔺❓', question: 'Wat komt er?', answer: '🔻', options: ['🔺', '🔻', '⬜', '🔵'] },
+                    { visual: '🐱🐶🐱🐶🐱❓', question: 'Wat komt er?', answer: '🐶', options: ['🐱', '🐶', '🐰', '🐻'] },
+                    { visual: '1️⃣2️⃣1️⃣2️⃣1️⃣❓', question: 'Wat komt er?', answer: '2️⃣', options: ['1️⃣', '2️⃣', '3️⃣', '0️⃣'] },
+                    { visual: '🟢🟢🔴🟢🟢🔴🟢🟢❓', question: 'Wat komt er?', answer: '🔴', options: ['🟢', '🔴', '🔵', '🟡'] },
+                    { visual: '❤️💙❤️💙❤️💙❤️❓', question: 'Wat komt er?', answer: '💙', options: ['❤️', '💙', '💚', '💛'] },
+                    { visual: '⬆️⬇️⬆️⬇️⬆️❓', question: 'Wat komt er?', answer: '⬇️', options: ['⬆️', '⬇️', '⬅️', '➡️'] },
+                    { visual: '🌸🌸🌼🌸🌸🌼🌸🌸❓', question: 'Wat komt er?', answer: '🌼', options: ['🌸', '🌼', '🌹', '🌻'] }
+                ]
+            },
+            geography: {
+                title: '🌍 Aardrijkskunde',
+                goals: ['4.1.1', '4.1.2', '4.2.6'],
+                items: [
+                    { visual: '🇧🇪', question: 'In welk land wonen wij?', answer: 'België', options: ['Nederland', 'België', 'Frankrijk', 'Duitsland'] },
+                    { visual: '🌊〰️', question: 'Welke rivier stroomt door België?', answer: 'de Schelde', options: ['de Nijl', 'de Schelde', 'de Amazone', 'de Rijn'] },
+                    { visual: '🇪🇬🏛️', question: 'Welke rivier stroomt door Egypte?', answer: 'de Nijl', options: ['de Nijl', 'de Schelde', 'de Maas', 'de Zee'] },
+                    { visual: '🌍', question: 'Hoe noemen we de hele wereld?', answer: 'de aarde', options: ['de maan', 'de aarde', 'de zon', 'de ster'] },
+                    { visual: '🌍🌊', question: 'Wat is er het MEESTE op aarde?', answer: 'water', options: ['water', 'land', 'bergen', 'bomen'] },
+                    { visual: '❄️🐻‍❄️', question: 'Waar woont de ijsbeer?', answer: 'noordpool', options: ['zuidpool', 'noordpool', 'België', 'Afrika'] },
+                    { visual: '🐧❄️', question: 'Waar woont de pinguïn?', answer: 'zuidpool', options: ['noordpool', 'zuidpool', 'Europa', 'Egypte'] },
+                    { visual: '☀️', question: 'Wat geeft ons licht overdag?', answer: 'de zon', options: ['de maan', 'de sterren', 'de zon', 'de lamp'] },
+                    { visual: '🌙⭐', question: 'Wat zie je \'s nachts aan de hemel?', answer: 'de maan en sterren', options: ['de zon', 'de maan en sterren', 'wolken', 'vogels'] },
+                    { visual: '🌍🔄', question: 'Wat doet de aarde de hele tijd?', answer: 'draaien', options: ['stilstaan', 'draaien', 'springen', 'vallen'] },
+                    { visual: '🌍➡️☀️', question: 'Waarom is het soms dag?', answer: 'de zon schijnt', options: ['de maan schijnt', 'de zon schijnt', 'het regent', 'het sneeuwt'] },
+                    { visual: '🗺️', question: 'Op welk continent ligt België?', answer: 'Europa', options: ['Afrika', 'Europa', 'Azië', 'Amerika'] }
+                ]
+            },
+            ranking: {
+                title: '🏆 Rangorde',
+                goals: ['2.1.2', '2.1.3'],
+                items: [
+                    { visual: '🥇🥈🥉', question: 'Wie wint de gouden medaille?', answer: 'de eerste', options: ['de eerste', 'de tweede', 'de derde', 'de laatste'] },
+                    { visual: '1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣', question: 'Welk cijfer komt NA de tweede?', answer: 'de derde', options: ['de eerste', 'de derde', 'de vierde', 'de tweede'] },
+                    { visual: '🐢🐇🦊🐻🦁', question: 'De beer is de...', answer: 'vierde', options: ['derde', 'vierde', 'vijfde', 'tweede'] },
+                    { visual: '🍎🍊🍋🍐🍇', question: 'De peer is de...', answer: 'vierde', options: ['derde', 'vijfde', 'vierde', 'tweede'] },
+                    { visual: '⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐', question: 'De laatste ster is de...', answer: 'tiende', options: ['negende', 'tiende', 'achtste', 'zevende'] },
+                    { visual: '🚗🚌🚎🚐🚑', question: 'De ambulance is de...', answer: 'vijfde', options: ['vierde', 'vijfde', 'derde', 'zesde'] },
+                    { visual: '📚📚📚📚📚📚', question: 'Het zesde boek is het...', answer: 'laatste', options: ['eerste', 'vijfde', 'laatste', 'vierde'] },
+                    { visual: '🐸🐸🐸🐸🐸🐸🐸', question: 'Hoeveel kikkers zijn er?', answer: 'zeven', options: ['zes', 'zeven', 'acht', 'vijf'] },
+                    { visual: '🎈🎈🎈🎈🎈🎈🎈🎈', question: 'De achtste ballon is de...', answer: 'laatste', options: ['zevende', 'laatste', 'zesde', 'negende'] },
+                    { visual: '🌺🌺🌺', question: 'De eerste bloem staat...', answer: 'vooraan', options: ['achteraan', 'vooraan', 'in het midden', 'laatste'] }
+                ]
+            },
+            subitize: {
+                title: '👀 Flitsen (Subiteren)',
+                goals: ['2.1.9'],
+                items: [
+                    { visual: '⚫', answer: '1', options: ['1', '2', '3'], hint: 'Kijk snel! Niet tellen!' },
+                    { visual: '⚫⚫', answer: '2', options: ['1', '2', '3'], hint: 'Hoeveel zie je?' },
+                    { visual: '⚫⚫⚫', answer: '3', options: ['2', '3', '4'], hint: 'In één oogopslag!' },
+                    { visual: '⚫⚫<br>⚫⚫', answer: '4', options: ['3', '4', '5'], hint: 'Kijk goed!' },
+                    { visual: '⚫⚫<br>⚫⚫⚫', answer: '5', options: ['4', '5', '6'], hint: 'Hoeveel stippen?' },
+                    { visual: '🎲 ⚀', answer: '1', options: ['1', '2', '3'], hint: 'Dobbelsteen!' },
+                    { visual: '🎲 ⚁', answer: '2', options: ['1', '2', '3'], hint: 'Dobbelsteen!' },
+                    { visual: '🎲 ⚂', answer: '3', options: ['2', '3', '4'], hint: 'Dobbelsteen!' },
+                    { visual: '🎲 ⚃', answer: '4', options: ['3', '4', '5'], hint: 'Dobbelsteen!' },
+                    { visual: '🎲 ⚄', answer: '5', options: ['4', '5', '6'], hint: 'Dobbelsteen!' },
+                    { visual: '✋', question: 'Hoeveel vingers heeft een hand?', answer: '5', options: ['4', '5', '6'] },
+                    { visual: '👀', question: 'Hoeveel ogen heb je?', answer: '2', options: ['1', '2', '3'] }
+                ]
+            },
+            money: {
+                title: '💶 Geld',
+                goals: ['2.3.10', '2.3.11'],
+                items: [
+                    { visual: '🪙', question: 'Dit is een...', answer: 'munt', options: ['munt', 'biljet', 'kaart', 'bon'] },
+                    { visual: '💵', question: 'Dit is een...', answer: 'biljet', options: ['munt', 'biljet', 'kaart', 'bon'] },
+                    { visual: '🛒💶', question: 'In de winkel moet je...', answer: 'betalen', options: ['betalen', 'stelen', 'wachten', 'slapen'] },
+                    { visual: '🍬 = 1€', question: 'Het snoepje...1 euro', answer: 'kost', options: ['kost', 'weegt', 'eet', 'slaapt'] },
+                    { visual: '🧸🔄🚗', question: 'Speelgoed wisselen heet...', answer: 'ruilen', options: ['kopen', 'ruilen', 'stelen', 'gooien'] },
+                    { visual: '💶💶', question: 'Met geld kun je dingen...', answer: 'kopen', options: ['kopen', 'eten', 'drinken', 'gooien'] },
+                    { visual: '🏷️ 2€', question: 'Op het kaartje staat de...', answer: 'prijs', options: ['naam', 'prijs', 'kleur', 'grootte'] },
+                    { visual: '€', question: 'Dit symbool is van de...', answer: 'euro', options: ['euro', 'dollar', 'pond', 'yen'] },
+                    { visual: '🛍️💳', question: 'Na het kiezen moet je...', answer: 'afrekenen', options: ['wegrennen', 'afrekenen', 'slapen', 'eten'] },
+                    { visual: '👛', question: 'Geld bewaar je in een...', answer: 'portemonnee', options: ['portemonnee', 'koelkast', 'bed', 'auto'] }
+                ]
+            },
+            seasons: {
+                title: '🍂 Seizoenen',
+                goals: ['4.2.7'],
+                items: [
+                    { visual: '🌸🌷🌱', question: 'Welk seizoen is dit?', answer: 'lente', options: ['lente', 'zomer', 'herfst', 'winter'] },
+                    { visual: '☀️🏖️🌴', question: 'Welk seizoen is dit?', answer: 'zomer', options: ['lente', 'zomer', 'herfst', 'winter'] },
+                    { visual: '🍂🍁🎃', question: 'Welk seizoen is dit?', answer: 'herfst', options: ['lente', 'zomer', 'herfst', 'winter'] },
+                    { visual: '❄️⛄🧣', question: 'Welk seizoen is dit?', answer: 'winter', options: ['lente', 'zomer', 'herfst', 'winter'] },
+                    { visual: '🐣🌈', question: 'In welk seizoen worden veel dieren geboren?', answer: 'lente', options: ['lente', 'zomer', 'herfst', 'winter'] },
+                    { visual: '🏊‍♂️🍦', question: 'In welk seizoen ga je zwemmen?', answer: 'zomer', options: ['lente', 'zomer', 'herfst', 'winter'] },
+                    { visual: '🎄🎁', question: 'In welk seizoen is Kerstmis?', answer: 'winter', options: ['lente', 'zomer', 'herfst', 'winter'] },
+                    { visual: '🍎📚', question: 'In welk seizoen begint school?', answer: 'herfst', options: ['lente', 'zomer', 'herfst', 'winter'] },
+                    { visual: '🧤❄️', question: 'Wanneer draag je wanten?', answer: 'winter', options: ['lente', 'zomer', 'herfst', 'winter'] },
+                    { visual: '🌻🌽', question: 'Wanneer groeien zonnebloemen?', answer: 'zomer', options: ['lente', 'zomer', 'herfst', 'winter'] }
+                ]
+            },
+            lines: {
+                title: '📐 Lijn Herkennen',
+                goals: ['1.2.3', '6.3.2'],
+                items: [
+                    { visual: '<div style="width:100px;height:4px;background:#333;margin:2rem auto;"></div>', question: 'Dit is een...lijn', answer: 'rechte', options: ['rechte', 'gebogen', 'zigzag', 'golvende'] },
+                    { visual: '<div style="width:100px;height:50px;border:4px solid #333;border-radius:50%;border-bottom:none;margin:2rem auto;"></div>', question: 'Dit is een...lijn', answer: 'gebogen', options: ['rechte', 'gebogen', 'zigzag', 'onderbroken'] },
+                    { visual: '<div style="font-size:3rem;letter-spacing:0;">〰️〰️〰️</div>', question: 'Dit is een...lijn', answer: 'golvende', options: ['rechte', 'gebogen', 'zigzag', 'golvende'] },
+                    { visual: '<div style="width:100px;height:4px;background:#333;margin:2rem auto;transform:rotate(90deg);"></div>', question: 'Dit is een...lijn', answer: 'verticale', options: ['horizontale', 'verticale', 'diagonale', 'gebogen'] },
+                    { visual: '<div style="width:100px;height:4px;background:#333;margin:2rem auto;transform:rotate(45deg);"></div>', question: 'Dit is een...lijn', answer: 'schuine', options: ['rechte', 'verticale', 'schuine', 'gebogen'] }
+                ]
+            },
+            direction: {
+                title: '➡️ Richting Quiz',
+                goals: ['1.2.7', '1.1.10'],
+                items: [
+                    { visual: '➡️', question: 'Welke richting gaan we bij het schrijven?', answer: 'rechts', options: ['links', 'rechts', 'boven', 'onder'] },
+                    { visual: '📖', question: 'Waar beginnen we te lezen?', answer: 'links', options: ['links', 'rechts', 'midden', 'onder'] },
+                    { visual: '⬇️', question: 'Na een regel gaan we naar...', answer: 'beneden', options: ['boven', 'beneden', 'links', 'rechts'] },
+                    { visual: 'ABC', question: 'Dit zijn...', answer: 'letters', options: ['cijfers', 'letters', 'vormen', 'kleuren'] },
+                    { visual: '123', question: 'Dit zijn...', answer: 'cijfers', options: ['cijfers', 'letters', 'vormen', 'kleuren'] },
+                    { visual: '📝', question: 'We schrijven van links naar...', answer: 'rechts', options: ['links', 'rechts', 'boven', 'onder'] },
+                    { visual: '📄', question: 'We lezen van boven naar...', answer: 'beneden', options: ['boven', 'beneden', 'links', 'rechts'] }
+                ]
+            }
+        };
+        // Data storage
+        let wordClicks = JSON.parse(localStorage.getItem('wordClicks') || '{}');
+        let goalProgress = JSON.parse(localStorage.getItem('goalProgress') || '{}');
+        let taskProgress = JSON.parse(localStorage.getItem('taskProgress') || '{}');
+        let currentGame = null;
+        let currentIndex = 0;
+        let score = 0;
+        let shuffledItems = [];
+
+        function updateGoalProgress(goals, count = 1) {
+            if (!goals) return;
+            const goalList = typeof goals === 'string' ? goals.split(',') : goals;
+            goalList.forEach(goal => {
+                goal = goal.trim();
+                if (goal && goalsDatabase[goal]) {
+                    goalProgress[goal] = (goalProgress[goal] || 0) + count;
+                }
+            });
+            localStorage.setItem('goalProgress', JSON.stringify(goalProgress));
+            updateStats();
+        }
+
+        function updateStats() {
+            const totalClicks = Object.values(wordClicks).reduce((a, b) => a + b, 0);
+            const uniqueWords = Object.keys(wordClicks).length;
+            const goalsPracticed = Object.keys(goalProgress).length;
+            
+            document.getElementById('total-clicks').textContent = totalClicks;
+            document.getElementById('unique-words').textContent = uniqueWords;
+            document.getElementById('goals-practiced').textContent = goalsPracticed;
+            
+            const goalsTotal = document.getElementById('goals-total');
+            const topGoal = document.getElementById('top-goal');
+            if (goalsTotal) goalsTotal.textContent = goalsPracticed;
+            
+            if (topGoal) {
+                let maxGoal = '-';
+                let maxCount = 0;
+                for (const [goal, count] of Object.entries(goalProgress)) {
+                    if (count > maxCount) {
+                        maxCount = count;
+                        maxGoal = goal;
+                    }
+                }
+                topGoal.textContent = maxGoal !== '-' ? `${maxGoal} (${maxCount}x)` : '-';
+            }
+        }
+
+        function updateWordTagStyle(tag, count) {
+            tag.classList.remove('clicked-1', 'clicked-2', 'clicked-3', 'clicked-many');
+            if (count === 1) tag.classList.add('clicked-1');
+            else if (count === 2) tag.classList.add('clicked-2');
+            else if (count === 3) tag.classList.add('clicked-3');
+            else if (count >= 4) tag.classList.add('clicked-many');
+            
+            let badge = tag.querySelector('.click-count');
+            if (count > 0) {
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'click-count';
+                    tag.appendChild(badge);
+                }
+                badge.textContent = count;
+            }
+        }
+
+        function resetClicks() {
+            if (confirm('Weet je zeker dat je alle voortgang wilt resetten?')) {
+                wordClicks = {};
+                goalProgress = {};
+                taskProgress = {};
+                localStorage.setItem('wordClicks', '{}');
+                localStorage.setItem('goalProgress', '{}');
+                localStorage.setItem('taskProgress', '{}');
+                document.querySelectorAll('.word-tag').forEach(tag => {
+                    tag.classList.remove('clicked-1', 'clicked-2', 'clicked-3', 'clicked-many');
+                    const badge = tag.querySelector('.click-count');
+                    if (badge) badge.remove();
+                });
+                document.querySelectorAll('.task-card').forEach(card => {
+                    card.classList.remove('completed');
+                    card.querySelector('.task-count').textContent = '0x';
+                });
+                updateStats();
+                renderGoals();
+            }
+        }
+
+        // Sort function for goal codes (e.g., "1.2.3" < "1.2.10" < "2.1.1")
+        function compareGoalCodes(codeA, codeB) {
+            const partsA = codeA.split('.').map(Number);
+            const partsB = codeB.split('.').map(Number);
+            for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
+                const numA = partsA[i] || 0;
+                const numB = partsB[i] || 0;
+                if (numA !== numB) return numA - numB;
+            }
+            return 0;
+        }
+
+        function renderGoals() {
+            const container = document.getElementById('goals-list');
+            if (!container) return;
+            
+            const activeFilter = document.querySelector('.goal-filter-btn.active')?.dataset.domain || 'all';
+            const searchQuery = (document.getElementById('goals-search')?.value || '').toLowerCase().trim();
+            const sortMethod = document.getElementById('goals-sort')?.value || 'code';
+            
+            let html = '';
+            let goalsArray = Object.entries(goalsDatabase);
+            
+            // Apply sorting
+            switch(sortMethod) {
+                case 'code':
+                    goalsArray.sort((a, b) => compareGoalCodes(a[0], b[0]));
+                    break;
+                case 'count-desc':
+                    goalsArray.sort((a, b) => {
+                        const diff = (goalProgress[b[0]] || 0) - (goalProgress[a[0]] || 0);
+                        return diff !== 0 ? diff : compareGoalCodes(a[0], b[0]);
+                    });
+                    break;
+                case 'count-asc':
+                    goalsArray.sort((a, b) => {
+                        const diff = (goalProgress[a[0]] || 0) - (goalProgress[b[0]] || 0);
+                        return diff !== 0 ? diff : compareGoalCodes(a[0], b[0]);
+                    });
+                    break;
+                case 'title':
+                    goalsArray.sort((a, b) => a[1].title.localeCompare(b[1].title));
+                    break;
+            }
+            
+            for (const [code, goal] of goalsArray) {
+                // Filter by domain
+                if (activeFilter !== 'all' && goal.domain !== activeFilter) continue;
+                
+                // Filter by search query
+                if (searchQuery) {
+                    const matchesCode = code.toLowerCase().includes(searchQuery);
+                    const matchesTitle = goal.title.toLowerCase().includes(searchQuery);
+                    const matchesDesc = goal.description.toLowerCase().includes(searchQuery);
+                    if (!matchesCode && !matchesTitle && !matchesDesc) continue;
+                }
+                
+                const count = goalProgress[code] || 0;
+                const maxProgress = 20;
+                const progressPercent = Math.min((count / maxProgress) * 100, 100);
+                
+                html += `
+                    <div class="goal-card" data-domain="${goal.domain}" data-code="${code}">
+                        <h4>
+                            <span class="goal-code">${code}</span>
+                            ${goal.title}
+                        </h4>
+                        <p>${goal.description}</p>
+                        <div class="goal-stats">
+                            <span class="goal-stat"><strong>${count}</strong> keer geoefend</span>
+                            <span class="goal-stat">📚 ${goal.subject}</span>
+                        </div>
+                        <div class="goal-progress">
+                            <div class="goal-progress-fill" style="width: ${progressPercent}%"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html || '<p style="text-align:center;padding:2rem;color:#888;">Geen doelen gevonden.</p>';
+        }
+
+        // Export functionality
+        function openExport() {
+            const exportText = generateReport();
+            document.getElementById('export-text').value = exportText;
+            document.getElementById('export-modal').classList.add('active');
+        }
+
+        function closeExport() {
+            document.getElementById('export-modal').classList.remove('active');
+        }
+
+        function copyExport() {
+            const textarea = document.getElementById('export-text');
+            textarea.select();
+            document.execCommand('copy');
+            alert('Rapport gekopieerd naar klembord!');
+        }
+
+        function generateReport() {
+            const date = new Date().toLocaleDateString('nl-BE');
+            let report = `KLEUTERLEREN - VOORTGANGSRAPPORT\n`;
+            report += `Datum: ${date}\n`;
+            report += `${'='.repeat(50)}\n\n`;
+            
+            // Summary
+            const totalClicks = Object.values(wordClicks).reduce((a, b) => a + b, 0);
+            const uniqueWords = Object.keys(wordClicks).length;
+            const goalsPracticed = Object.keys(goalProgress).length;
+            const totalGoals = Object.keys(goalsDatabase).length;
+            
+            report += `SAMENVATTING\n`;
+            report += `-`.repeat(30) + `\n`;
+            report += `Totaal woorden geoefend: ${totalClicks}\n`;
+            report += `Unieke woorden: ${uniqueWords}\n`;
+            report += `Doelen geoefend: ${goalsPracticed} / ${totalGoals}\n\n`;
+            
+            // Goals by domain
+            const domains = {
+                '1': 'Nederlands',
+                '2': 'Wiskunde',
+                '3': 'Wetenschap & Techniek',
+                '4': 'Aardrijkskunde',
+                '5': 'Geschiedenis',
+                '6': 'Muzische vorming',
+                '7': 'Lichamelijke opvoeding',
+                '9': 'Attitudes'
+            };
+            
+            report += `VOORTGANG PER DOMEIN\n`;
+            report += `-`.repeat(30) + `\n`;
+            
+            for (const [domainCode, domainName] of Object.entries(domains)) {
+                const domainGoals = Object.entries(goalsDatabase).filter(([code, goal]) => goal.domain === domainCode);
+                const practiced = domainGoals.filter(([code]) => goalProgress[code] > 0);
+                report += `${domainName}: ${practiced.length}/${domainGoals.length} doelen\n`;
+            }
+            
+            report += `\n`;
+            
+            // Detailed goals - sorted by goal code number
+            report += `DETAIL PER DOEL (geoefend)\n`;
+            report += `-`.repeat(30) + `\n`;
+            
+            // Sort function for goal codes (e.g., "1.2.3" < "1.2.10" < "2.1.1")
+            const sortGoalCodes = (a, b) => {
+                const partsA = a[0].split('.').map(Number);
+                const partsB = b[0].split('.').map(Number);
+                for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
+                    const numA = partsA[i] || 0;
+                    const numB = partsB[i] || 0;
+                    if (numA !== numB) return numA - numB;
+                }
+                return 0;
+            };
+            
+            const practicedGoals = Object.entries(goalProgress)
+                .filter(([code, count]) => count > 0)
+                .sort(sortGoalCodes);
+            
+            for (const [code, count] of practicedGoals) {
+                const goal = goalsDatabase[code];
+                if (goal) {
+                    report += `${code} - ${goal.title}: ${count}x\n`;
+                }
+            }
+            
+            if (practicedGoals.length === 0) {
+                report += `Nog geen doelen geoefend.\n`;
+            }
+            
+            report += `\n`;
+            
+            // Top words
+            report += `MEEST GEOEFENDE WOORDEN\n`;
+            report += `-`.repeat(30) + `\n`;
+            
+            const topWords = Object.entries(wordClicks)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            for (const [word, count] of topWords) {
+                report += `${word}: ${count}x\n`;
+            }
+            
+            if (topWords.length === 0) {
+                report += `Nog geen woorden geoefend.\n`;
+            }
+            
+            return report;
+        }
+
+        // Initialize word tags
+        document.querySelectorAll('.word-tag').forEach(tag => {
+            const word = tag.dataset.word;
+            const goals = tag.dataset.goals;
+            
+            if (wordClicks[word]) {
+                updateWordTagStyle(tag, wordClicks[word]);
+            }
+            
+            tag.addEventListener('click', () => {
+                wordClicks[word] = (wordClicks[word] || 0) + 1;
+                localStorage.setItem('wordClicks', JSON.stringify(wordClicks));
+                updateWordTagStyle(tag, wordClicks[word]);
+                updateGoalProgress(goals);
+                
+                tag.style.transform = 'scale(1.1)';
+                setTimeout(() => tag.style.transform = '', 200);
+            });
+            
+            // Tooltip for goals
+            const tooltip = document.getElementById('tooltip');
+            tag.addEventListener('mouseenter', (e) => {
+                if (goals) {
+                    const goalNames = goals.split(',').map(g => {
+                        const goal = goalsDatabase[g.trim()];
+                        return goal ? `${g}: ${goal.title}` : g;
+                    }).join('\n');
+                    tooltip.textContent = goalNames;
+                    tooltip.style.left = Math.min(e.pageX + 10, window.innerWidth - 260) + 'px';
+                    tooltip.style.top = e.pageY + 10 + 'px';
+                    tooltip.style.opacity = '1';
+                }
+            });
+            tag.addEventListener('mouseleave', () => {
+                tooltip.style.opacity = '0';
+            });
+        });
+
+        // Tab navigation
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+                if (tab.dataset.tab === 'goals') renderGoals();
+            });
+        });
+
+        // Filter pills (vocabulary)
+        document.querySelectorAll('.filter-pill').forEach(pill => {
+            pill.addEventListener('click', () => {
+                document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                const filter = pill.dataset.filter;
+                document.querySelectorAll('.category-card').forEach(card => {
+                    card.style.display = (filter === 'all' || card.dataset.category === filter) ? 'block' : 'none';
+                });
+            });
+        });
+
+        // Goal filter buttons
+        document.querySelectorAll('.goal-filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.goal-filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderGoals();
+            });
+        });
+
+        // Goals search
+        document.getElementById('goals-search')?.addEventListener('input', () => {
+            renderGoals();
+        });
+
+        // Goals sort
+        document.getElementById('goals-sort')?.addEventListener('change', () => {
+            renderGoals();
+        });
+
+        // Search
+        document.getElementById('vocab-search').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            document.querySelectorAll('.word-tag').forEach(tag => {
+                if (query && tag.textContent.toLowerCase().includes(query)) {
+                    tag.style.boxShadow = '0 0 10px var(--sky-blue)';
+                } else {
+                    tag.style.boxShadow = '';
+                }
+            });
+        });
+
+        // Game functions
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function openGame(gameType) {
+            if (!gameData[gameType]) return;
+            currentGame = gameType;
+            currentIndex = 0;
+            score = 0;
+            shuffledItems = shuffleArray(gameData[gameType].items);
+            document.getElementById('game-modal').classList.add('active');
+            showQuestion();
+        }
+
+        function closeGame() {
+            document.getElementById('game-modal').classList.remove('active');
+            currentGame = null;
+        }
+
+        // Generate position visual with proper z-index layering
+        function renderPositionVisual(catPos) {
+            const styles = {
+                box: 'width:80px;height:80px;background:linear-gradient(135deg,#8B4513,#A0522D);border:3px solid #654321;border-radius:8px;position:absolute;box-shadow:5px 5px 15px rgba(0,0,0,0.3);',
+                cat: 'font-size:2.5rem;position:absolute;filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.3));'
+            };
+            
+            let boxStyle = styles.box;
+            let catStyle = styles.cat;
+            let boxPos, catPosStyle;
+            
+            switch(catPos) {
+                case 'under':
+                    boxPos = 'left:60px;top:30px;';
+                    catPosStyle = 'left:70px;top:120px;';
+                    break;
+                case 'on':
+                    boxPos = 'left:60px;top:80px;';
+                    catPosStyle = 'left:70px;top:30px;z-index:10;';
+                    break;
+                case 'in':
+                    boxPos = 'left:60px;top:60px;';
+                    catPosStyle = 'left:75px;top:70px;z-index:10;font-size:2rem;';
+                    break;
+                case 'next':
+                    boxPos = 'left:30px;top:60px;';
+                    catPosStyle = 'left:130px;top:80px;';
+                    break;
+                case 'front':
+                    boxPos = 'left:80px;top:40px;opacity:0.7;';
+                    catPosStyle = 'left:60px;top:90px;z-index:10;';
+                    break;
+                case 'behind':
+                    boxPos = 'left:60px;top:80px;z-index:10;';
+                    catPosStyle = 'left:80px;top:50px;opacity:0.6;';
+                    break;
+                default:
+                    boxPos = 'left:60px;top:60px;';
+                    catPosStyle = 'left:70px;top:120px;';
+            }
+            
+            return `
+                <div style="width:200px;height:180px;position:relative;margin:1rem auto;">
+                    <div style="${boxStyle}${boxPos}">📦</div>
+                    <div style="${catStyle}${catPosStyle}">🐱</div>
+                </div>
+            `;
+        }
+
+        function showQuestion() {
+            const game = gameData[currentGame];
+            const item = shuffledItems[currentIndex];
+            const gameArea = document.getElementById('game-area');
+            const progress = ((currentIndex) / shuffledItems.length) * 100;
+            
+            let html = `<h2 class="game-title">${game.title}</h2>`;
+            html += `<div style="font-size:0.8rem;color:#888;text-align:center;margin-bottom:0.5rem;">📚 Doelen: ${game.goals.join(', ')}</div>`;
+            html += `<div class="progress-bar"><div class="progress-fill" style="width: ${progress}%"></div></div>`;
+            html += `<div class="score-display">⭐ ${score}/${shuffledItems.length} | Vraag ${currentIndex + 1}/${shuffledItems.length}</div>`;
+            
+            if (currentGame === 'colors') {
+                const border = item.border ? 'border:2px solid #ccc;' : '';
+                html += `<div class="color-display" style="background:${item.color};${border}"></div>`;
+                html += `<div class="game-question">Welke kleur is dit?</div>`;
+            } else if (item.type === 'position') {
+                html += renderPositionVisual(item.catPos);
+                html += `<div class="game-question">${item.question}</div>`;
+            } else if (item.visual) {
+                html += `<div class="game-visual">${item.visual}</div>`;
+                html += `<div class="game-question">${item.question || 'Wat is dit?'}</div>`;
+            } else {
+                html += `<div class="game-question">${item.question}</div>`;
+            }
+            
+            html += '<div class="game-options">';
+            shuffleArray(item.options).forEach(opt => {
+                html += `<button class="game-option" onclick="checkAnswer(this, '${opt}', '${item.answer}')">${opt}</button>`;
+            });
+            html += '</div>';
+            
+            gameArea.innerHTML = html;
+        }
+
+        function checkAnswer(btn, selected, correct) {
+            document.querySelectorAll('.game-option').forEach(b => {
+                b.disabled = true;
+                b.style.pointerEvents = 'none';
+            });
+            
+            if (selected === correct) {
+                btn.classList.add('correct');
+                score++;
+                setTimeout(() => nextQuestion(), 800);
+            } else {
+                btn.classList.add('wrong');
+                document.querySelectorAll('.game-option').forEach(b => {
+                    if (b.textContent === correct) b.classList.add('correct');
+                });
+                setTimeout(() => nextQuestion(), 1200);
+            }
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < shuffledItems.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            const game = gameData[currentGame];
+            const percentage = Math.round((score / shuffledItems.length) * 100);
+            
+            // Update goal progress based on score
+            updateGoalProgress(game.goals, score);
+            
+            let emoji, message;
+            if (percentage >= 90) { emoji = '🏆'; message = 'Fantastisch!'; }
+            else if (percentage >= 70) { emoji = '⭐'; message = 'Heel goed!'; }
+            else if (percentage >= 50) { emoji = '👍'; message = 'Goed gedaan!'; }
+            else { emoji = '💪'; message = 'Blijf oefenen!'; }
+            
+            document.getElementById('game-area').innerHTML = `
+                <h2 class="game-title">${game.title}</h2>
+                <div class="game-visual">${emoji}</div>
+                <div class="game-question">${message}</div>
+                <div class="score-display">${score}/${shuffledItems.length} (${percentage}%)</div>
+                <div style="font-size:0.9rem;color:#666;margin:1rem 0;">
+                    ✅ Doelen bijgewerkt: ${game.goals.join(', ')}
+                </div>
+                <button class="next-btn" onclick="openGame('${currentGame}')">🔄 Opnieuw</button>
+                <button class="next-btn" onclick="closeGame()" style="background:linear-gradient(135deg,var(--coral-pink),#FF8E8E);margin-left:10px;">✖️ Sluiten</button>
+            `;
+        }
+
+        // Close modal on backdrop click
+        document.getElementById('game-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('game-modal')) closeGame();
+        });
+
+        // Task functions
+        function toggleTask(card) {
+            const taskId = card.dataset.task;
+            const goals = card.dataset.goals;
+            
+            // Increment count
+            taskProgress[taskId] = (taskProgress[taskId] || 0) + 1;
+            localStorage.setItem('taskProgress', JSON.stringify(taskProgress));
+            
+            // Update goal progress
+            updateGoalProgress(goals, 1);
+            
+            // Update UI
+            card.classList.add('completed');
+            const countEl = card.querySelector('.task-count');
+            countEl.textContent = taskProgress[taskId] + 'x';
+            
+            // Animation feedback
+            card.style.transform = 'scale(1.02)';
+            setTimeout(() => card.style.transform = '', 300);
+        }
+
+        function initTasks() {
+            document.querySelectorAll('.task-card').forEach(card => {
+                const taskId = card.dataset.task;
+                const count = taskProgress[taskId] || 0;
+                if (count > 0) {
+                    card.classList.add('completed');
+                    card.querySelector('.task-count').textContent = count + 'x';
+                }
+            });
+        }
+
+        // Task filter buttons
+        document.querySelectorAll('.task-filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.task-filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const filter = btn.dataset.taskfilter;
+                
+                document.querySelectorAll('.task-card').forEach(card => {
+                    const domain = card.dataset.domain;
+                    const isDone = card.classList.contains('completed');
+                    
+                    let show = false;
+                    if (filter === 'all') show = true;
+                    else if (filter === 'todo') show = !isDone;
+                    else if (filter === 'done') show = isDone;
+                    else show = domain === filter;
+                    
+                    card.style.display = show ? 'flex' : 'none';
+                });
+            });
+        });
+
+        // Initialize
+        updateStats();
+        renderGoals();
+        initTasks();
+    </script>
+</body>
+</html>

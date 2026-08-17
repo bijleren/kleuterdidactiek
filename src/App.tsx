@@ -1,0 +1,281 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { SchoolProvider } from './contexts/SchoolContext';
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import Dashboard from './pages/Dashboard';
+import GroupsPage from './pages/GroupsPage';
+import KleuterdoelenPage from './pages/KleuterdoelenPage';
+import AnalyticsPage from './pages/AnalyticsPage';
+import AgendaPage from './pages/AgendaPage';
+import StudentsPage from './pages/StudentsPage';
+import ActiviTijdPage from './pages/ActiviTijdPage';
+import SchoolOnboarding from './components/SchoolOnboarding';
+import OnboardingPage from './pages/OnboardingPage';
+import VoorWiePage from './pages/VoorWiePage';
+import PrijsPage from './pages/PrijsPage';
+import HoeWerktHetPage from './pages/HoeWerktHetPage';
+import WaaromPage from './pages/WaaromPage';
+import ContactPage from './pages/ContactPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import SchoolAnalyticsPage from './pages/SchoolAnalyticsPage';
+import NieuweScholenPage from './pages/NieuweScholenPage';
+import { useState } from 'react';
+import { X, Mail } from 'lucide-react';
+
+function LaunchSignupWidget() {
+  const { user, loading } = useAuth();
+  const [dismissed, setDismissed] = useState(false);
+
+  if (loading || user || dismissed) return null;
+
+  return (
+    <div className="fixed bottom-5 right-5 z-50 max-w-xs w-full animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+        <div className="bg-gradient-to-r from-deep-purple to-[#9B9EFF] px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Mail className="w-4 h-4 text-white flex-shrink-0" />
+            <span className="text-white font-semibold text-sm">Op de hoogte blijven?</span>
+          </div>
+          <button
+            onClick={() => setDismissed(true)}
+            className="text-white/70 hover:text-white transition-colors flex-shrink-0"
+            aria-label="Sluiten"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="px-4 py-3 space-y-3">
+          <p className="text-sm text-gray-700 leading-relaxed">
+            Mogen we je één keer mailen bij de lancering? Deel hier je mailadres.
+          </p>
+          <a
+            href="https://forms.office.com/e/zviHhhk52T"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full text-center bg-gradient-to-r from-deep-purple to-[#9B9EFF] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:scale-105 transition-transform shadow-md"
+          >
+            Ja, schrijf me in
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FFF8E7] via-[#FFF5E6] to-[#E8F6F3]">
+        <div className="text-2xl font-baloo text-[#5D5FEF]">Laden...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+function PublicRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FFF8E7] via-[#FFF5E6] to-[#E8F6F3]">
+        <div className="text-2xl font-baloo text-[#5D5FEF]">Laden...</div>
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/aan-de-slag" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+function AppRoutes() {
+  return (
+    <>
+      <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/voor-wie" element={<VoorWiePage />} />
+      <Route path="/prijs" element={<PrijsPage />} />
+      <Route path="/hoe-werkt-het" element={<HoeWerktHetPage />} />
+      <Route path="/waarom" element={<WaaromPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/algemene-voorwaarden" element={<TermsPage />} />
+      <Route path="/nieuwe-scholen" element={<NieuweScholenPage />} />
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <RegisterPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/forgot-password"
+        element={
+          <PublicRoute>
+            <ForgotPasswordPage />
+          </PublicRoute>
+        }
+      />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route
+        path="/onboarding"
+        element={
+          <ProtectedRoute>
+            <SchoolOnboarding onComplete={() => window.location.href = '/groups'} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/groups"
+        element={
+          <ProtectedRoute>
+            <GroupsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/aan-de-slag"
+        element={
+          <ProtectedRoute>
+            <KleuterdoelenPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/doelen"
+        element={
+          <ProtectedRoute>
+            <KleuterdoelenPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/evalueren"
+        element={
+          <ProtectedRoute>
+            <StudentsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/planner"
+        element={
+          <ProtectedRoute>
+            <AgendaPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/analyse"
+        element={
+          <ProtectedRoute>
+            <AnalyticsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/school-analyse"
+        element={
+          <ProtectedRoute>
+            <SchoolAnalyticsPage />
+          </ProtectedRoute>
+        }
+      />
+      {/* Legacy routes for backwards compatibility */}
+      <Route
+        path="/kleuterdoelen/:groupId"
+        element={
+          <ProtectedRoute>
+            <KleuterdoelenPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/students/:groupId"
+        element={
+          <ProtectedRoute>
+            <StudentsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/analytics"
+        element={
+          <ProtectedRoute>
+            <AnalyticsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/agenda"
+        element={
+          <ProtectedRoute>
+            <AgendaPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/activi-tijd"
+        element={
+          <ProtectedRoute>
+            <ActiviTijdPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/onboarding/:groupId"
+        element={
+          <ProtectedRoute>
+            <OnboardingPage />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+      <LaunchSignupWidget />
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <SchoolProvider>
+          <AppRoutes />
+        </SchoolProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
