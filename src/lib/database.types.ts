@@ -344,9 +344,190 @@ export interface Database {
           created_at?: string
         }
       }
+      minimumdoelen: {
+        Row: {
+          code: string
+          domein: string
+          vakdiscipline: string
+          onderwerp: string | null
+          subthema: string | null
+          type_onderwijsdoel: string
+          is_te_bereiken: boolean
+          doelzin: string
+          uitbreiding: string | null
+          woordenschat: string | null
+          geldig_vanaf: string | null
+          niveau: string
+          onderwijsstructuur: string
+          created_at: string
+        }
+        Insert: {
+          code: string
+          domein: string
+          vakdiscipline: string
+          onderwerp?: string | null
+          subthema?: string | null
+          type_onderwijsdoel: string
+          is_te_bereiken?: boolean
+          doelzin: string
+          uitbreiding?: string | null
+          woordenschat?: string | null
+          geldig_vanaf?: string | null
+          niveau?: string
+          onderwijsstructuur?: string
+          created_at?: string
+        }
+        Update: {
+          code?: string
+          domein?: string
+          vakdiscipline?: string
+          onderwerp?: string | null
+          subthema?: string | null
+          type_onderwijsdoel?: string
+          is_te_bereiken?: boolean
+          doelzin?: string
+          uitbreiding?: string | null
+          woordenschat?: string | null
+          geldig_vanaf?: string | null
+        }
+      }
+      netten: {
+        Row: {
+          code: string
+          naam: string
+          bron_url: string | null
+          opgehaald_op: string | null
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          naam: string
+          bron_url?: string | null
+          opgehaald_op?: string | null
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          naam?: string
+          bron_url?: string | null
+          opgehaald_op?: string | null
+          sort_order?: number
+        }
+      }
+      leerplandoelen: {
+        Row: {
+          id: string
+          net_code: string
+          doelnummer: string
+          doelnummers: string[]
+          omschrijving: string
+          path: string[]
+          path_labels: string[]
+          leeftijd_25_4: boolean
+          leeftijd_4_5: boolean
+          leeftijd_5_6: boolean
+          extra: Json
+          bron_volgorde: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          net_code: string
+          doelnummer: string
+          doelnummers?: string[]
+          omschrijving: string
+          path?: string[]
+          path_labels?: string[]
+          leeftijd_25_4?: boolean
+          leeftijd_4_5?: boolean
+          leeftijd_5_6?: boolean
+          extra?: Json
+          bron_volgorde?: number | null
+        }
+        Update: {
+          net_code?: string
+          doelnummer?: string
+          omschrijving?: string
+          leeftijd_25_4?: boolean
+          leeftijd_4_5?: boolean
+          leeftijd_5_6?: boolean
+          extra?: Json
+        }
+      }
+      leerplandoel_minimumdoelen: {
+        Row: {
+          leerplandoel_id: string
+          code: string
+        }
+        Insert: {
+          leerplandoel_id: string
+          code: string
+        }
+        Update: {
+          leerplandoel_id?: string
+          code?: string
+        }
+      }
+      leerplandoel_details: {
+        Row: {
+          id: string
+          leerplandoel_id: string
+          soort: string
+          tekst: string
+          leeftijd_25_4: boolean
+          leeftijd_4_5: boolean
+          leeftijd_5_6: boolean
+          volgorde: number
+        }
+        Insert: {
+          id?: string
+          leerplandoel_id: string
+          soort: string
+          tekst: string
+          leeftijd_25_4?: boolean
+          leeftijd_4_5?: boolean
+          leeftijd_5_6?: boolean
+          volgorde?: number
+        }
+        Update: {
+          soort?: string
+          tekst?: string
+          volgorde?: number
+        }
+      }
     }
     Views: {
-      [_ in never]: never
+      v_doelen_per_leeftijd_en_net: {
+        Row: {
+          net_code: string
+          net_naam: string
+          leeftijd: string
+          code: string
+          vakdiscipline: string
+          onderwerp: string | null
+          doelzin: string
+          is_te_bereiken: boolean
+          in_app: boolean
+          app_titel: string | null
+          aantal_leerplandoelen: number
+          doelnummers: string[]
+        }
+        Relationships: []
+      }
+      v_woord_per_net_en_leeftijd: {
+        Row: {
+          word_id: string
+          word: string
+          is_custom: boolean
+          school_id: string | null
+          net_code: string
+          leeftijd_25_4: boolean
+          leeftijd_4_5: boolean
+          leeftijd_5_6: boolean
+          precisie: string
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

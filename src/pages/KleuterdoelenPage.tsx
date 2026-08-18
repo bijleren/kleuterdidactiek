@@ -6,6 +6,7 @@ import VocabularyTracker from '../components/VocabularyTracker';
 import GamesGrid from '../components/GamesGrid';
 import WritingExercises from '../components/WritingExercises';
 import GoalsOverview from '../components/GoalsOverview';
+import LeerplandoelenOverzicht from '../components/LeerplandoelenOverzicht';
 import PhysicalTasks from '../components/PhysicalTasks';
 import VideosManager from '../components/VideosManager';
 import MaterialsManager from '../components/MaterialsManager';
@@ -38,6 +39,8 @@ interface ActivityBoard {
 }
 
 type TabType = 'vocabulary' | 'games' | 'writing' | 'videos' | 'materials' | 'tasks' | 'activities' | 'routines' | 'goals' | null;
+/** Binnen het doelenscherm: de minimumdoelen van de app, of de leerplandoelen per net. */
+type DoelenWeergave = 'minimum' | 'leerplan';
 
 export default function KleuterdoelenPage() {
   const { groupId: urlGroupId } = useParams<{ groupId: string }>();
@@ -48,6 +51,7 @@ export default function KleuterdoelenPage() {
   const [group, setGroup] = useState<Group | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>(null);
+  const [doelenWeergave, setDoelenWeergave] = useState<DoelenWeergave>('minimum');
   const [selectedBoard, setSelectedBoard] = useState<ActivityBoard | null>(null);
   const [showBoardAnalytics, setShowBoardAnalytics] = useState(false);
   const [analyticsBoardId, setAnalyticsBoardId] = useState<string | undefined>(undefined);
@@ -263,7 +267,38 @@ export default function KleuterdoelenPage() {
             )
           )}
           {activeTab === 'routines' && groupId && group && <RoutinesManager schoolId={group.school_id} groupId={groupId} goalFilter={goalFilter} />}
-          {activeTab === 'goals' && groupId && <GoalsOverview groupId={groupId} />}
+          {activeTab === 'goals' && groupId && (
+            <div className="space-y-6">
+              {/* Twee lagen: de minimumdoelen van de app, en de leerplandoelen per net. */}
+              <div className="flex flex-wrap gap-3">
+                {(
+                  [
+                    ['minimum', 'Minimumdoelen', '🎯'],
+                    ['leerplan', 'Leerplandoelen per net', '🧭'],
+                  ] as [DoelenWeergave, string, string][]
+                ).map(([id, label, icon]) => (
+                  <button
+                    key={id}
+                    onClick={() => setDoelenWeergave(id)}
+                    className={`px-6 py-3 rounded-full font-baloo text-lg font-semibold shadow-lg transition-all duration-200 flex items-center gap-2 whitespace-nowrap ${
+                      doelenWeergave === id
+                        ? 'bg-gradient-to-r from-deep-purple to-[#9B9EFF] text-white scale-105'
+                        : 'bg-white text-gray-700 hover:scale-105'
+                    }`}
+                  >
+                    <span>{icon}</span>
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {doelenWeergave === 'minimum' ? (
+                <GoalsOverview groupId={groupId} />
+              ) : (
+                <LeerplandoelenOverzicht groupId={groupId} />
+              )}
+            </div>
+          )}
         </div>
 
         {/* Introduction text - only shown when no tab is selected */}

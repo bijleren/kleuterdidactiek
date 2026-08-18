@@ -5,6 +5,19 @@ import { useNavigate } from 'react-router-dom';
 import Modal from './Modal';
 import * as XLSX from 'xlsx';
 import { compareGoalCodes } from '../utils/goalSort';
+import { SCHOOLJAAR_EIND, SCHOOLJAAR_START, getSchoolYearWeeks, getWeekNumber } from '../utils/schooljaar';
+import NetLeeftijdFilter from './NetLeeftijdFilter';
+import { DoelNetBadges } from './NetBadges';
+import {
+  NET_CODES,
+  bewaarFilter,
+  leesNetEnLeeftijd,
+  loadDoelNetInfo,
+  voldoetAanNetLeeftijd,
+  type DoelNetInfo,
+  type Leeftijd,
+  type NetCode,
+} from '../lib/leerplandoelen';
 
 interface GoalsOverviewProps {
   groupId: string;
@@ -82,25 +95,6 @@ const getProgressCategory = (sessions: number): 'not_started' | 'beginner' | 'in
   return 'expert';
 };
 
-const getWeekNumber = (date: Date, schoolYearStart: Date): number => {
-  const diff = date.getTime() - schoolYearStart.getTime();
-  return Math.floor(diff / (7 * 24 * 60 * 60 * 1000));
-};
-
-const getSchoolYearWeeks = () => {
-  const start = new Date('2025-09-01');
-  const end = new Date('2026-06-30');
-  const weeks = [];
-  const current = new Date(start);
-
-  while (current < end) {
-    weeks.push(new Date(current));
-    current.setDate(current.getDate() + 7);
-  }
-
-  return { start, end, weeks };
-};
-
 export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
   const navigate = useNavigate();
   const [goals, setGoals] = useState<GoalWithProgress[]>([]);
@@ -116,6 +110,20 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
   const [lessonsLoading, setLessonsLoading] = useState(false);
   const timelineRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [contentCounts, setContentCounts] = useState<Map<string, ContentCounts>>(new Map());
+  const [doelNetInfo, setDoelNetInfo] = useState<Map<string, DoelNetInfo>>(new Map());
+  const [netFilter, setNetFilter] = useState<NetCode | 'all'>(() => leesNetEnLeeftijd().net);
+  const [leeftijdFilter, setLeeftijdFilter] = useState<Leeftijd | 'all'>(
+    () => leesNetEnLeeftijd().leeftijd
+  );
+
+  const kiesNet = (n: NetCode | 'all') => {
+    setNetFilter(n);
+    bewaarFilter('kd.netFilter', n);
+  };
+  const kiesLeeftijd = (l: Leeftijd | 'all') => {
+    setLeeftijdFilter(l);
+    bewaarFilter('kd.leeftijdFilter', l);
+  };
 
   useEffect(() => {
     loadGoals();
@@ -130,15 +138,21 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
 
   const loadGoals = async () => {
     try {
+      // Apart van de Promise.all hieronder: een niet-Postgrest belofte in
+      // dezelfde array maakt het elementtype een union en verstoort de
+      // typeinferentie van de andere resultaten.
+      loadDoelNetInfo().then(setDoelNetInfo);
+
       const [goalsResult, progressResult, sessionsResult] = await Promise.all([
         supabase.from('educational_goals').select('*').order('sort_order'),
         supabase.from('group_goal_progress').select('*').eq('group_id', groupId),
-        supabase
-          .from('goal_tracking_sessions')
-          .select('goal_codes, practiced_at')
-          .eq('group_id', groupId)
-          .gte('practiced_at', '2025-09-01')
-          .lte('practiced_at', '2026-06-30'),
+        // Weken server-side samengevat per code: het aantal sessies groeit
+        // onbeperkt, het aantal codes niet.
+        supabase.rpc('doel_weken', {
+          p_group_id: groupId,
+          p_van: SCHOOLJAAR_START,
+          p_tot: SCHOOLJAAR_EIND,
+        } as never),
       ]);
 
       if (goalsResult.error) throw goalsResult.error;
@@ -157,18 +171,13 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
         ]) || []
       );
 
-      const { start: schoolYearStart } = getSchoolYearWeeks();
       const weeklyMap = new Map<string, Set<number>>();
-
-      sessionsResult.data?.forEach((session) => {
-        const weekNum = getWeekNumber(new Date(session.practiced_at), schoolYearStart);
-        session.goal_codes.forEach((goalCode: string) => {
-          if (!weeklyMap.has(goalCode)) {
-            weeklyMap.set(goalCode, new Set());
-          }
-          weeklyMap.get(goalCode)!.add(weekNum);
-        });
-      });
+      for (const r of (sessionsResult.data ?? []) as unknown as {
+        code: string;
+        weken: number[];
+      }[]) {
+        weeklyMap.set(r.code, new Set(r.weken ?? []));
+      }
 
       setWeeklyData(weeklyMap);
 
@@ -409,6 +418,8 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
     .filter((g) => {
       if (filter !== 'all' && g.progress_category !== filter) return false;
       if (domainFilter.length > 0 && !domainFilter.includes(g.domain)) return false;
+      if (!voldoetAanNetLeeftijd(doelNetInfo.get(g.code), netFilter, leeftijdFilter))
+        return false;
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         return (
@@ -612,6 +623,16 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
           </select>
         </div>
 
+        <div className="mb-4 pb-4 border-b border-gray-100">
+          <NetLeeftijdFilter
+            net={netFilter}
+            leeftijd={leeftijdFilter}
+            onNetChange={kiesNet}
+            onLeeftijdChange={kiesLeeftijd}
+            aantal={filteredGoals.length}
+          />
+        </div>
+
         <div className="space-y-3 mb-4">
           <div className="flex gap-2">
             <button
@@ -738,6 +759,7 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
                   <span className="text-xs px-3 py-1 bg-gray-100 text-gray-700 rounded-full font-semibold">
                     {domainLabels[goal.domain] || goal.subject}
                   </span>
+                  <DoelNetBadges info={doelNetInfo.get(goal.code)} />
                   <span
                     className={`text-xs px-3 py-1 rounded-full font-semibold ${
                       categoryColors[goal.progress_category]
@@ -759,6 +781,40 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
               </div>
 
               <p className="text-sm text-gray-600 mb-3">{goal.description}</p>
+
+              {(() => {
+                const net = doelNetInfo.get(goal.code);
+                if (!net) return null;
+                return (
+                  <details className="mb-3 group">
+                    <summary className="text-xs text-gray-500 cursor-pointer hover:text-deep-purple select-none">
+                      Officieel minimumdoel {goal.code}
+                      {net.onderwerp ? ` · ${net.vakdiscipline} › ${net.onderwerp}` : ` · ${net.vakdiscipline}`}
+                    </summary>
+                    <p className="mt-2 text-sm text-gray-700 whitespace-pre-line bg-gray-50 rounded-xl p-3">
+                      {net.doelzin}
+                    </p>
+                    <div className="mt-2 space-y-1">
+                      {NET_CODES.map((n) => {
+                        const nrs = net.doelnummers[n];
+                        const leeftijden = net.perNet[n];
+                        if (!nrs?.length || !leeftijden?.length) return null;
+                        return (
+                          <p key={n} className="text-xs text-gray-500">
+                            <span className="font-semibold">{n === 'GO' ? 'GO!' : 'Katholiek Onderwijs'}</span>
+                            {' — '}
+                            {leeftijden.join(', ')} · {nrs.length} leerplandoel
+                            {nrs.length === 1 ? '' : 'en'}
+                            {': '}
+                            <span className="text-gray-400">{nrs.slice(0, 6).join(', ')}</span>
+                            {nrs.length > 6 && <span className="text-gray-400"> …</span>}
+                          </p>
+                        );
+                      })}
+                    </div>
+                  </details>
+                );
+              })()}
 
               <div className="mb-3">
                 <div className="flex items-center gap-2 mb-2">

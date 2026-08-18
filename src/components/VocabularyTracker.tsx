@@ -6,6 +6,17 @@ import { useSchool } from '../contexts/SchoolContext';
 import { logActivityToCalendar } from '../utils/calendarLogger';
 import { exportVocabularyToPDF } from '../utils/vocabularyPdfExport';
 import { getVideoEmbed } from '../utils/videoEmbed';
+import NetLeeftijdFilter from './NetLeeftijdFilter';
+import { WoordNetBadges } from './NetBadges';
+import {
+  NET_CODES,
+  bewaarFilter,
+  leesNetEnLeeftijd,
+  loadWoordNetInfo,
+  type Leeftijd,
+  type NetCode,
+  type WoordNetInfo,
+} from '../lib/leerplandoelen';
 
 interface VocabularyTrackerProps {
   groupId: string;
@@ -104,6 +115,40 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
   const [activeVideo, setActiveVideo] = useState<LinkedVideo | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [woordNetInfo, setWoordNetInfo] = useState<Map<string, WoordNetInfo>>(new Map());
+  const [netFilter, setNetFilter] = useState<NetCode | 'all'>(() => leesNetEnLeeftijd().net);
+  const [leeftijdFilter, setLeeftijdFilter] = useState<Leeftijd | 'all'>(
+    () => leesNetEnLeeftijd().leeftijd
+  );
+
+  const kiesNet = (n: NetCode | 'all') => {
+    setNetFilter(n);
+    bewaarFilter('kd.netFilter', n);
+  };
+  const kiesLeeftijd = (l: Leeftijd | 'all') => {
+    setLeeftijdFilter(l);
+    bewaarFilter('kd.leeftijdFilter', l);
+  };
+  const [toonAlleWoorden, setToonAlleWoorden] = useState(false);
+
+  useEffect(() => {
+    loadWoordNetInfo().then(setWoordNetInfo);
+  }, []);
+
+  /** Hoort dit woord bij het gekozen net en de gekozen leeftijdsgroep? */
+  const woordVoldoet = (woord: string): boolean => {
+    if (netFilter === 'all' && leeftijdFilter === 'all') return true;
+    const info = woordNetInfo.get(woord.toLowerCase());
+    if (!info) return false;
+    const netten: NetCode[] = netFilter === 'all' ? NET_CODES : [netFilter];
+    return netten.some((n) => {
+      const per = info.perNet[n];
+      if (!per || per.leeftijden.length === 0) return false;
+      return leeftijdFilter === 'all' || per.leeftijden.includes(leeftijdFilter);
+    });
+  };
+
+  const filterActief = netFilter !== 'all' || leeftijdFilter !== 'all';
   const [directVideoUrl, setDirectVideoUrl] = useState('');
   const [directVideoTitle, setDirectVideoTitle] = useState('');
   const [addingVideo, setAddingVideo] = useState(false);
@@ -291,22 +336,25 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
     if (!groupId) return;
 
     try {
-      let query = supabase
-        .from('vocabulary_practice_log')
-        .select('word, clicked_at')
-        .eq('group_id', groupId);
-
+      // Server-side tellen in plaats van elke logregel ophalen: het aantal
+      // klikken groeit onbeperkt, het aantal woorden niet. Zonder dit loopt een
+      // actieve groep na een paar schooljaren tegen de rijlimiet aan en vallen
+      // de oudste klikken stil uit de tellers.
+      let vanaf: string | null = null;
       if (timeFilter === 'today') {
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
-        query = query.gte('clicked_at', startOfDay.toISOString());
+        vanaf = startOfDay.toISOString();
       } else if (timeFilter === 'hour') {
         const oneHourAgo = new Date();
         oneHourAgo.setHours(oneHourAgo.getHours() - 1);
-        query = query.gte('clicked_at', oneHourAgo.toISOString());
+        vanaf = oneHourAgo.toISOString();
       }
 
-      const { data, error } = await query;
+      const { data, error } = await supabase.rpc('woord_klikken', {
+        p_group_id: groupId,
+        p_vanaf: vanaf,
+      } as never);
 
       if (error) {
         console.error('Error loading click counts:', error);
@@ -314,9 +362,9 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
       }
 
       const counts: WordClickCount = {};
-      data?.forEach((entry) => {
-        counts[entry.word] = (counts[entry.word] || 0) + 1;
-      });
+      for (const r of (data ?? []) as unknown as { word: string; aantal: number }[]) {
+        counts[r.word] = Number(r.aantal);
+      }
 
       setClickCounts(counts);
     } catch (error) {
@@ -822,6 +870,30 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
             />
           </div>
         </div>
+
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <NetLeeftijdFilter
+            net={netFilter}
+            leeftijd={leeftijdFilter}
+            onNetChange={kiesNet}
+            onLeeftijdChange={kiesLeeftijd}
+          />
+
+          {filterActief && (
+            <label className="flex items-center gap-2 mt-3 text-sm text-gray-600 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={toonAlleWoorden}
+                onChange={(e) => setToonAlleWoorden(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 text-deep-purple focus:ring-deep-purple"
+              />
+              Alle woorden tonen
+              <span className="text-xs text-gray-400">
+                (woorden buiten het filter blijven staan, maar grijs)
+              </span>
+            </label>
+          )}
+        </div>
       </div>
 
       <div className="bg-white rounded-3xl p-6 shadow-xl">
@@ -1017,6 +1089,17 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
           if (goalFilter) {
             filteredWords = filteredWords.filter((w) => w.goals && w.goals.includes(goalFilter));
           }
+          // Buiten het filter: normaal weglaten, maar met 'alle woorden tonen'
+          // blijven ze staan in grijstint zodat je kunt zien wat wegvalt.
+          const buitenFilter = new Set(
+            filteredWords.filter((w) => !woordVoldoet(w.word)).map((w) => w.word)
+          );
+          if (!toonAlleWoorden) {
+            filteredWords = filteredWords.filter((w) => !buitenFilter.has(w.word));
+          }
+          if (filteredWords.length === 0 && filterActief) {
+            return null;
+          }
 
           return (
             <div
@@ -1033,7 +1116,17 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
               </div>
               <div className="flex flex-wrap gap-2">
                 {filteredWords.map((word) => (
-                  <div key={`${category.id}-${word.word}`} className="relative group">
+                  <div
+                    key={`${category.id}-${word.word}`}
+                    className={`relative group ${
+                      buitenFilter.has(word.word) ? 'opacity-40 grayscale' : ''
+                    }`}
+                    title={
+                      buitenFilter.has(word.word)
+                        ? 'Valt buiten het gekozen net- en leeftijdsfilter'
+                        : undefined
+                    }
+                  >
                     <button
                       onClick={() => handleWordClick(word.word, word.goals, category.id)}
                       disabled={loading}
@@ -1362,6 +1455,31 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
                   <span>Speel klankteken</span>
                 </button>
               </div>
+
+              {/* Leerplandoelen: bij welk net en welke leeftijd hoort dit woord? */}
+              {(() => {
+                const info = woordNetInfo.get(meaningModal.word.toLowerCase());
+                if (!info) return null;
+                const heeftAfgeleid = NET_CODES.some(
+                  (n) => info.perNet[n]?.precisie === 'afgeleid'
+                );
+                return (
+                  <div className="pt-1">
+                    <p className="text-xs font-semibold text-gray-500 mb-2 text-center">
+                      In de leerplannen
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      <WoordNetBadges info={info} />
+                    </div>
+                    {heeftAfgeleid && (
+                      <p className="text-[11px] text-gray-400 mt-2 text-center">
+                        Grijs met ~ is afgeleid uit de doelcodes van dit woord: een ruwe
+                        schatting, geen uitspraak van het leerplan zelf.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Phoneme chips */}
               {meaningModal.phonemes.length > 0 && (
