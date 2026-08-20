@@ -3,7 +3,7 @@ import { MapPin, Plus, Trash2, Upload, CreditCard as Edit2, Check, X, Image as I
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import ClassroomSketchModal from './ClassroomSketchModal';
-import * as LucideIcons from 'lucide-react';
+import { getActivityIcon } from '../lib/activityIcons';
 
 interface ActivityOption {
   id: string;
@@ -329,7 +329,7 @@ export default function ClassroomMapView({ schoolId, groupId, groupName, activeB
   }, [activityOptions]);
 
   const renderIcon = (iconName: string, className = 'w-4 h-4') => {
-    const Icon = (LucideIcons as any)[iconName];
+    const Icon = getActivityIcon(iconName);
     if (Icon) return <Icon className={className} />;
     return <span className="text-sm">{iconName}</span>;
   };

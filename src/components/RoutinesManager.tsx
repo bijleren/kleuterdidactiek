@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { RefreshCw, Plus, Pencil, Trash2, X, Search, Check, Clock, Settings } from 'lucide-react';
-import * as Icons from 'lucide-react';
+import { Circle } from 'lucide-react';
+import { getActivityIcon } from '../lib/activityIcons';
 import Modal from './Modal';
 
 type RoutineCategory = 'start_week' | 'start_day' | 'start_lesson' | 'lesson' | 'end_lesson' | 'end_day' | 'end_week';
@@ -561,11 +562,8 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
   };
 
   const renderIcon = (iconName: string, className: string = '') => {
-    const IconComponent = (Icons as any)[iconName.split('-').map((part, i) =>
-      i === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1)
-    ).join('')];
-
-    return IconComponent ? <IconComponent className={className} /> : <Icons.Circle className={className} />;
+    const IconComponent = getActivityIcon(iconName);
+    return IconComponent ? <IconComponent className={className} /> : <Circle className={className} />;
   };
 
   const filteredRoutines = routines.filter(routine => {
@@ -594,7 +592,7 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
           <div>
             <h3 className="text-xl sm:text-2xl font-baloo text-deep-purple flex items-center gap-2">
-              <Icons.RefreshCw className="w-5 h-5 sm:w-6 sm:h-6" />
+              <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6" />
               Routines
             </h3>
             <p className="text-sm sm:text-base text-gray-600 mt-1">
@@ -665,7 +663,7 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
           </div>
         ) : filteredRoutines.length === 0 ? (
           <div className="text-center py-12">
-            <Icons.RefreshCw className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <RefreshCw className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-600">Geen routines gevonden</p>
           </div>
         ) : (

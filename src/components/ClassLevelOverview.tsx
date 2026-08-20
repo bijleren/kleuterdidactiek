@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Download, ChevronUp, ChevronDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import * as XLSX from 'xlsx';
 import { compareGoalCodes } from '../utils/goalSort';
 import CurrentLessonActivityBoard from './CurrentLessonActivityBoard';
 
@@ -207,7 +206,10 @@ export default function ClassLevelOverview({ groupId }: ClassLevelOverviewProps)
     );
   };
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
+    // xlsx is ~284 kB: pas laden wanneer iemand echt exporteert,
+    // niet bij het opstarten van de app.
+    const XLSX = await import('xlsx');
     const exportData = filteredProgress.map(item => ({
       'Doel Code': item.goal_code,
       'Titel': item.goal_title,

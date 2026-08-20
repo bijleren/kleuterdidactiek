@@ -4,7 +4,6 @@ import { useSchool } from '../contexts/SchoolContext';
 import AppLayout from '../components/AppLayout';
 import { BarChart3, TrendingUp, Filter, Download, School, Calendar, Copy, Check } from 'lucide-react';
 import { compareGoalCodes } from '../utils/goalSort';
-import * as XLSX from 'xlsx';
 
 interface GroupGoalStat {
   group_id: string;
@@ -297,7 +296,10 @@ export default function SchoolAnalyticsPage() {
     return colors[firstDigit] || 'bg-gray-400';
   };
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
+    // xlsx is ~284 kB: pas laden wanneer iemand echt exporteert,
+    // niet bij het opstarten van de app.
+    const XLSX = await import('xlsx');
     if (view === 'yearly-grid' && selectedGoal) {
       const activeGroups = groups.filter(g => !g.deleted_at && yearlyGridData.has(g.id));
 

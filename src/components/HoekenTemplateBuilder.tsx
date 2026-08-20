@@ -3,7 +3,7 @@ import { Plus, X, Check, Search, Upload } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import Modal from './Modal';
-import * as LucideIcons from 'lucide-react';
+import { getActivityIcon } from '../lib/activityIcons';
 import { uploadHoekenIcon } from '../utils/iconUpload';
 
 interface ActivityPreset {
@@ -239,7 +239,7 @@ export default function HoekenTemplateBuilder({
       return <img src={customUrl} alt="" className={`object-cover rounded ${className}`} />;
     }
     if (iconName && /^[A-Z]/.test(iconName)) {
-      const IconComponent = (LucideIcons as any)[iconName];
+      const IconComponent = getActivityIcon(iconName);
       if (IconComponent) return <IconComponent className={className} />;
     }
     return <span className={className}>{iconName}</span>;

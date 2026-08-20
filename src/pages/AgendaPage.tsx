@@ -9,7 +9,6 @@ import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
 import WeekCalendarView from '../components/WeekCalendarView';
 import { extractGoalCodesFromLessonItems } from '../utils/lessonGoalExtractor';
-import * as XLSX from 'xlsx';
 
 interface Lesson {
   id: string;
@@ -1040,6 +1039,9 @@ export default function AgendaPage() {
   };
 
   const handleExportRange = async () => {
+    // xlsx is ~284 kB: pas laden wanneer iemand echt exporteert,
+    // niet bij het opstarten van de app.
+    const XLSX = await import('xlsx');
     if (!selectedGroupId || !selectedSchoolId) return;
 
     setExporting(true);

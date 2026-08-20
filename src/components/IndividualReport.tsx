@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Download, ChevronDown, ChevronRight, ExternalLink, Users } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import * as XLSX from 'xlsx';
 import { compareGoalCodes } from '../utils/goalSort';
 
 interface Student {
@@ -208,7 +207,10 @@ export default function IndividualReport({ groupId }: IndividualReportProps) {
     }
   };
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
+    // xlsx is ~284 kB: pas laden wanneer iemand echt exporteert,
+    // niet bij het opstarten van de app.
+    const XLSX = await import('xlsx');
     if (!selectedStudent) return;
 
     const summaryData = goalSummaries.map(summary => ({

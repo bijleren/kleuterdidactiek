@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Check, HelpCircle, Save, Download, ExternalLink, Users, Camera, Image, Loader2, UserPlus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import * as XLSX from 'xlsx';
 
 interface Goal {
   code: string;
@@ -222,7 +221,10 @@ export default function ObserveStudents({ groupId }: ObserveStudentsProps) {
 
   const selectedGoalData = goals.find(g => g.code === selectedGoal);
 
-  const exportCurrentSession = () => {
+  const exportCurrentSession = async () => {
+    // xlsx is ~284 kB: pas laden wanneer iemand echt exporteert,
+    // niet bij het opstarten van de app.
+    const XLSX = await import('xlsx');
     if (!selectedGoal || !observationMethod) {
       alert('Selecteer eerst een doel en observatiemethode');
       return;

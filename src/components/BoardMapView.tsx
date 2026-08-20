@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, ReactNode } from 'react';
 import { MapPin, Users } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import * as LucideIcons from 'lucide-react';
+import { getActivityIcon } from '../lib/activityIcons';
 
 interface Student {
   id: string;
@@ -60,7 +60,7 @@ interface BoardMapViewProps {
 
 function renderIcon(icon: string | null, className = 'w-5 h-5 text-white'): ReactNode {
   if (!icon) return <MapPin className={className} />;
-  const Icon = (LucideIcons as Record<string, any>)[icon];
+  const Icon = getActivityIcon(icon);
   if (!Icon) return <MapPin className={className} />;
   return <Icon className={className} />;
 }

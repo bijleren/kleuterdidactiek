@@ -3,7 +3,7 @@ import { Calendar, Clock, Trash2, Plus, ToggleLeft, ToggleRight, Repeat } from '
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import Modal from './Modal';
-import * as LucideIcons from 'lucide-react';
+import { getActivityIcon } from '../lib/activityIcons';
 
 interface HoekenTemplate {
   id: string;
@@ -150,7 +150,7 @@ export default function HoekenScheduleManager({
 
   const renderIcon = (iconName: string, className: string = 'w-5 h-5') => {
     if (iconName && /^[A-Z]/.test(iconName)) {
-      const IconComponent = (LucideIcons as any)[iconName];
+      const IconComponent = getActivityIcon(iconName);
       if (IconComponent) return <IconComponent className={className} />;
     }
     return <span className={className}>{iconName}</span>;

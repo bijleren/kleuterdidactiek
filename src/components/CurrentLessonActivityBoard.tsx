@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Clock, Calendar, Palette, BookOpen, Blocks, Hammer, Scissors, Home, Wrench, Building2, Puzzle, Drama, Rainbow, Music, Paintbrush } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import * as LucideIcons from 'lucide-react';
+import { getActivityIcon } from '../lib/activityIcons';
 
 interface ActivityPreset {
   id: string;
@@ -110,7 +110,7 @@ export default function CurrentLessonActivityBoard({ groupId, schoolId }: Curren
       Paintbrush,
     };
 
-    const IconComponent = iconMap[iconName] || (LucideIcons as any)[iconName] || Palette;
+    const IconComponent = iconMap[iconName] || getActivityIcon(iconName) || Palette;
     return <IconComponent className={className} />;
   };
 
