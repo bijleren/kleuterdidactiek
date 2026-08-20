@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import DoelenKnop from './DoelenKnop';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { Sparkles, Check, Clock, Search } from 'lucide-react';
@@ -257,6 +258,9 @@ export default function PhysicalTasks({ groupId, schoolId, goalFilter }: Physica
 
               <div className="text-xs text-center bg-lavender/30 px-3 py-1 rounded-full mb-4 inline-block w-full">
                 {task.goal_codes.join(', ')}
+              </div>
+              <div className="mt-2 flex justify-center">
+                <DoelenKnop codes={task.goal_codes} naam={task.title} />
               </div>
 
               <p className="text-sm text-gray-700 mb-3 font-semibold">{task.description}</p>

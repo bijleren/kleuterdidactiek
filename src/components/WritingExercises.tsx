@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import DoelenKnop from './DoelenKnop';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { PenTool, Check, Gamepad2 } from 'lucide-react';
@@ -263,6 +264,9 @@ export default function WritingExercises({ groupId, schoolId, goalFilter }: Writ
               <div className="text-xs text-center bg-lavender/30 px-3 py-1 rounded-full mb-4 inline-block w-full">
                 {exercise.goal_codes.join(', ')}
               </div>
+              <div className="mt-2 flex justify-center">
+                <DoelenKnop codes={exercise.goal_codes} naam={exercise.title} />
+              </div>
 
               <p className="text-sm text-gray-700 mb-3 font-semibold">{exercise.description}</p>
 
@@ -335,6 +339,9 @@ export default function WritingExercises({ groupId, schoolId, goalFilter }: Writ
               <p className="text-sm text-gray-600 mb-3 text-center">{game.description}</p>
               <div className="text-xs text-center bg-sky-blue/20 px-3 py-2 rounded-full">
                 {game.goal_codes.join(', ')}
+              </div>
+              <div className="mt-2 flex justify-center">
+                <DoelenKnop codes={game.goal_codes} naam={game.name} />
               </div>
             </button>
           ))}

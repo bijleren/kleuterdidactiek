@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import DoelenKnop from './DoelenKnop';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { Play, Trophy, Search } from 'lucide-react';
@@ -217,8 +218,8 @@ export default function GamesGrid({ groupId, schoolId, goalFilter }: GamesGridPr
           const colorClass = gameTypeColors[game.game_type] || 'from-gray-100 to-gray-200';
 
           return (
+            <div key={game.id} className="flex flex-col gap-2">
             <button
-              key={game.id}
               onClick={() => handleGameClick(game)}
               className={`bg-gradient-to-br ${colorClass} rounded-3xl p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 border-2 text-left relative group`}
             >
@@ -252,6 +253,10 @@ export default function GamesGrid({ groupId, schoolId, goalFilter }: GamesGridPr
                 </span>
               </div>
             </button>
+            <div className="flex justify-center">
+              <DoelenKnop codes={game.goal_codes} naam={game.name} />
+            </div>
+            </div>
           );
         })}
       </div>
