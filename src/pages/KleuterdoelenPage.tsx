@@ -274,29 +274,7 @@ export default function KleuterdoelenPage() {
           {activeTab === 'routines' && groupId && group && <RoutinesManager schoolId={group.school_id} groupId={groupId} goalFilter={goalFilter} />}
           {activeTab === 'goals' && groupId && (
             <div className="space-y-6">
-              {/* Twee lagen: de minimumdoelen van de app, en de leerplandoelen per net. */}
-              <div className="flex flex-wrap gap-3">
-                {(
-                  [
-                    ['minimum', '/doelen', 'Minimumdoelen', '🎯'],
-                    ['leerplan', '/leerdoelen', 'Leerdoelen per net', '🧭'],
-                  ] as [DoelenWeergave, string, string, string][]
-                ).map(([id, pad, label, icon]) => (
-                  <Link
-                    key={id}
-                    to={pad}
-                    className={`px-6 py-3 rounded-full font-baloo text-lg font-semibold shadow-lg transition-all duration-200 flex items-center gap-2 whitespace-nowrap ${
-                      doelenWeergave === id
-                        ? 'bg-gradient-to-r from-deep-purple to-[#9B9EFF] text-white scale-105'
-                        : 'bg-white text-gray-700 hover:scale-105'
-                    }`}
-                  >
-                    <span>{icon}</span>
-                    {label}
-                  </Link>
-                ))}
-              </div>
-
+              {/* De keuze tussen beide lagen staat in de hoofdnavigatie. */}
               {doelenWeergave === 'minimum' ? (
                 <GoalsOverview groupId={groupId} />
               ) : (
