@@ -3,7 +3,6 @@ import { supabase } from '../lib/supabase';
 import { Target, BarChart2, Search, CheckCircle, ArrowRight, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Modal from './Modal';
-import * as XLSX from 'xlsx';
 import { compareGoalCodes } from '../utils/goalSort';
 import { SCHOOLJAAR_EIND, SCHOOLJAAR_START, getSchoolYearWeeks, getWeekNumber } from '../utils/schooljaar';
 import NetLeeftijdFilter from './NetLeeftijdFilter';
@@ -513,7 +512,10 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
     }
   }, [loading, goals]);
 
-  const exportWeekMatrix = () => {
+  const exportWeekMatrix = async () => {
+    // xlsx is ~284 kB: pas laden wanneer iemand echt exporteert,
+    // niet bij het opstarten van de app.
+    const XLSX = await import('xlsx');
     const { weeks } = getSchoolYearWeeks();
     const sortedGoals = [...goals].sort((a, b) => a.sort_order - b.sort_order);
 
