@@ -96,6 +96,11 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
   const [goals, setGoals] = useState<GoalWithProgress[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
+  /*
+    Officiele minimumdoelen zijn te bereiken (wettelijk bindend) of na te
+    streven. De eigen doelen van de app horen bij geen van beide.
+  */
+  const [soortFilter, setSoortFilter] = useState<'all' | 'te_bereiken' | 'na_te_streven' | 'eigen'>('all');
   const [domainFilter, setDomainFilter] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'code' | 'progress' | 'title'>('code');
@@ -407,9 +412,24 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
     setDomainFilter([]);
   };
 
+  /* Zelfde bron als de badge op de kaart, zodat filter en label niet uiteenlopen. */
+  const soortVan = (code: string): 'te_bereiken' | 'na_te_streven' | 'eigen' => {
+    const info = doelNetInfo.get(code);
+    if (!info) return 'eigen';
+    return info.isTeBereiken ? 'te_bereiken' : 'na_te_streven';
+  };
+
+  const soortTellers = {
+    te_bereiken: goals.filter((g) => soortVan(g.code) === 'te_bereiken').length,
+    na_te_streven: goals.filter((g) => soortVan(g.code) === 'na_te_streven').length,
+    eigen: goals.filter((g) => soortVan(g.code) === 'eigen').length,
+  };
+
   const filteredGoals = goals
     .filter((g) => {
       if (filter !== 'all' && g.progress_category !== filter) return false;
+      // Netinfo komt asynchroon binnen; tot dan zou alles als eigen doel lezen.
+      if (doelNetInfo.size > 0 && soortFilter !== 'all' && soortVan(g.code) !== soortFilter) return false;
       if (domainFilter.length > 0 && !domainFilter.includes(g.domain)) return false;
       if (!voldoetAanNetLeeftijd(doelNetInfo.get(g.code), netFilter, leeftijdFilter))
         return false;
@@ -734,6 +754,30 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
           </button>
         </div>
       </div>
+
+      {doelNetInfo.size > 0 && (
+      <div className="flex flex-wrap items-center gap-2 px-4">
+        <span className="text-xs font-semibold text-gray-500 w-20">Soort</span>
+        {([
+          ['all', 'Alle', 'bg-deep-purple'],
+          ['te_bereiken', `Te bereiken (${soortTellers.te_bereiken})`, 'bg-rose-500'],
+          ['na_te_streven', `Na te streven (${soortTellers.na_te_streven})`, 'bg-sky-blue'],
+          ['eigen', `Eigen doelen (${soortTellers.eigen})`, 'bg-amber-500'],
+        ] as const).map(([waarde, label, kleur]) => (
+          <button
+            key={waarde}
+            onClick={() => setSoortFilter(waarde)}
+            className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+              soortFilter === waarde
+                ? `${kleur} text-white`
+                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      )}
 
       <div className="text-sm text-gray-600 px-4">
         {filteredGoals.length} van {goals.length} doelen weergegeven
