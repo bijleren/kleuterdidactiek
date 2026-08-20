@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, ChevronDown, BarChart3, Target, Calendar, UserCheck, Rocket, HelpCircle, School, MessageSquarePlus, X, Copy, Check, Plus, ArrowLeft } from 'lucide-react';
+import { LogOut, ChevronDown, BarChart3, Target, Compass, Calendar, UserCheck, Rocket, HelpCircle, School, MessageSquarePlus, X, Copy, Check, Plus, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSchool } from '../contexts/SchoolContext';
 import { supabase } from '../lib/supabase';
@@ -220,6 +220,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
               <span>Aan de slag</span>
             </Link>
 
+            {/* Twee lagen, twee links: de minimumdoelen van de overheid en de
+                leerdoelen waarmee elk net die invult. */}
             <Link
               to="/doelen"
               className={`flex items-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded-full font-medium text-sm sm:text-base shadow-lg transition-all duration-200 ${
@@ -229,7 +231,19 @@ export default function AppLayout({ children }: AppLayoutProps) {
               }`}
             >
               <Target className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span>Doelen</span>
+              <span>Minimumdoelen</span>
+            </Link>
+
+            <Link
+              to="/leerdoelen"
+              className={`flex items-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded-full font-medium text-sm sm:text-base shadow-lg transition-all duration-200 ${
+                isActive('/leerdoelen')
+                  ? 'bg-white text-deep-purple scale-105'
+                  : 'bg-white/90 text-gray-700 hover:bg-white hover:scale-105'
+              }`}
+            >
+              <Compass className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span>Leerdoelen</span>
             </Link>
 
             <Link

@@ -197,6 +197,15 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      {/* Eigen adres per laag, zodat je rechtstreeks naar de leerplandoelen kan linken. */}
+      <Route
+        path="/leerdoelen"
+        element={
+          <ProtectedRoute>
+            <KleuterdoelenPage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/evalueren"
         element={

@@ -52,7 +52,9 @@ export default function KleuterdoelenPage() {
   const [group, setGroup] = useState<Group | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>(null);
-  const [doelenWeergave, setDoelenWeergave] = useState<DoelenWeergave>('minimum');
+  /* De laag volgt het adres, zodat /doelen en /leerdoelen elk hun eigen link zijn. */
+  const doelenWeergave: DoelenWeergave =
+    location.pathname === '/leerdoelen' ? 'leerplan' : 'minimum';
   const [selectedBoard, setSelectedBoard] = useState<ActivityBoard | null>(null);
   const [showBoardAnalytics, setShowBoardAnalytics] = useState(false);
   const [analyticsBoardId, setAnalyticsBoardId] = useState<string | undefined>(undefined);
@@ -64,7 +66,7 @@ export default function KleuterdoelenPage() {
     const tabParam = searchParams.get('tab') as TabType;
     if (tabParam && ['vocabulary', 'games', 'writing', 'videos', 'materials', 'tasks', 'activities', 'routines', 'leerdoelactiviteit', 'goals'].includes(tabParam)) {
       setActiveTab(tabParam);
-    } else if (location.pathname === '/doelen') {
+    } else if (location.pathname === '/doelen' || location.pathname === '/leerdoelen') {
       setActiveTab('goals');
     } else if (location.pathname === '/aan-de-slag') {
       setActiveTab(null);
@@ -276,13 +278,13 @@ export default function KleuterdoelenPage() {
               <div className="flex flex-wrap gap-3">
                 {(
                   [
-                    ['minimum', 'Minimumdoelen', '🎯'],
-                    ['leerplan', 'Leerplandoelen per net', '🧭'],
-                  ] as [DoelenWeergave, string, string][]
-                ).map(([id, label, icon]) => (
-                  <button
+                    ['minimum', '/doelen', 'Minimumdoelen', '🎯'],
+                    ['leerplan', '/leerdoelen', 'Leerdoelen per net', '🧭'],
+                  ] as [DoelenWeergave, string, string, string][]
+                ).map(([id, pad, label, icon]) => (
+                  <Link
                     key={id}
-                    onClick={() => setDoelenWeergave(id)}
+                    to={pad}
                     className={`px-6 py-3 rounded-full font-baloo text-lg font-semibold shadow-lg transition-all duration-200 flex items-center gap-2 whitespace-nowrap ${
                       doelenWeergave === id
                         ? 'bg-gradient-to-r from-deep-purple to-[#9B9EFF] text-white scale-105'
@@ -291,7 +293,7 @@ export default function KleuterdoelenPage() {
                   >
                     <span>{icon}</span>
                     {label}
-                  </button>
+                  </Link>
                 ))}
               </div>
 
