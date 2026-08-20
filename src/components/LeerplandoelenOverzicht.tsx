@@ -6,9 +6,11 @@ import NetLeeftijdFilter from './NetLeeftijdFilter';
 import WeekBalk from './WeekBalk';
 import { SCHOOLJAAR_EIND, SCHOOLJAAR_START } from '../utils/schooljaar';
 import {
+  NET_CODES,
   NET_LABELS,
   loadLeerplandoelen,
   type Leerplandoel,
+  type NetCode,
 } from '../lib/leerplandoelen';
 import { useKlasFilter } from '../hooks/useKlasFilter';
 
@@ -252,6 +254,7 @@ export default function LeerplandoelenOverzicht({ groupId }: Props) {
         </p>
 
         <NetLeeftijdFilter
+          netVerplicht
           toonAlles={toonAlles}
           onToonAllesChange={setToonAlles}
           klasFilterActief={klasFilterActief}
@@ -301,11 +304,32 @@ export default function LeerplandoelenOverzicht({ groupId }: Props) {
         )}
       </div>
 
+      {/*
+        Een leerplandoel hoort altijd bij een net, dus zonder net valt er niets
+        te tonen. Vandaar een keuze in plaats van een lege lijst. Heeft de
+        school haar net ingevuld, dan staat die al klaar en zie je dit niet.
+      */}
       {netFilter === 'all' && (
-        <div className="bg-white rounded-2xl p-8 shadow-lg text-center">
-          <p className="text-gray-500">
-            Kies hierboven <span className="font-semibold">{NET_LABELS.KATH}</span> of{' '}
-            <span className="font-semibold">{NET_LABELS.GO}</span> om hun leerplandoelen te zien.
+        <div className="bg-white rounded-2xl p-8 shadow-lg text-center space-y-4">
+          <div>
+            <h3 className="text-xl font-baloo text-deep-purple mb-1">Van welk net wil je de leerdoelen zien?</h3>
+            <p className="text-sm text-gray-500">
+              Elk net vult de minimumdoelen op zijn eigen manier in.
+            </p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-3">
+            {NET_CODES.map((n: NetCode) => (
+              <button
+                key={n}
+                onClick={() => kiesNet(n)}
+                className="px-6 py-3 rounded-full font-baloo text-lg font-semibold shadow-lg bg-white text-gray-700 border-2 border-gray-200 hover:border-deep-purple hover:scale-105 transition-all"
+              >
+                {NET_LABELS[n]}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-gray-400">
+            Vul het net in bij de schoolgegevens en deze vraag verdwijnt.
           </p>
         </div>
       )}

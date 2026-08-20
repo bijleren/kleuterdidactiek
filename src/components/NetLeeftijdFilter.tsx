@@ -20,6 +20,12 @@ interface NetLeeftijdFilterProps {
   klasFilterActief?: boolean;
   /** Korte omschrijving van de klasinstelling, bv. "GO! · 5-6 jaar". */
   klasOmschrijving?: string;
+  /**
+   * Een net is verplicht: de knop "Minimumdoelen" en het vinkje "toon alle
+   * doelen" vervallen. Op de leerdoelenpagina bestaat er buiten een net immers
+   * niets om te tonen — een leerplandoel hoort altijd bij een net.
+   */
+  netVerplicht?: boolean;
 }
 
 /**
@@ -36,6 +42,7 @@ export default function NetLeeftijdFilter({
   onToonAllesChange,
   klasFilterActief = false,
   klasOmschrijving,
+  netVerplicht = false,
 }: NetLeeftijdFilterProps) {
   const knop = (actief: boolean) =>
     `px-4 py-2 rounded-full text-sm font-semibold transition-all ${
@@ -56,7 +63,7 @@ export default function NetLeeftijdFilter({
 
   return (
     <div className="space-y-3">
-      {klasFilterActief && onToonAllesChange && (
+      {!netVerplicht && klasFilterActief && onToonAllesChange && (
         <label className="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
           <input
             type="checkbox"
@@ -76,10 +83,14 @@ export default function NetLeeftijdFilter({
       )}
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold text-gray-500 w-20">Doelen</span>
-        <button className={knop(net === 'all')} onClick={() => kiesNet('all')}>
-          Minimumdoelen
-        </button>
+        <span className="text-xs font-semibold text-gray-500 w-20">
+          {netVerplicht ? 'Net' : 'Doelen'}
+        </span>
+        {!netVerplicht && (
+          <button className={knop(net === 'all')} onClick={() => kiesNet('all')}>
+            Minimumdoelen
+          </button>
+        )}
         {NET_CODES.map((n) => (
           <button key={n} className={knop(net === n)} onClick={() => kiesNet(n)}>
             {NET_LABELS[n]}
