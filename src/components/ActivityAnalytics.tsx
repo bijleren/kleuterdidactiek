@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BarChart3, Download, Users, Clock, TrendingUp, FileSpreadsheet } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import * as XLSX from 'xlsx';
 
 interface ActivityAnalyticsProps {
   schoolId: string;
@@ -322,7 +321,10 @@ export default function ActivityAnalytics({ schoolId, initialBoardId }: Activity
     return `${hours}u ${mins}m`;
   };
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
+    // xlsx is ~284 kB: pas laden wanneer iemand echt exporteert,
+    // niet bij het opstarten van de app.
+    const XLSX = await import('xlsx');
     const wb = XLSX.utils.book_new();
 
     const activityData = activityStats.map((stat) => ({

@@ -9,7 +9,7 @@ import HoekenTemplateBuilder from './HoekenTemplateBuilder';
 import BoardCountdownTimer from './BoardCountdownTimer';
 import GroupBoardRulesModal from './GroupBoardRulesModal';
 import ActivityPresetsManager from './ActivityPresetsManager';
-import * as LucideIcons from 'lucide-react';
+import { getActivityIcon } from '../lib/activityIcons';
 
 interface ActivityBoard {
   id: string;
@@ -239,6 +239,7 @@ export default function ActivityBoardsList({
         .filter((item) => item.activity_presets != null)
         .map((item) => ({
         board_id: newBoard.id,
+        preset_id: item.activity_presets!.id,
         name: item.activity_presets!.name,
         icon: item.activity_presets!.icon ?? 'Palette',
         color: item.activity_presets!.color ?? '#3B82F6',
@@ -383,7 +384,7 @@ export default function ActivityBoardsList({
       return <img src={customIconUrl} alt="" className={`object-cover rounded ${className}`} />;
     }
     if (iconName && /^[A-Z]/.test(iconName)) {
-      const IconComponent = (LucideIcons as any)[iconName];
+      const IconComponent = getActivityIcon(iconName);
       if (IconComponent) return <IconComponent className={className} />;
     }
     return <span className={className}>{iconName}</span>;

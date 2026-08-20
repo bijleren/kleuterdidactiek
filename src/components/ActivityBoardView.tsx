@@ -7,7 +7,7 @@ import BoardCountdownTimer from './BoardCountdownTimer';
 import GroupBoardRulesModal from './GroupBoardRulesModal';
 import ClassroomMapView from './ClassroomMapView';
 import BoardMapView from './BoardMapView';
-import * as LucideIcons from 'lucide-react';
+import { getActivityIcon } from '../lib/activityIcons';
 import { uploadHoekenIcon } from '../utils/iconUpload';
 
 interface ActivityBoard {
@@ -255,6 +255,7 @@ export default function ActivityBoardView({ board, onBack, schoolId }: ActivityB
     const maxOrder = Math.max(...activities.map(a => a.sort_order), -1);
     await supabase.from('activity_options').insert({
       board_id: board.id,
+      preset_id: preset.id,
       name: preset.name,
       description: preset.description,
       max_students: preset.max_students,
@@ -546,7 +547,7 @@ export default function ActivityBoardView({ board, onBack, schoolId }: ActivityB
       return <img src={customIconUrl} alt="" className={`object-cover rounded ${className || 'w-6 h-6'}`} />;
     }
     if (iconName && /^[A-Z]/.test(iconName)) {
-      const IconComponent = (LucideIcons as any)[iconName];
+      const IconComponent = getActivityIcon(iconName);
       if (IconComponent) return <IconComponent className={className || "w-6 h-6"} />;
     }
     return <span className={className}>{iconName}</span>;

@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useSchool } from '../contexts/SchoolContext';
 import { useNavigate } from 'react-router-dom';
 import Modal from './Modal';
-import * as LucideIcons from 'lucide-react';
+import { getActivityIcon } from '../lib/activityIcons';
 import { logActivityToCalendar } from '../utils/calendarLogger';
 import { uploadHoekenIcon } from '../utils/iconUpload';
 
@@ -244,32 +244,45 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
     }
   };
 
+  /*
+    Twee queries, ongeacht het aantal activiteiten: eerst de activiteiten van
+    het bord, dan in een keer alle open sessies van datzelfde bord. Voorheen
+    ging er een aparte telling per activiteit uit, elke keer dat de presets
+    veranderden en bij elke poll van 60 seconden.
+  */
   const loadStudentCounts = async () => {
     if (!selectedSchool || !activeLessonBoard) return;
 
     try {
-      const { data: activityOptions, error: optionsError } = await supabase
-        .from('activity_options')
-        .select('id, name')
-        .eq('board_id', activeLessonBoard.id)
-        .eq('is_active', true);
+      const [optionsRes, sessionsRes] = await Promise.all([
+        supabase
+          .from('activity_options')
+          .select('id, name, preset_id')
+          .eq('board_id', activeLessonBoard.id)
+          .eq('is_active', true),
+        supabase
+          .from('activity_sessions')
+          .select('activity_option_id')
+          .eq('board_id', activeLessonBoard.id)
+          .is('end_time', null),
+      ]);
 
-      if (optionsError) throw optionsError;
+      if (optionsRes.error) throw optionsRes.error;
+      if (sessionsRes.error) throw sessionsRes.error;
+
+      const perOption = new Map<string, number>();
+      for (const session of (sessionsRes.data || []) as { activity_option_id: string }[]) {
+        perOption.set(session.activity_option_id, (perOption.get(session.activity_option_id) || 0) + 1);
+      }
 
       const counts = new Map<string, number>();
-
-      for (const option of activityOptions || []) {
-        const { data: sessions, error: sessionsError } = await supabase
-          .from('activity_sessions')
-          .select('id', { count: 'exact' })
-          .eq('activity_option_id', option.id)
-          .is('end_time', null);
-
-        if (sessionsError) throw sessionsError;
-
-        const matchingPreset = presets.find(p => p.name === option.name);
-        if (matchingPreset) {
-          counts.set(matchingPreset.id, sessions?.length || 0);
+      const options = (optionsRes.data || []) as { id: string; name: string; preset_id: string | null }[];
+      for (const option of options) {
+        // preset_id is leeg bij vrij aangemaakte activiteiten en bij rijen van
+        // voor de koppeling; die vallen terug op de naam.
+        const presetId = option.preset_id ?? presets.find(p => p.name === option.name)?.id;
+        if (presetId) {
+          counts.set(presetId, (counts.get(presetId) || 0) + (perOption.get(option.id) || 0));
         }
       }
 
@@ -453,6 +466,7 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
         .from('activity_options')
         .insert({
           board_id: boardId,
+          preset_id: preset.id,
           name: preset.name,
           description: preset.description,
           max_students: preset.max_students,
@@ -745,7 +759,7 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
     }
     // Check if it's a Lucide icon name (starts with uppercase letter)
     if (iconName && /^[A-Z]/.test(iconName)) {
-      const IconComponent = (LucideIcons as any)[iconName];
+      const IconComponent = getActivityIcon(iconName);
       if (IconComponent) {
         return <IconComponent className={className || "w-6 h-6"} />;
       }
