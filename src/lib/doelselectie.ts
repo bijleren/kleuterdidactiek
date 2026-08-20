@@ -87,20 +87,23 @@ export async function loadLeerplandoelOpties(
 }
 
 /**
- * De volledige keuzelijst voor de huidige filterstand.
+ * De keuzelijst voor de huidige filterstand.
  *
- * Zonder net (het filter staat open, of de school vulde niets in) zijn er geen
- * leerplandoelen om te tonen: een leerplandoel bestaat alleen binnen een net.
- * Dan blijven de minimumdoelen over, precies zoals voorheen.
+ * De knoppenrij is een keuze tussen lagen, niet een stapeling: de eerste knop
+ * heet "Minimumdoelen", de andere staan voor een net. Kies je een net, dan zie
+ * je de leerplandoelen van dat net en niets anders — anders zouden de 128
+ * minimumdoelen tussen de leerplandoelen blijven staan en lijkt het alsof het
+ * wisselen van net niet werkte.
+ *
+ * Een minimumdoel koppelen kan nog steeds: zet de rij terug op Minimumdoelen.
  */
 export async function loadDoelOpties(
   net: NetCode | 'all',
   leeftijd: Leeftijd | 'all',
 ): Promise<DoelOptie[]> {
-  const minimum = await loadMinimumdoelOpties();
-  if (net === 'all') return minimum;
-  const leerplan = await loadLeerplandoelOpties(net, leeftijd);
-  return [...minimum, ...leerplan];
+  return net === 'all'
+    ? loadMinimumdoelOpties()
+    : loadLeerplandoelOpties(net, leeftijd);
 }
 
 /* ---------- labels voor reeds opgeslagen codes ---------- */
@@ -188,3 +191,4 @@ export async function loadDoelLabels(codes: string[]): Promise<Map<string, DoelL
 
   return new Map(uniek.map((c) => [c, labelCache.get(c)!]));
 }
+

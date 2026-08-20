@@ -167,7 +167,7 @@ export default function DoelSelector({ waarde, onChange, label = 'Doelen' }: Pro
         placeholder={
           filter.net === 'all'
             ? 'Zoek een minimumdoel...'
-            : `Zoek een minimum- of leerplandoel (${NET_LABELS[filter.net]})...`
+            : `Zoek een leerplandoel van ${NET_LABELS[filter.net]}...`
         }
         className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-deep-purple focus:outline-none"
       />
