@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
+import DoelSelector from './DoelSelector';
 import { Search, Plus, CreditCard as Edit, Trash2, X, Clock, Calendar, Check, Copy, Palette, BookOpen, Blocks, Hammer, Scissors, Home, Wrench, Building2, Puzzle, Drama, Rainbow, Music, Paintbrush, LayoutGrid as Layout, Users, Upload } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSchool } from '../contexts/SchoolContext';
@@ -29,11 +30,6 @@ interface ActivityPreset {
   custom_icon_url?: string | null;
 }
 
-interface Goal {
-  code: string;
-  description: string;
-  domain: number;
-}
 
 export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }: ActivityPresetsManagerProps) {
   const { user } = useAuth();
@@ -49,7 +45,6 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
   const [showAddToAgendaModal, setShowAddToAgendaModal] = useState<ActivityPreset | null>(null);
   const [showCreateLessonModal, setShowCreateLessonModal] = useState<ActivityPreset | null>(null);
   const [editingPreset, setEditingPreset] = useState<ActivityPreset | null>(null);
-  const [allGoals, setAllGoals] = useState<Goal[]>([]);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [activePresetIds, setActivePresetIds] = useState<Set<string>>(new Set());
   const [activeLessonBoard, setActiveLessonBoard] = useState<{ id: string; name: string } | null>(null);
@@ -84,7 +79,6 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
 
   useEffect(() => {
     loadPresets();
-    loadGoals();
     loadActivePresets();
     loadActiveLessonBoard();
     checkAdminStatus();
@@ -156,19 +150,6 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
     }
   };
 
-  const loadGoals = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('educational_goals')
-        .select('code, description, domain')
-        .order('code');
-
-      if (error) throw error;
-      setAllGoals(data || []);
-    } catch (error) {
-      console.error('Error loading goals:', error);
-    }
-  };
 
   const loadActivePresets = async () => {
     try {
@@ -714,7 +695,6 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
       custom_icon_id: null,
       custom_icon_url: null,
     });
-    setGoalSearch('');
   };
 
   const filteredPresets = presets.filter(preset => {
@@ -723,29 +703,6 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
     }
     return preset.name.toLowerCase().includes(searchTerm.toLowerCase());
   });
-
-  const [goalSearch, setGoalSearch] = useState('');
-
-  const groupedGoals = allGoals
-    .filter((g) => {
-      if (!goalSearch.trim()) return true;
-      const q = goalSearch.toLowerCase();
-      return g.code.toLowerCase().includes(q) || g.description.toLowerCase().includes(q);
-    })
-    .reduce((acc, goal) => {
-    if (!acc[goal.domain]) acc[goal.domain] = [];
-    acc[goal.domain].push(goal);
-    return acc;
-  }, {} as Record<number, Goal[]>);
-
-  const toggleGoal = (goalCode: string) => {
-    setFormData(prev => ({
-      ...prev,
-      goal_codes: prev.goal_codes.includes(goalCode)
-        ? prev.goal_codes.filter(code => code !== goalCode)
-        : [...prev.goal_codes, goalCode],
-    }));
-  };
 
   const commonIcons = [
     '🎨', '📚', '🎮', '✏️', '🏗️', '🎭', '🧩', '🏠', '🔨', '✂️', '🎪', '🌈',
@@ -1125,47 +1082,11 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Gekoppelde Doelen ({formData.goal_codes.length})
-              </label>
-              <div className="relative mb-2">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                <input
-                  type="text"
-                  value={goalSearch}
-                  onChange={(e) => setGoalSearch(e.target.value)}
-                  placeholder="Zoek doelen..."
-                  className="w-full pl-9 pr-4 py-2 rounded-lg border-2 border-gray-200 focus:border-sky-blue focus:outline-none text-sm"
-                />
-              </div>
-              <div className="max-h-64 overflow-y-auto border-2 border-gray-200 rounded-lg p-4">
-                {Object.entries(groupedGoals).map(([domain, goals]) => (
-                  <div key={domain} className="mb-4">
-                    <h4 className="font-semibold text-deep-purple mb-2">Domein {domain}</h4>
-                    <div className="space-y-1">
-                      {goals.map((goal) => (
-                        <label
-                          key={goal.code}
-                          className="flex items-start gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={formData.goal_codes.includes(goal.code)}
-                            onChange={() => toggleGoal(goal.code)}
-                            className="mt-1 w-4 h-4 text-sky-blue rounded focus:ring-sky-blue"
-                          />
-                          <span className="text-sm">
-                            <span className="font-semibold text-deep-purple">{goal.code}</span>
-                            <span className="text-gray-600"> - {goal.description}</span>
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <DoelSelector
+              waarde={formData.goal_codes}
+              onChange={(codes) => setFormData({ ...formData, goal_codes: codes })}
+              label={`Gekoppelde doelen (${formData.goal_codes.length})`}
+            />
 
             <div className="flex gap-3 pt-4">
               <button

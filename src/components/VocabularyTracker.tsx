@@ -7,6 +7,7 @@ import { logActivityToCalendar } from '../utils/calendarLogger';
 import { exportVocabularyToPDF } from '../utils/vocabularyPdfExport';
 import { getVideoEmbed } from '../utils/videoEmbed';
 import NetLeeftijdFilter from './NetLeeftijdFilter';
+import DoelSelector from './DoelSelector';
 import { WoordNetBadges } from './NetBadges';
 import {
   NET_CODES,
@@ -92,9 +93,6 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [systemWords, setSystemWords] = useState<string[]>([]);
-  const [goalInput, setGoalInput] = useState('');
-  const [availableGoals, setAvailableGoals] = useState<Array<{ code: string; description: string }>>([]);
-  const [showGoalSuggestions, setShowGoalSuggestions] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState<{ wordId: string; wordText: string } | null>(null);
   const [groupName, setGroupName] = useState<string>('');
@@ -186,7 +184,6 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
 
   useEffect(() => {
     if (showAddModal) {
-      loadAvailableGoals();
     }
   }, [showAddModal]);
 
@@ -229,20 +226,6 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
     }
   };
 
-  const loadAvailableGoals = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('educational_goals')
-        .select('code, description')
-        .order('code');
-
-      if (error) throw error;
-
-      setAvailableGoals(data.map(goal => ({ code: goal.code, description: goal.description || '' })) || []);
-    } catch (error) {
-      console.error('Error loading available goals:', error);
-    }
-  };
 
   const loadWordsWithImages = async () => {
     try {
@@ -695,8 +678,6 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
       setNewWord('');
       setSelectedCategoryId('');
       setSelectedGoals([]);
-      setGoalInput('');
-      setShowGoalSuggestions(false);
       setShowAddModal(false);
       setNotification({ message: 'Woord succesvol toegevoegd!', type: 'success' });
       loadVocabularyData();
@@ -1180,8 +1161,6 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
                   setNewWord('');
                   setSelectedCategoryId('');
                   setSelectedGoals([]);
-                  setGoalInput('');
-                  setShowGoalSuggestions(false);
                 }}
                 className="text-gray-400 hover:text-gray-600"
               >
@@ -1231,105 +1210,11 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
               </div>
 
               {selectedCategoryId && (
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Doelen (geselecteerd uit categorie)
-                  </label>
-                  <div className="relative">
-                    <div className="border-2 border-gray-200 rounded-xl p-3 focus-within:border-deep-purple transition-colors">
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {selectedGoals.map((goal) => (
-                          <span
-                            key={goal}
-                            className="inline-flex items-center gap-1 bg-deep-purple text-white px-3 py-1 rounded-full text-sm font-medium"
-                          >
-                            {goal}
-                            <button
-                              onClick={() => {
-                                setSelectedGoals((prev) => prev.filter((g) => g !== goal));
-                              }}
-                              className="hover:bg-white hover:bg-opacity-20 rounded-full p-0.5 transition-colors"
-                              type="button"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                      <input
-                        type="text"
-                        value={goalInput}
-                        onChange={(e) => {
-                          setGoalInput(e.target.value);
-                          setShowGoalSuggestions(true);
-                        }}
-                        onFocus={() => setShowGoalSuggestions(true)}
-                        onBlur={() => {
-                          setTimeout(() => setShowGoalSuggestions(false), 200);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ',') {
-                            e.preventDefault();
-                            const trimmedGoal = goalInput.trim();
-                            if (trimmedGoal && !selectedGoals.includes(trimmedGoal)) {
-                              setSelectedGoals((prev) => [...prev, trimmedGoal]);
-                              setGoalInput('');
-                              setShowGoalSuggestions(false);
-                            }
-                          } else if (e.key === 'Backspace' && goalInput === '' && selectedGoals.length > 0) {
-                            setSelectedGoals((prev) => prev.slice(0, -1));
-                          } else if (e.key === 'Escape') {
-                            setShowGoalSuggestions(false);
-                          }
-                        }}
-                        placeholder={selectedGoals.length === 0 ? "Type doel nummer en druk op Enter..." : "Type om meer doelen toe te voegen..."}
-                        className="w-full outline-none text-sm"
-                      />
-                    </div>
-                    {showGoalSuggestions && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border-2 border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                        {availableGoals
-                          .filter(
-                            (goal) =>
-                              (goalInput === '' ||
-                                goal.code.toLowerCase().includes(goalInput.toLowerCase()) ||
-                                goal.description.toLowerCase().includes(goalInput.toLowerCase())) &&
-                              !selectedGoals.includes(goal.code)
-                          )
-                          .map((goal) => (
-                            <button
-                              key={goal.code}
-                              type="button"
-                              onClick={() => {
-                                if (!selectedGoals.includes(goal.code)) {
-                                  setSelectedGoals((prev) => [...prev, goal.code]);
-                                  setGoalInput('');
-                                  setShowGoalSuggestions(false);
-                                }
-                              }}
-                              className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0"
-                            >
-                              <div className="font-semibold text-deep-purple">{goal.code}</div>
-                              <div className="text-xs text-gray-600 truncate">{goal.description}</div>
-                            </button>
-                          ))}
-                        {goalInput && availableGoals.filter(
-                          (goal) =>
-                            (goal.code.toLowerCase().includes(goalInput.toLowerCase()) ||
-                              goal.description.toLowerCase().includes(goalInput.toLowerCase())) &&
-                            !selectedGoals.includes(goal.code)
-                        ).length === 0 && (
-                          <div className="px-4 py-3 text-sm text-gray-500">
-                            Geen doelen gevonden. Druk op Enter om "{goalInput}" toe te voegen.
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Type een doel nummer en druk op Enter om toe te voegen, of selecteer uit de lijst
-                  </p>
-                </div>
+                <DoelSelector
+                  waarde={selectedGoals}
+                  onChange={setSelectedGoals}
+                  label="Doelen"
+                />
               )}
 
               <div className="flex gap-3 pt-4">
@@ -1351,8 +1236,6 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
                     setNewWord('');
                     setSelectedCategoryId('');
                     setSelectedGoals([]);
-                    setGoalInput('');
-                    setShowGoalSuggestions(false);
                   }}
                   className="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-transform"
                 >

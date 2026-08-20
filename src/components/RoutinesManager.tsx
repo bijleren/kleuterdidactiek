@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { RefreshCw, Plus, Pencil, Trash2, X, Search, Check, Clock, Settings } from 'lucide-react';
+import DoelSelector from './DoelSelector';
+import { RefreshCw, Plus, Pencil, Trash2, Search, Clock, Settings } from 'lucide-react';
 import { Circle } from 'lucide-react';
 import { getActivityIcon } from '../lib/activityIcons';
 import Modal from './Modal';
@@ -112,10 +113,6 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
     goal_codes: [] as string[],
   });
 
-  const [goalInput, setGoalInput] = useState('');
-  const [availableGoals, setAvailableGoals] = useState<Array<{ code: string; title: string }>>([]);
-  const [showGoalSuggestions, setShowGoalSuggestions] = useState(false);
-
   useEffect(() => {
     loadRoutines();
     checkAdminStatus();
@@ -130,7 +127,6 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
 
   useEffect(() => {
     if (showFormModal) {
-      loadAvailableGoals();
     }
   }, [showFormModal]);
 
@@ -202,16 +198,6 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
     }
   };
 
-  const loadAvailableGoals = async () => {
-    const { data } = await supabase
-      .from('educational_goals')
-      .select('code, title')
-      .order('code');
-
-    if (data) {
-      setAvailableGoals(data);
-    }
-  };
 
   const loadGroups = async () => {
     try {
@@ -403,7 +389,6 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
       category: 'lesson',
       goal_codes: [],
     });
-    setGoalInput('');
     setShowFormModal(true);
   };
 
@@ -423,7 +408,6 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
       category: routine.category,
       goal_codes: routine.goal_codes,
     });
-    setGoalInput('');
     setShowFormModal(true);
   };
 
@@ -439,7 +423,6 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
       category: 'lesson',
       goal_codes: [],
     });
-    setGoalInput('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -546,20 +529,7 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
     }
   };
 
-  const addGoalCode = (code: string) => {
-    if (!formData.goal_codes.includes(code)) {
-      setFormData({ ...formData, goal_codes: [...formData.goal_codes, code] });
-    }
-    setGoalInput('');
-    setShowGoalSuggestions(false);
-  };
 
-  const removeGoalCode = (code: string) => {
-    setFormData({
-      ...formData,
-      goal_codes: formData.goal_codes.filter(c => c !== code),
-    });
-  };
 
   const renderIcon = (iconName: string, className: string = '') => {
     const IconComponent = getActivityIcon(iconName);
@@ -574,13 +544,6 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
 
     return matchesSearch && matchesCategory && matchesGoal;
   });
-
-  const filteredGoals = availableGoals.filter(goal =>
-    goalInput && (
-      goal.code.toLowerCase().includes(goalInput.toLowerCase()) ||
-      goal.title.toLowerCase().includes(goalInput.toLowerCase())
-    )
-  ).slice(0, 5);
 
   const canEditRoutine = (routine: Routine) => {
     return !routine.is_default || isAdmin;
@@ -846,46 +809,11 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Gekoppelde Doelen</label>
-            <div className="relative">
-              <input
-                type="text"
-                value={goalInput}
-                onChange={(e) => { setGoalInput(e.target.value); setShowGoalSuggestions(e.target.value.length > 0); }}
-                onFocus={() => goalInput && setShowGoalSuggestions(true)}
-                placeholder="Zoek doelcode..."
-                className="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 focus:border-deep-purple focus:outline-none text-sm"
-              />
-              {showGoalSuggestions && filteredGoals.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                  {filteredGoals.map(goal => (
-                    <button
-                      key={goal.code}
-                      type="button"
-                      onClick={() => addGoalCode(goal.code)}
-                      className="w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center justify-between text-sm"
-                    >
-                      <span><span className="font-medium">{goal.code}</span> - {goal.title}</span>
-                      {formData.goal_codes.includes(goal.code) && <Check className="w-4 h-4 text-green-600" />}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            {formData.goal_codes.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {formData.goal_codes.map(code => (
-                  <span key={code} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                    {code}
-                    <button type="button" onClick={() => removeGoalCode(code)} className="hover:bg-blue-200 rounded-full p-0.5">
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+          <DoelSelector
+            waarde={formData.goal_codes}
+            onChange={(codes) => setFormData({ ...formData, goal_codes: codes })}
+            label="Gekoppelde doelen"
+          />
 
           <div className="flex gap-3 pt-2">
             <button

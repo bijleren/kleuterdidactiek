@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { BookOpen, Plus, CheckCircle, Trash2, X, Search, CreditCard as Edit, ExternalLink, FileText, Globe, Book, Upload } from 'lucide-react';
+import DoelSelector from './DoelSelector';
+import { BookOpen, Plus, CheckCircle, Trash2, Search, CreditCard as Edit, ExternalLink, FileText, Globe, Book, Upload } from 'lucide-react';
 import Modal from './Modal';
 import { logActivityToCalendar } from '../utils/calendarLogger';
 
@@ -54,9 +55,6 @@ export default function MaterialsManager({ groupId, schoolId: propSchoolId, goal
     material_type: 'website' as 'website' | 'book' | 'document' | 'other',
     goal_codes: [] as string[],
   });
-  const [goalInput, setGoalInput] = useState('');
-  const [availableGoals, setAvailableGoals] = useState<Array<{ code: string; description: string }>>([]);
-  const [showGoalSuggestions, setShowGoalSuggestions] = useState(false);
   const [editingMaterialId, setEditingMaterialId] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -78,7 +76,6 @@ export default function MaterialsManager({ groupId, schoolId: propSchoolId, goal
 
   useEffect(() => {
     if (showAddModal) {
-      loadAvailableGoals();
     }
   }, [showAddModal]);
 
@@ -147,19 +144,6 @@ export default function MaterialsManager({ groupId, schoolId: propSchoolId, goal
     }
   };
 
-  const loadAvailableGoals = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('educational_goals')
-        .select('code, description')
-        .order('code');
-
-      if (error) throw error;
-      setAvailableGoals(data || []);
-    } catch (error) {
-      console.error('Error loading goals:', error);
-    }
-  };
 
   const uploadDocument = async (file: File): Promise<string | null> => {
     try {
@@ -400,8 +384,6 @@ export default function MaterialsManager({ groupId, schoolId: propSchoolId, goal
       material_type: 'website',
       goal_codes: [],
     });
-    setGoalInput('');
-    setShowGoalSuggestions(false);
     setUploadedFiles([]);
   };
 
@@ -411,13 +393,6 @@ export default function MaterialsManager({ groupId, schoolId: propSchoolId, goal
     }
   };
 
-  const filteredGoals = availableGoals.filter(
-    (goal) =>
-      (goalInput === '' ||
-        goal.code.toLowerCase().includes(goalInput.toLowerCase()) ||
-        goal.description.toLowerCase().includes(goalInput.toLowerCase())) &&
-      !formData.goal_codes.includes(goal.code)
-  );
 
   const filteredMaterials = materials.filter((material) => {
     const matchesSearch = material.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -717,96 +692,11 @@ export default function MaterialsManager({ groupId, schoolId: propSchoolId, goal
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Gekoppelde doelen
-            </label>
-            <div className="relative">
-              <div className="border-2 border-gray-300 rounded-lg p-3 focus-within:border-deep-purple transition-colors">
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {formData.goal_codes.map((goal) => (
-                    <span
-                      key={goal}
-                      className="inline-flex items-center gap-1 bg-deep-purple text-white px-3 py-1 rounded-full text-sm font-medium"
-                    >
-                      {goal}
-                      <button
-                        onClick={() => {
-                          setFormData({
-                            ...formData,
-                            goal_codes: formData.goal_codes.filter((g) => g !== goal),
-                          });
-                        }}
-                        className="hover:bg-white hover:bg-opacity-20 rounded-full p-0.5 transition-colors"
-                        type="button"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-                <input
-                  type="text"
-                  value={goalInput}
-                  onChange={(e) => {
-                    setGoalInput(e.target.value);
-                    setShowGoalSuggestions(true);
-                  }}
-                  onFocus={() => setShowGoalSuggestions(true)}
-                  onBlur={() => {
-                    setTimeout(() => setShowGoalSuggestions(false), 200);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ',') {
-                      e.preventDefault();
-                      const trimmedGoal = goalInput.trim();
-                      if (trimmedGoal && !formData.goal_codes.includes(trimmedGoal)) {
-                        setFormData({
-                          ...formData,
-                          goal_codes: [...formData.goal_codes, trimmedGoal],
-                        });
-                        setGoalInput('');
-                        setShowGoalSuggestions(false);
-                      }
-                    } else if (e.key === 'Backspace' && goalInput === '' && formData.goal_codes.length > 0) {
-                      setFormData({
-                        ...formData,
-                        goal_codes: formData.goal_codes.slice(0, -1),
-                      });
-                    } else if (e.key === 'Escape') {
-                      setShowGoalSuggestions(false);
-                    }
-                  }}
-                  placeholder={formData.goal_codes.length === 0 ? "Type doel nummer en druk op Enter..." : "Type om meer doelen toe te voegen..."}
-                  className="w-full outline-none text-sm"
-                />
-              </div>
-              {showGoalSuggestions && (
-                <div className="absolute z-10 w-full mt-1 bg-white border-2 border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                  {filteredGoals.map((goal) => (
-                    <button
-                      key={goal.code}
-                      type="button"
-                      onClick={() => {
-                        if (!formData.goal_codes.includes(goal.code)) {
-                          setFormData({
-                            ...formData,
-                            goal_codes: [...formData.goal_codes, goal.code],
-                          });
-                          setGoalInput('');
-                          setShowGoalSuggestions(false);
-                        }
-                      }}
-                      className="w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors text-sm border-b border-gray-100 last:border-0"
-                    >
-                      <span className="font-medium text-deep-purple">{goal.code}</span>
-                      <span className="text-gray-600 ml-2">{goal.description}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+          <DoelSelector
+            waarde={formData.goal_codes}
+            onChange={(codes) => setFormData({ ...formData, goal_codes: codes })}
+            label="Gekoppelde doelen"
+          />
 
           <div className="flex gap-3 pt-4">
             <button
