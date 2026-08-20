@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { Search, Plus, Trash2, X, FileDown, Eye, Volume2, BookOpen, Image, ChevronLeft, ChevronRight, Play, Video } from 'lucide-react';
+import { Search, Plus, Trash2, X, FileDown, Eye, Volume2, BookOpen, Image, ChevronLeft, ChevronRight, Play, Video, Target } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSchool } from '../contexts/SchoolContext';
 import { logActivityToCalendar } from '../utils/calendarLogger';
@@ -8,6 +8,7 @@ import { exportVocabularyToPDF } from '../utils/vocabularyPdfExport';
 import { getVideoEmbed } from '../utils/videoEmbed';
 import NetLeeftijdFilter from './NetLeeftijdFilter';
 import DoelSelector from './DoelSelector';
+import DoelenPerNetModal from './DoelenPerNetModal';
 import { WoordNetBadges } from './NetBadges';
 import {
   NET_CODES,
@@ -83,6 +84,7 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
   const { selectedSchool } = useSchool();
   const [clickCounts, setClickCounts] = useState<WordClickCount>({});
   const [categories, setCategories] = useState<VocabularyCategory[]>([]);
+  const [toonDoelenModal, setToonDoelenModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<string[]>([]);
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('today');
@@ -810,6 +812,26 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
     return true;
   });
 
+  /*
+    De doelcodes van alles wat nu in beeld staat: zowel de codes van de
+    categorie zelf als die van de losse woorden. Dat is wat de doelenmodal
+    uitsplitst per net.
+  */
+  const doelCodesInBeeld = useMemo(() => {
+    const codes = new Set<string>();
+    for (const categorie of filteredCategories) {
+      categorie.goalCodes
+        .split(',')
+        .map((c) => c.trim())
+        .filter(Boolean)
+        .forEach((c) => codes.add(c));
+      for (const woord of categorie.words) {
+        (woord.goals || []).forEach((c) => codes.add(c));
+      }
+    }
+    return [...codes];
+  }, [filteredCategories]);
+
   const totalClicks = Object.values(clickCounts).reduce((sum, count) => sum + count, 0);
   const uniqueWords = Object.keys(clickCounts).length;
   const uniqueGoals = new Set<string>();
@@ -1003,6 +1025,13 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
               >
                 <Eye className="w-4 h-4" />
                 {meaningMode ? 'Betekenis modus actief' : 'Betekenis tonen'}
+              </button>
+              <button
+                onClick={() => setToonDoelenModal(true)}
+                className="px-4 py-2 rounded-full text-sm font-semibold transition-all bg-deep-purple text-white hover:scale-105 shadow-md flex items-center gap-2 whitespace-nowrap"
+              >
+                <Target className="w-4 h-4" />
+                Doelen tonen
               </button>
               <button
                 onClick={handleExportPDF}
@@ -1671,6 +1700,13 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
           </div>
         </div>
       )}
+      <DoelenPerNetModal
+        isOpen={toonDoelenModal}
+        onClose={() => setToonDoelenModal(false)}
+        codes={doelCodesInBeeld}
+        herkomst={`${filteredCategories.length} ${filteredCategories.length === 1 ? 'categorie' : 'categorieën'} in beeld`}
+      />
+
     </div>
   );
 }

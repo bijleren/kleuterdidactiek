@@ -192,3 +192,76 @@ export async function loadDoelLabels(codes: string[]): Promise<Map<string, DoelL
   return new Map(uniek.map((c) => [c, labelCache.get(c)!]));
 }
 
+/* ---------- doelen van een woordenschatselectie, per net ---------- */
+
+export interface DoelRegel {
+  code: string;
+  omschrijving: string;
+}
+
+export interface DoelenPerNet {
+  minimumdoelen: DoelRegel[];
+  perNet: Record<NetCode, DoelRegel[]>;
+}
+
+/**
+ * Alle doelen die bij een set minimumdoelcodes horen, uitgesplitst per net.
+ *
+ * De woordenschat hangt aan minimumdoelen. Welk leerplandoel daar in een net
+ * bij hoort, staat in leerplandoel_minimumdoelen. Zo kan een leerkracht zien
+ * welke doelen uit haar eigen leerplan ze met deze woorden bedient.
+ */
+export async function loadDoelenPerNet(codes: string[]): Promise<DoelenPerNet> {
+  const uniek = [...new Set(codes.filter(Boolean))];
+  const leeg: DoelenPerNet = { minimumdoelen: [], perNet: { KATH: [], GO: [], OVSG: [] } };
+  if (uniek.length === 0) return leeg;
+
+  const { data: minimumData, error: minimumError } = await supabase
+    .from('educational_goals')
+    .select('code, title, description')
+    .in('code', uniek);
+  if (minimumError) throw minimumError;
+
+  // Paginerend: een brede selectie kan makkelijk boven de standaardlimiet van
+  // 1000 rijen uitkomen, en PostgREST kapt dat zonder foutmelding af.
+  const koppelingen: { leerplandoel_id: string }[] = [];
+  const PAGINA = 1000;
+  for (let van = 0; ; van += PAGINA) {
+    const { data, error } = await supabase
+      .from('leerplandoel_minimumdoelen')
+      .select('leerplandoel_id')
+      .in('code', uniek)
+      .range(van, van + PAGINA - 1);
+    if (error) throw error;
+    const rijen = (data ?? []) as unknown as { leerplandoel_id: string }[];
+    koppelingen.push(...rijen);
+    if (rijen.length < PAGINA) break;
+  }
+
+  const ids = [...new Set(koppelingen.map((k) => k.leerplandoel_id))];
+  const doelen: { doelnummer: string; omschrijving: string; net_code: NetCode }[] = [];
+  for (let i = 0; i < ids.length; i += PAGINA) {
+    const { data, error } = await supabase
+      .from('leerplandoelen')
+      .select('doelnummer, omschrijving, net_code')
+      .in('id', ids.slice(i, i + PAGINA));
+    if (error) throw error;
+    doelen.push(...((data ?? []) as unknown as typeof doelen));
+  }
+
+  const perNet: Record<NetCode, DoelRegel[]> = { KATH: [], GO: [], OVSG: [] };
+  for (const d of doelen) {
+    if (perNet[d.net_code]) {
+      perNet[d.net_code].push({ code: d.doelnummer, omschrijving: d.omschrijving });
+    }
+  }
+  for (const net of Object.keys(perNet) as NetCode[]) {
+    perNet[net].sort((a, b) => a.code.localeCompare(b.code, 'nl', { numeric: true }));
+  }
+
+  const minimumdoelen = ((minimumData ?? []) as unknown as MinimumdoelRij[])
+    .map((r) => ({ code: r.code, omschrijving: r.description || r.title || r.code }))
+    .sort((a, b) => a.code.localeCompare(b.code, 'nl', { numeric: true }));
+
+  return { minimumdoelen, perNet };
+}
