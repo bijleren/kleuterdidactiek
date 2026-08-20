@@ -79,7 +79,7 @@ const domainLabels: Record<string, string> = {
   '5': '📜 Geschiedenis',
   '6': '🎨 Muzische vorming',
   '7': '🏃 Lichamelijke opvoeding',
-  '8': '🤝 Sociale vaardigheden',
+  SV: '🤝 Sociale vaardigheden',
   '9': '💚 Attitudes',
 };
 
