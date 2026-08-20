@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, ChevronDown, BarChart3, Target, Compass, Calendar, UserCheck, Rocket, HelpCircle, School, MessageSquarePlus, X, Copy, Check, Plus, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSchool } from '../contexts/SchoolContext';
+import KlasinstellingenKnop from './KlasinstellingenKnop';
 import { supabase } from '../lib/supabase';
 import FeedbackModal from './FeedbackModal';
 
@@ -166,6 +167,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   <ChevronDown className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 text-white pointer-events-none" />
                 </div>
               )}
+
+              {/* Net van de school en leeftijdsgroep van de klas: bepalen wat je standaard ziet. */}
+              <KlasinstellingenKnop />
 
               {schools.length === 1 && selectedSchool && (
                 <button
