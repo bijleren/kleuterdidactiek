@@ -239,6 +239,17 @@ export async function loadDoelenPerNet(codes: string[]): Promise<DoelenPerNet> {
   }
 
   const ids = [...new Set(koppelingen.map((k) => k.leerplandoel_id))];
+
+  /*
+    Codes kunnen sinds de doelenkiezer ook rechtstreeks een leerplandoel zijn.
+    Die horen in de lijst van hun eigen net thuis; zonder deze stap zou een
+    doel dat je zelf koppelde nergens opduiken.
+  */
+  const { data: directData, error: directError } = await supabase
+    .from('leerplandoelen')
+    .select('doelnummer, omschrijving, net_code')
+    .in('doelnummer', uniek);
+  if (directError) throw directError;
   const doelen: { doelnummer: string; omschrijving: string; net_code: NetCode }[] = [];
   for (let i = 0; i < ids.length; i += PAGINA) {
     const { data, error } = await supabase
@@ -250,8 +261,14 @@ export async function loadDoelenPerNet(codes: string[]): Promise<DoelenPerNet> {
   }
 
   const perNet: Record<NetCode, DoelRegel[]> = { KATH: [], GO: [], OVSG: [] };
-  for (const d of doelen) {
-    if (perNet[d.net_code]) {
+  const gezien = new Set<string>();
+  const alles = [
+    ...((directData ?? []) as unknown as typeof doelen),
+    ...doelen,
+  ];
+  for (const d of alles) {
+    if (perNet[d.net_code] && !gezien.has(d.doelnummer)) {
+      gezien.add(d.doelnummer);
       perNet[d.net_code].push({ code: d.doelnummer, omschrijving: d.omschrijving });
     }
   }

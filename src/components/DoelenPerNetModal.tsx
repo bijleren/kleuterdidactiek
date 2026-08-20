@@ -7,20 +7,27 @@ import { NET_CODES, NET_LABELS, type NetCode } from '../lib/leerplandoelen';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  /** Minimumdoelcodes van de woorden die nu in beeld staan. */
+  /** Minimumdoelcodes van het woord waarop geklikt is. */
   codes: string[];
-  /** Waar de doelen vandaan komen, bv. "3 categorieën". */
+  /** Waar de doelen bij horen, bv. het woord zelf. */
   herkomst?: string;
+  titel?: string;
 }
 
 /**
- * Toont welke doelen bij de woorden in beeld horen, per net naast elkaar.
+ * Toont welke doelen bij een woord horen, per net naast elkaar.
  *
  * De woordenschat hangt aan minimumdoelen; elk net vult die met eigen
  * leerplandoelen in. Een leerkracht die haar leerplan moet verantwoorden, wil
  * die lijst kunnen overnemen — vandaar een kopieerknop per net.
  */
-export default function DoelenPerNetModal({ isOpen, onClose, codes, herkomst }: Props) {
+export default function DoelenPerNetModal({
+  isOpen,
+  onClose,
+  codes,
+  herkomst,
+  titel = 'Doelen bij dit woord',
+}: Props) {
   const [data, setData] = useState<DoelenPerNet | null>(null);
   const [laden, setLaden] = useState(false);
   const [fout, setFout] = useState('');
@@ -98,11 +105,11 @@ export default function DoelenPerNetModal({ isOpen, onClose, codes, herkomst }: 
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Doelen bij deze woorden" size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title={titel} size="lg">
       <div className="space-y-4">
         <p className="text-sm text-gray-600">
-          De woordenschat hangt aan minimumdoelen. Hieronder staat per net welke leerplandoelen
-          daarmee bediend worden{herkomst ? `, voor ${herkomst}` : ''}.
+          {herkomst ? <span className="font-semibold">{herkomst}</span> : 'Dit woord'} hangt aan
+          minimumdoelen. Hieronder staat per net welke leerplandoelen daarmee bediend worden.
         </p>
 
         {fout && (

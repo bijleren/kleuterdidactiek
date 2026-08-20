@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { Search, Plus, Trash2, X, FileDown, Eye, Volume2, BookOpen, Image, ChevronLeft, ChevronRight, Play, Video, Target } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -84,7 +84,8 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
   const { selectedSchool } = useSchool();
   const [clickCounts, setClickCounts] = useState<WordClickCount>({});
   const [categories, setCategories] = useState<VocabularyCategory[]>([]);
-  const [toonDoelenModal, setToonDoelenModal] = useState(false);
+  const [doelenMode, setDoelenMode] = useState(false);
+  const [doelenVoorWoord, setDoelenVoorWoord] = useState<{ woord: string; codes: string[] } | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<string[]>([]);
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('today');
@@ -360,6 +361,16 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
       // fall through to also log the click
     }
 
+    if (doelenMode) {
+      /*
+        Alleen tonen, niet loggen: dit is opzoekwerk van de leerkracht, geen
+        oefenbeurt van een kind. De betekenismodus logt wel, want daar wordt
+        het woord met de klas behandeld.
+      */
+      setDoelenVoorWoord({ woord: word, codes: goalCodes || [] });
+      return;
+    }
+
     if (deleteMode) {
       await handleDeleteWordClick(word);
       return;
@@ -483,6 +494,7 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
     if (!deleteMode) {
       setShowDeleteInstructions(true);
       setMeaningMode(false);
+      setDoelenMode(false);
     }
     setDeleteMode(!deleteMode);
   };
@@ -490,6 +502,13 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
   const toggleMeaningMode = () => {
     setMeaningMode((prev) => !prev);
     setDeleteMode(false);
+    setDoelenMode(false);
+  };
+
+  const toggleDoelenMode = () => {
+    setDoelenMode((prev) => !prev);
+    setDeleteMode(false);
+    setMeaningMode(false);
   };
 
   const stopCurrentAudio = () => {
@@ -812,25 +831,6 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
     return true;
   });
 
-  /*
-    De doelcodes van alles wat nu in beeld staat: zowel de codes van de
-    categorie zelf als die van de losse woorden. Dat is wat de doelenmodal
-    uitsplitst per net.
-  */
-  const doelCodesInBeeld = useMemo(() => {
-    const codes = new Set<string>();
-    for (const categorie of filteredCategories) {
-      categorie.goalCodes
-        .split(',')
-        .map((c) => c.trim())
-        .filter(Boolean)
-        .forEach((c) => codes.add(c));
-      for (const woord of categorie.words) {
-        (woord.goals || []).forEach((c) => codes.add(c));
-      }
-    }
-    return [...codes];
-  }, [filteredCategories]);
 
   const totalClicks = Object.values(clickCounts).reduce((sum, count) => sum + count, 0);
   const uniqueWords = Object.keys(clickCounts).length;
@@ -1027,11 +1027,15 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
                 {meaningMode ? 'Betekenis modus actief' : 'Betekenis tonen'}
               </button>
               <button
-                onClick={() => setToonDoelenModal(true)}
-                className="px-4 py-2 rounded-full text-sm font-semibold transition-all bg-deep-purple text-white hover:scale-105 shadow-md flex items-center gap-2 whitespace-nowrap"
+                onClick={toggleDoelenMode}
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all hover:scale-105 shadow-md flex items-center gap-2 whitespace-nowrap ${
+                  doelenMode
+                    ? 'bg-deep-purple text-white ring-2 ring-lavender'
+                    : 'bg-deep-purple/80 text-white'
+                }`}
               >
                 <Target className="w-4 h-4" />
-                Doelen tonen
+                {doelenMode ? 'Doelen modus actief' : 'Doelen tonen'}
               </button>
               <button
                 onClick={handleExportPDF}
@@ -1085,6 +1089,21 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
             className="ml-auto p-1 hover:bg-amber-200 rounded-lg transition-colors"
           >
             <X className="w-4 h-4 text-amber-600" />
+          </button>
+        </div>
+      )}
+
+      {doelenMode && (
+        <div className="bg-lavender/30 border-2 border-deep-purple/30 rounded-2xl px-5 py-3 flex items-center gap-3">
+          <Target className="w-5 h-5 text-deep-purple flex-shrink-0" />
+          <p className="text-sm font-semibold text-deep-purple">
+            Doelen modus: klik op een woord om te zien welke doelen eraan hangen, per net.
+          </p>
+          <button
+            onClick={toggleDoelenMode}
+            className="ml-auto p-1 hover:bg-lavender/60 rounded-lg transition-colors"
+          >
+            <X className="w-4 h-4 text-deep-purple" />
           </button>
         </div>
       )}
@@ -1701,10 +1720,10 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
         </div>
       )}
       <DoelenPerNetModal
-        isOpen={toonDoelenModal}
-        onClose={() => setToonDoelenModal(false)}
-        codes={doelCodesInBeeld}
-        herkomst={`${filteredCategories.length} ${filteredCategories.length === 1 ? 'categorie' : 'categorieën'} in beeld`}
+        isOpen={doelenVoorWoord !== null}
+        onClose={() => setDoelenVoorWoord(null)}
+        codes={doelenVoorWoord?.codes ?? []}
+        herkomst={doelenVoorWoord ? `"${doelenVoorWoord.woord}"` : undefined}
       />
 
     </div>
