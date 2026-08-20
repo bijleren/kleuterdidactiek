@@ -9,6 +9,7 @@
   allebei soorten dragen.
 */
 import { supabase } from './supabase';
+import { relevantieVoorWoord } from './woordmatch';
 import {
   loadLeerplandoelen,
   NET_LABELS,
@@ -197,6 +198,11 @@ export async function loadDoelLabels(codes: string[]): Promise<Map<string, DoelL
 export interface DoelRegel {
   code: string;
   omschrijving: string;
+  /**
+   * 'noemt'    het doel somt begrippen op en dit woord staat erbij
+   * 'algemeen' het doel somt niets op en dekt het minimumdoel als geheel
+   */
+  soort: 'noemt' | 'algemeen';
 }
 
 export interface DoelenPerNet {
@@ -211,7 +217,10 @@ export interface DoelenPerNet {
  * bij hoort, staat in leerplandoel_minimumdoelen. Zo kan een leerkracht zien
  * welke doelen uit haar eigen leerplan ze met deze woorden bedient.
  */
-export async function loadDoelenPerNet(codes: string[]): Promise<DoelenPerNet> {
+export async function loadDoelenPerNet(
+  codes: string[],
+  woord?: string,
+): Promise<DoelenPerNet> {
   const uniek = [...new Set(codes.filter(Boolean))];
   const leeg: DoelenPerNet = { minimumdoelen: [], perNet: { KATH: [], GO: [], OVSG: [] } };
   if (uniek.length === 0) return leeg;
@@ -267,17 +276,31 @@ export async function loadDoelenPerNet(codes: string[]): Promise<DoelenPerNet> {
     ...doelen,
   ];
   for (const d of alles) {
-    if (perNet[d.net_code] && !gezien.has(d.doelnummer)) {
-      gezien.add(d.doelnummer);
-      perNet[d.net_code].push({ code: d.doelnummer, omschrijving: d.omschrijving });
-    }
+    if (!perNet[d.net_code] || gezien.has(d.doelnummer)) continue;
+    /*
+      Zonder woord kunnen we niets wegen; dan telt alles mee. Met een woord
+      vallen doelen af die hun begrippen opsommen zonder dit woord te noemen —
+      die gaan echt over iets anders.
+    */
+    const soort = woord ? relevantieVoorWoord(d.omschrijving, woord) : 'algemeen';
+    if (soort === 'anders') continue;
+    gezien.add(d.doelnummer);
+    perNet[d.net_code].push({
+      code: d.doelnummer,
+      omschrijving: d.omschrijving,
+      soort: soort === 'noemt' ? 'noemt' : 'algemeen',
+    });
   }
   for (const net of Object.keys(perNet) as NetCode[]) {
     perNet[net].sort((a, b) => a.code.localeCompare(b.code, 'nl', { numeric: true }));
   }
 
   const minimumdoelen = ((minimumData ?? []) as unknown as MinimumdoelRij[])
-    .map((r) => ({ code: r.code, omschrijving: r.description || r.title || r.code }))
+    .map((r) => ({
+      code: r.code,
+      omschrijving: r.description || r.title || r.code,
+      soort: 'noemt' as const,
+    }))
     .sort((a, b) => a.code.localeCompare(b.code, 'nl', { numeric: true }));
 
   return { minimumdoelen, perNet };

@@ -1723,6 +1723,7 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
         isOpen={doelenVoorWoord !== null}
         onClose={() => setDoelenVoorWoord(null)}
         codes={doelenVoorWoord?.codes ?? []}
+        woord={doelenVoorWoord?.woord}
         herkomst={doelenVoorWoord ? `"${doelenVoorWoord.woord}"` : undefined}
       />
 
