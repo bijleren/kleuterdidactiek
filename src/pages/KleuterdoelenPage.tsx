@@ -14,6 +14,7 @@ import ActivityBoardsList from '../components/ActivityBoardsList';
 import ActivityBoardView from '../components/ActivityBoardView';
 import ActivityAnalytics from '../components/ActivityAnalytics';
 import RoutinesManager from '../components/RoutinesManager';
+import LeerdoelActiviteiten from '../components/LeerdoelActiviteiten';
 import { supabase } from '../lib/supabase';
 import { useSchool } from '../contexts/SchoolContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -38,7 +39,7 @@ interface ActivityBoard {
   archived_at?: string | null;
 }
 
-type TabType = 'vocabulary' | 'games' | 'writing' | 'videos' | 'materials' | 'tasks' | 'activities' | 'routines' | 'goals' | null;
+type TabType = 'vocabulary' | 'games' | 'writing' | 'videos' | 'materials' | 'tasks' | 'activities' | 'routines' | 'leerdoelactiviteit' | 'goals' | null;
 /** Binnen het doelenscherm: de minimumdoelen van de app, of de leerplandoelen per net. */
 type DoelenWeergave = 'minimum' | 'leerplan';
 
@@ -61,7 +62,7 @@ export default function KleuterdoelenPage() {
 
   useEffect(() => {
     const tabParam = searchParams.get('tab') as TabType;
-    if (tabParam && ['vocabulary', 'games', 'writing', 'videos', 'materials', 'tasks', 'activities', 'routines', 'goals'].includes(tabParam)) {
+    if (tabParam && ['vocabulary', 'games', 'writing', 'videos', 'materials', 'tasks', 'activities', 'routines', 'leerdoelactiviteit', 'goals'].includes(tabParam)) {
       setActiveTab(tabParam);
     } else if (location.pathname === '/doelen') {
       setActiveTab('goals');
@@ -189,6 +190,7 @@ export default function KleuterdoelenPage() {
     { id: 'materials' as TabType, label: 'Materiaal', icon: '📖', color: 'from-deep-purple to-[#9B9EFF]' },
     { id: 'activities' as TabType, label: 'Hoekenwerk', icon: '🎨', color: 'from-lavender to-[#E8B4FF]' },
     { id: 'routines' as TabType, label: 'Routines', icon: '🔄', color: 'from-blue-500 to-[#60A5FA]' },
+    { id: 'leerdoelactiviteit' as TabType, label: 'Leerdoelactiviteit', icon: '💡', color: 'from-deep-purple to-[#7EDCD5]' },
   ];
 
   const tabs = allTabs;
@@ -266,6 +268,7 @@ export default function KleuterdoelenPage() {
               />
             )
           )}
+          {activeTab === 'leerdoelactiviteit' && <LeerdoelActiviteiten />}
           {activeTab === 'routines' && groupId && group && <RoutinesManager schoolId={group.school_id} groupId={groupId} goalFilter={goalFilter} />}
           {activeTab === 'goals' && groupId && (
             <div className="space-y-6">
