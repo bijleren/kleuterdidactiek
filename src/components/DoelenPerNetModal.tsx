@@ -142,6 +142,34 @@ export default function DoelenPerNetModal({
           minimumdoelen. Hieronder staat per net welke leerplandoelen daarmee bediend worden.
         </p>
 
+        {/*
+          Zonder woord is er niets te wegen en staat alles in dezelfde kleur;
+          dan zou een legende alleen verwarren.
+        */}
+        {woord && (
+          <div className="rounded-xl bg-gray-50 border border-gray-200 p-3 space-y-1.5">
+            <p className="flex items-start gap-2 text-xs text-gray-700">
+              <span className="mt-1 w-2 h-2 rounded-full bg-deep-purple flex-shrink-0" />
+              <span>
+                <span className="font-semibold text-gray-800">Zwart</span> — dit doel noemt
+                &ldquo;{woord}&rdquo; letterlijk in zijn opsomming van begrippen.
+              </span>
+            </p>
+            <p className="flex items-start gap-2 text-xs text-gray-500">
+              <span className="mt-1 w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" />
+              <span>
+                <span className="font-semibold text-gray-600">Grijs</span> — dit doel somt geen
+                begrippen op. Het dekt het minimumdoel als geheel, maar zegt niets over dit woord
+                in het bijzonder.
+              </span>
+            </p>
+            <p className="text-[11px] text-gray-400 pt-1">
+              Doelen die wél begrippen opsommen maar &ldquo;{woord}&rdquo; niet noemen, staan er
+              niet bij: die gaan over iets anders.
+            </p>
+          </div>
+        )}
+
         {fout && (
           <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm">
             {fout}
