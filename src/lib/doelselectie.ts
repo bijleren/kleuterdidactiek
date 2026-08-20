@@ -282,3 +282,83 @@ export async function loadDoelenPerNet(codes: string[]): Promise<DoelenPerNet> {
 
   return { minimumdoelen, perNet };
 }
+
+/* ---------- leerdoelen die bij een gekozen minimumdoel horen ---------- */
+
+export interface Suggestie {
+  /** Het minimumdoel waaruit deze suggestie voortkomt. */
+  vanuit: string;
+  optie: DoelOptie;
+}
+
+/**
+ * De leerdoelen die aan de opgegeven minimumdoelen hangen.
+ *
+ * Koos iemand een minimumdoel, dan is het handig te zien hoe het eigen net dat
+ * invult: dat zijn concretere doelen, en registreren op dat niveau maakt de
+ * opvolging fijnmaziger. Andersom hoeft dit niet — een leerdoel sleept zijn
+ * minimumdoelen al mee via codesVoorOpslag.
+ *
+ * Zonder net krijg je de leerdoelen van alle netten; met een net alleen die van
+ * dat net.
+ */
+export async function loadLeerdoelSuggesties(
+  minimumdoelCodes: string[],
+  net: NetCode | 'all',
+): Promise<Suggestie[]> {
+  const codes = [...new Set(minimumdoelCodes.filter(Boolean))];
+  if (codes.length === 0) return [];
+
+  const { data: koppelingen, error: koppelFout } = await supabase
+    .from('leerplandoel_minimumdoelen')
+    .select('leerplandoel_id, code')
+    .in('code', codes);
+  if (koppelFout) throw koppelFout;
+
+  const rijen = (koppelingen ?? []) as unknown as { leerplandoel_id: string; code: string }[];
+  const ids = [...new Set(rijen.map((r) => r.leerplandoel_id))];
+  if (ids.length === 0) return [];
+
+  let q = supabase
+    .from('leerplandoelen')
+    .select('id, doelnummer, omschrijving, net_code, path_labels')
+    .in('id', ids);
+  if (net !== 'all') q = q.eq('net_code', net);
+
+  const { data: doelen, error: doelFout } = await q;
+  if (doelFout) throw doelFout;
+
+  // Alle minimumdoelen per leerdoel, niet alleen het doel waaruit we vertrokken:
+  // anders zou opslaan een koppeling laten vallen.
+  const gevonden = (doelen ?? []) as unknown as {
+    id: string; doelnummer: string; omschrijving: string; net_code: NetCode; path_labels: string[] | null;
+  }[];
+  const { data: alle, error: alleFout } = await supabase
+    .from('leerplandoel_minimumdoelen')
+    .select('leerplandoel_id, code')
+    .in('leerplandoel_id', gevonden.map((d) => d.id));
+  if (alleFout) throw alleFout;
+
+  const perDoel = new Map<string, string[]>();
+  for (const r of (alle ?? []) as unknown as { leerplandoel_id: string; code: string }[]) {
+    if (!perDoel.has(r.leerplandoel_id)) perDoel.set(r.leerplandoel_id, []);
+    perDoel.get(r.leerplandoel_id)!.push(r.code);
+  }
+
+  const vanuitPerDoel = new Map<string, string>();
+  for (const r of rijen) {
+    if (!vanuitPerDoel.has(r.leerplandoel_id)) vanuitPerDoel.set(r.leerplandoel_id, r.code);
+  }
+
+  return gevonden.map((d) => ({
+    vanuit: vanuitPerDoel.get(d.id) ?? codes[0],
+    optie: {
+      code: d.doelnummer,
+      soort: 'leerplandoel' as const,
+      omschrijving: d.omschrijving,
+      context: d.path_labels?.[0] || NET_LABELS[d.net_code],
+      minimumdoelen: perDoel.get(d.id) ?? [],
+      net: d.net_code,
+    },
+  }));
+}

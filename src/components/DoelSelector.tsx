@@ -5,8 +5,10 @@ import {
   codesVoorOpslag,
   loadDoelLabels,
   loadDoelOpties,
+  loadLeerdoelSuggesties,
   type DoelLabel,
   type DoelOptie,
+  type Suggestie,
 } from '../lib/doelselectie';
 import { NET_LABELS } from '../lib/leerplandoelen';
 import NetLeeftijdFilter from './NetLeeftijdFilter';
@@ -35,6 +37,7 @@ export default function DoelSelector({ waarde, onChange, label = 'Doelen' }: Pro
   const [labels, setLabels] = useState<Map<string, DoelLabel>>(new Map());
   const [zoek, setZoek] = useState('');
   const [laden, setLaden] = useState(false);
+  const [suggesties, setSuggesties] = useState<Suggestie[]>([]);
 
   useEffect(() => {
     let afgebroken = false;
@@ -71,6 +74,31 @@ export default function DoelSelector({ waarde, onChange, label = 'Doelen' }: Pro
 
   const gekozen = useMemo(() => new Set(waarde), [waarde]);
 
+  /*
+    Koos iemand een minimumdoel, dan tonen we hoe het net dat invult. De andere
+    richting hoeft niet: een leerdoel neemt zijn minimumdoelen al mee.
+  */
+  const gekozenMinimumdoelen = useMemo(
+    () => waarde.filter((c) => labels.get(c)?.soort !== 'leerplandoel'),
+    [waarde, labels],
+  );
+
+  useEffect(() => {
+    if (gekozenMinimumdoelen.length === 0) {
+      setSuggesties([]);
+      return;
+    }
+    let afgebroken = false;
+    loadLeerdoelSuggesties(gekozenMinimumdoelen, filter.net)
+      .then((s) => {
+        if (!afgebroken) setSuggesties(s);
+      })
+      .catch((e) => console.error('Suggesties laden mislukt', e));
+    return () => {
+      afgebroken = true;
+    };
+  }, [gekozenMinimumdoelen.join('|'), filter.net]);
+
   const resultaten = useMemo(() => {
     const q = zoek.trim().toLowerCase();
     return opties
@@ -83,6 +111,11 @@ export default function DoelSelector({ waarde, onChange, label = 'Doelen' }: Pro
           o.context.toLowerCase().includes(q),
       );
   }, [opties, gekozen, zoek]);
+
+  const zichtbareSuggesties = useMemo(
+    () => suggesties.filter((s) => !gekozen.has(s.optie.code)),
+    [suggesties, gekozen],
+  );
 
   const voegToe = (o: DoelOptie) => {
     const nieuw = codesVoorOpslag(o).filter((c) => !gekozen.has(c));
@@ -159,6 +192,37 @@ export default function DoelSelector({ waarde, onChange, label = 'Doelen' }: Pro
       />
 
       {waarde.length > 0 && <div className="flex flex-wrap gap-2">{waarde.map(chip)}</div>}
+
+      {/*
+        Suggesties op basis van de gekozen minimumdoelen. Boven het zoekveld,
+        want het is een aanbod dat je meestal meteen wil zien en anders negeert.
+      */}
+      {zichtbareSuggesties.length > 0 && (
+        <div className="rounded-xl border border-deep-purple/20 bg-deep-purple/5 p-3 space-y-2">
+          <p className="text-xs font-semibold text-deep-purple">
+            Leerdoelen die hierbij horen
+            {filter.net !== 'all' && <> volgens {NET_LABELS[filter.net]}</>}
+          </p>
+          <ul className="space-y-1 max-h-40 overflow-y-auto">
+            {zichtbareSuggesties.map((s) => (
+              <li key={`${s.optie.net}-${s.optie.code}`}>
+                <button
+                  type="button"
+                  onClick={() => voegToe(s.optie)}
+                  className="w-full text-left text-sm px-2 py-1.5 rounded-lg hover:bg-white transition-colors"
+                >
+                  <span className="font-semibold text-deep-purple">{s.optie.code}</span>
+                  <span className="text-gray-600 ml-2">{s.optie.omschrijving}</span>
+                  <span className="block text-[11px] text-gray-400">
+                    hoort bij {s.vanuit}
+                    {filter.net === 'all' && s.optie.net && <> · {NET_LABELS[s.optie.net]}</>}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <input
         type="text"
