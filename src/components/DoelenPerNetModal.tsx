@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Check, ChevronDown, ChevronRight, Copy } from 'lucide-react';
+import { Check, Copy } from 'lucide-react';
 import Modal from './Modal';
 import { loadDoelenPerNet, type DoelRegel, type DoelenPerNet } from '../lib/doelselectie';
 import { NET_CODES, NET_LABELS, type NetCode } from '../lib/leerplandoelen';
@@ -38,7 +38,6 @@ export default function DoelenPerNetModal({
   const [laden, setLaden] = useState(false);
   const [fout, setFout] = useState('');
   const [gekopieerd, setGekopieerd] = useState<string | null>(null);
-  const [open, setOpen] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!isOpen) return;
@@ -74,9 +73,11 @@ export default function DoelenPerNetModal({
   };
 
   const sectie = (sleutel: string, titelTekst: string, regels: DoelRegel[], accent: string) => {
-    const direct = regels.filter((r) => r.soort === 'noemt');
-    const algemeen = regels.filter((r) => r.soort === 'algemeen');
-    const uitgeklapt = open.has(sleutel);
+    /* Eerst wat het woord echt noemt, daarna de algemene doelen. */
+    const gesorteerd = [
+      ...regels.filter((r) => r.soort === 'noemt'),
+      ...regels.filter((r) => r.soort === 'algemeen'),
+    ];
 
     return (
       <div key={sleutel} className="border border-gray-200 rounded-2xl overflow-hidden">
@@ -105,54 +106,29 @@ export default function DoelenPerNetModal({
         {regels.length === 0 ? (
           <p className="px-4 py-3 text-sm text-gray-500">Geen doelen voor deze selectie.</p>
         ) : (
-          <>
-            {direct.length > 0 && (
-              <ul className="max-h-56 overflow-y-auto divide-y divide-gray-100">
-                {direct.map((r) => (
-                  <li key={r.code} className="px-4 py-2 text-sm flex gap-3">
-                    <span className={`font-semibold shrink-0 ${accent}`}>{r.code}</span>
-                    <span className="text-gray-600">{r.omschrijving}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {/*
-              Doelen die geen begrippen opsommen dekken het minimumdoel als
-              geheel. Ze horen erbij, maar zeggen niets over dit woord in het
-              bijzonder — dus ingeklapt, zodat de echte treffers bovenaan staan.
-              Bij GO! is dit vrijwel alles wat er is.
-            */}
-            {algemeen.length > 0 && (
-              <div className="border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setOpen((s) => {
-                      const n = new Set(s);
-                      if (n.has(sleutel)) n.delete(sleutel);
-                      else n.add(sleutel);
-                      return n;
-                    })
-                  }
-                  className="w-full px-4 py-2 text-left text-xs font-semibold text-gray-500 hover:bg-gray-50 transition-colors flex items-center gap-1"
+          <ul className="max-h-56 overflow-y-auto divide-y divide-gray-100">
+            {gesorteerd.map((r) => {
+              /*
+                Doelen die geen begrippen opsommen dekken het minimumdoel als
+                geheel; ze zeggen niets over dit woord in het bijzonder. Grijs,
+                zodat de echte treffers eruit springen. Bij GO! is dit vrijwel
+                alles wat er is, vandaar dat ze wel blijven staan.
+              */
+              const algemeen = r.soort === 'algemeen';
+              return (
+                <li
+                  key={r.code}
+                  className={`px-4 py-2 text-sm flex gap-3 ${algemeen ? 'bg-gray-50/60' : ''}`}
+                  title={algemeen ? 'Algemeen doel: noemt dit woord niet apart.' : undefined}
                 >
-                  {uitgeklapt ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-                  Ook algemeen van toepassing ({algemeen.length})
-                </button>
-                {uitgeklapt && (
-                  <ul className="max-h-44 overflow-y-auto divide-y divide-gray-100 bg-gray-50/60">
-                    {algemeen.map((r) => (
-                      <li key={r.code} className="px-4 py-2 text-sm flex gap-3">
-                        <span className="font-semibold shrink-0 text-gray-400">{r.code}</span>
-                        <span className="text-gray-500">{r.omschrijving}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
-          </>
+                  <span className={`font-semibold shrink-0 ${algemeen ? 'text-gray-400' : accent}`}>
+                    {r.code}
+                  </span>
+                  <span className={algemeen ? 'text-gray-400' : 'text-gray-600'}>{r.omschrijving}</span>
+                </li>
+              );
+            })}
+          </ul>
         )}
       </div>
     );
