@@ -203,6 +203,31 @@ export default function WeekCalendarView({
                 </div>
               )}
 
+              {/*
+                Zonder dagindeling was een lege dag helemaal niet aanklikbaar:
+                de zones "voor school" en "na school" verschijnen alleen als er
+                al een les staat. Daarom hier een band per uur, zodat je overal
+                een les kan beginnen. Zodra er wel blokken zijn, nemen die het
+                over. Geen z-index, zodat lessen erboven klikbaar blijven.
+              */}
+              {dayTemplateBlocks.length === 0 &&
+                timeMarkers.slice(0, -1).map((marker) => {
+                  const markerMinutes = timeToMinutes(marker.time);
+                  const topPosition = (markerMinutes - startMinutes) * PIXELS_PER_MINUTE;
+                  return (
+                    <div
+                      key={`uur-${marker.time}`}
+                      className="absolute w-full cursor-pointer hover:bg-blue-50/60 transition-colors group border-t border-transparent"
+                      style={{ top: `${topPosition}px`, height: `${60 * PIXELS_PER_MINUTE}px` }}
+                      onClick={() => onSlotClick(date, marker.time)}
+                    >
+                      <div className="absolute inset-0 flex items-center justify-center text-xs text-deep-purple font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
+                        + Les om {marker.display}
+                      </div>
+                    </div>
+                  );
+                })}
+
               {dayTemplateBlocks.map((block) => {
                 const blockStartMinutes = timeToMinutes(block.start_time);
                 const topPosition = (blockStartMinutes - startMinutes) * PIXELS_PER_MINUTE;
