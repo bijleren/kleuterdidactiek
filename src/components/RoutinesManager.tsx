@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import DoelChips from './DoelChips';
 import { supabase } from '../lib/supabase';
 import DoelSelector from './DoelSelector';
 import { RefreshCw, Plus, Pencil, Trash2, Search, Clock, Settings } from 'lucide-react';
@@ -674,17 +675,8 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
                 </p>
 
                 {routine.goal_codes.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {routine.goal_codes.slice(0, 4).map((code) => (
-                      <span key={code} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
-                        {code}
-                      </span>
-                    ))}
-                    {routine.goal_codes.length > 4 && (
-                      <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium">
-                        +{routine.goal_codes.length - 4}
-                      </span>
-                    )}
+                  <div className="mb-3">
+                    <DoelChips codes={routine.goal_codes} max={4} klein />
                   </div>
                 )}
 

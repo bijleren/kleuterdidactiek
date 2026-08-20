@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import DoelChips from './DoelChips';
 import { supabase } from '../lib/supabase';
 import DoelSelector from './DoelSelector';
 import { Search, Plus, CreditCard as Edit, Trash2, X, Clock, Calendar, Check, Copy, Palette, BookOpen, Blocks, Hammer, Scissors, Home, Wrench, Building2, Puzzle, Drama, Rainbow, Music, Paintbrush, LayoutGrid as Layout, Users, Upload } from 'lucide-react';
@@ -901,20 +902,8 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
                   )}
 
                   {preset.goal_codes && preset.goal_codes.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {preset.goal_codes.slice(0, 3).map((code) => (
-                        <span
-                          key={code}
-                          className="text-xs px-2 py-1 bg-sky-blue/10 text-sky-blue rounded-full"
-                        >
-                          {code}
-                        </span>
-                      ))}
-                      {preset.goal_codes.length > 3 && (
-                        <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
-                          +{preset.goal_codes.length - 3}
-                        </span>
-                      )}
+                    <div className="mb-3">
+                      <DoelChips codes={preset.goal_codes} max={3} klein />
                     </div>
                   )}
 

@@ -120,47 +120,70 @@ export interface DoelLabel {
 */
 const labelCache = new Map<string, DoelLabel>();
 
+/*
+  Een lijstweergave rendert al snel tientallen chipsets tegelijk. Zonder
+  bundeling stuurt elke chipset zijn eigen query de deur uit. Codes die in
+  dezelfde tick gevraagd worden, gaan daarom samen in één verzoek.
+*/
+let wachtrij = new Set<string>();
+let lopend: Promise<void> | null = null;
+
+async function haalOntbrekende(): Promise<void> {
+  const codes = [...wachtrij];
+  wachtrij = new Set();
+  if (codes.length === 0) return;
+
+  const [minimumRes, leerplanRes] = await Promise.all([
+    supabase.from('educational_goals').select('code, title, description').in('code', codes),
+    supabase.from('leerplandoelen').select('doelnummer, omschrijving, net_code').in('doelnummer', codes),
+  ]);
+
+  for (const r of (minimumRes.data ?? []) as unknown as {
+    code: string; title: string | null; description: string | null;
+  }[]) {
+    labelCache.set(r.code, {
+      code: r.code,
+      soort: 'minimumdoel',
+      omschrijving: r.description || r.title || r.code,
+    });
+  }
+  for (const r of (leerplanRes.data ?? []) as unknown as {
+    doelnummer: string; omschrijving: string; net_code: NetCode;
+  }[]) {
+    labelCache.set(r.doelnummer, {
+      code: r.doelnummer,
+      soort: 'leerplandoel',
+      omschrijving: r.omschrijving,
+      net: r.net_code,
+    });
+  }
+  // Codes die nergens (meer) bestaan: onthouden als onbekend, niet blijven zoeken.
+  for (const c of codes) {
+    if (!labelCache.has(c)) {
+      labelCache.set(c, { code: c, soort: 'minimumdoel', omschrijving: c });
+    }
+  }
+}
+
 export async function loadDoelLabels(codes: string[]): Promise<Map<string, DoelLabel>> {
   const uniek = [...new Set(codes.filter(Boolean))];
-  const ontbreekt = uniek.filter((c) => !labelCache.has(c));
 
-  if (ontbreekt.length > 0) {
-    const [minimumRes, leerplanRes] = await Promise.all([
-      supabase
-        .from('educational_goals')
-        .select('code, title, description')
-        .in('code', ontbreekt),
-      supabase
-        .from('leerplandoelen')
-        .select('doelnummer, omschrijving, net_code')
-        .in('doelnummer', ontbreekt),
-    ]);
-
-    for (const r of (minimumRes.data ?? []) as unknown as {
-      code: string; title: string | null; description: string | null;
-    }[]) {
-      labelCache.set(r.code, {
-        code: r.code,
-        soort: 'minimumdoel',
-        omschrijving: r.description || r.title || r.code,
-      });
+  /*
+    Blijven wachten tot elke code beslist is. Een code die nergens bestaat
+    wordt door haalOntbrekende als onbekend in de cache gezet, dus de lus
+    eindigt altijd.
+  */
+  while (uniek.some((c) => !labelCache.has(c))) {
+    uniek.filter((c) => !labelCache.has(c)).forEach((c) => wachtrij.add(c));
+    if (!lopend) {
+      // Microtask: alles wat in deze tick nog binnenkomt, reist mee.
+      lopend = Promise.resolve()
+        .then(haalOntbrekende)
+        .finally(() => {
+          lopend = null;
+        });
     }
-    for (const r of (leerplanRes.data ?? []) as unknown as {
-      doelnummer: string; omschrijving: string; net_code: NetCode;
-    }[]) {
-      labelCache.set(r.doelnummer, {
-        code: r.doelnummer,
-        soort: 'leerplandoel',
-        omschrijving: r.omschrijving,
-        net: r.net_code,
-      });
-    }
-    // Codes die nergens (meer) bestaan: onthouden als onbekend, niet blijven zoeken.
-    for (const c of ontbreekt) {
-      if (!labelCache.has(c)) {
-        labelCache.set(c, { code: c, soort: 'minimumdoel', omschrijving: c });
-      }
-    }
+    await lopend;
   }
 
   return new Map(uniek.map((c) => [c, labelCache.get(c)!]));

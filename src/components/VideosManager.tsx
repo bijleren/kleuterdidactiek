@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import DoelChips from './DoelChips';
 import { supabase } from '../lib/supabase';
 import DoelSelector from './DoelSelector';
 import { Video, Plus, Play, CheckCircle, Trash2, X, Search, CreditCard as Edit } from 'lucide-react';
@@ -565,20 +566,8 @@ export default function VideosManager({ groupId, schoolId: propSchoolId, goalFil
                   )}
 
                   {video.goal_codes && video.goal_codes.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {video.goal_codes.slice(0, 3).map((code) => (
-                        <span
-                          key={code}
-                          className="text-xs px-2 py-1 bg-sky-blue/10 text-sky-blue rounded-full"
-                        >
-                          {code}
-                        </span>
-                      ))}
-                      {video.goal_codes.length > 3 && (
-                        <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
-                          +{video.goal_codes.length - 3}
-                        </span>
-                      )}
+                    <div className="mb-2">
+                      <DoelChips codes={video.goal_codes} max={3} klein />
                     </div>
                   )}
 
@@ -916,16 +905,7 @@ export default function VideosManager({ groupId, schoolId: propSchoolId, goalFil
             {selectedVideo.goal_codes && selectedVideo.goal_codes.length > 0 && (
               <div className="mb-4">
                 <h4 className="text-sm font-semibold text-gray-700 mb-2">Gekoppelde doelen:</h4>
-                <div className="flex flex-wrap gap-2">
-                  {selectedVideo.goal_codes.map((code) => (
-                    <span
-                      key={code}
-                      className="px-3 py-1 bg-sky-blue/10 text-sky-blue rounded-full text-sm font-semibold"
-                    >
-                      {code}
-                    </span>
-                  ))}
-                </div>
+                <DoelChips codes={selectedVideo.goal_codes} />
               </div>
             )}
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import DoelChips from './DoelChips';
 import { Clock, Calendar, Palette, BookOpen, Blocks, Hammer, Scissors, Home, Wrench, Building2, Puzzle, Drama, Rainbow, Music, Paintbrush } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getActivityIcon } from '../lib/activityIcons';
@@ -201,20 +202,8 @@ export default function CurrentLessonActivityBoard({ groupId, schoolId }: Curren
                   )}
 
                   {preset.goal_codes && preset.goal_codes.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {preset.goal_codes.slice(0, 3).map((code) => (
-                        <span
-                          key={code}
-                          className="text-xs px-2 py-1 bg-sky-blue/10 text-sky-blue rounded-full"
-                        >
-                          {code}
-                        </span>
-                      ))}
-                      {preset.goal_codes.length > 3 && (
-                        <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
-                          +{preset.goal_codes.length - 3}
-                        </span>
-                      )}
+                    <div className="mb-2">
+                      <DoelChips codes={preset.goal_codes} max={3} klein />
                     </div>
                   )}
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import DoelChips from '../components/DoelChips';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { compareGoalCodes } from '../utils/goalSort';
@@ -798,15 +799,8 @@ export default function AnalyticsPage() {
                         {session.activity_type}
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {session.goal_codes.map((code) => (
-                        <span
-                          key={code}
-                          className="px-3 py-1 bg-lavender/30 text-deep-purple text-xs rounded-full font-semibold"
-                        >
-                          {code}
-                        </span>
-                      ))}
+                    <div className="mb-2">
+                      <DoelChips codes={session.goal_codes} klein />
                     </div>
                     <div className="text-sm text-gray-600">
                       {new Date(session.created_at).toLocaleString('nl-NL', {

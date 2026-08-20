@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import DoelChips from './DoelChips';
 import { supabase } from '../lib/supabase';
 import DoelSelector from './DoelSelector';
 import { BookOpen, Plus, CheckCircle, Trash2, Search, CreditCard as Edit, ExternalLink, FileText, Globe, Book, Upload } from 'lucide-react';
@@ -519,21 +520,7 @@ export default function MaterialsManager({ groupId, schoolId: propSchoolId, goal
 
                 {material.goal_codes && material.goal_codes.length > 0 && (
                   <div className="mb-4">
-                    <div className="flex flex-wrap gap-1">
-                      {material.goal_codes.slice(0, 3).map((code) => (
-                        <span
-                          key={code}
-                          className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium"
-                        >
-                          {code}
-                        </span>
-                      ))}
-                      {material.goal_codes.length > 3 && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium">
-                          +{material.goal_codes.length - 3}
-                        </span>
-                      )}
-                    </div>
+                    <DoelChips codes={material.goal_codes} max={3} klein />
                   </div>
                 )}
 
@@ -781,16 +768,7 @@ export default function MaterialsManager({ groupId, schoolId: propSchoolId, goal
               {selectedMaterial.goal_codes && selectedMaterial.goal_codes.length > 0 && (
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">Gekoppelde doelen</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedMaterial.goal_codes.map((code) => (
-                      <span
-                        key={code}
-                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
-                      >
-                        {code}
-                      </span>
-                    ))}
-                  </div>
+                  <DoelChips codes={selectedMaterial.goal_codes} />
                 </div>
               )}
 
