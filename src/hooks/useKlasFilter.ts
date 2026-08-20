@@ -3,9 +3,11 @@ import { useSchool } from '../contexts/SchoolContext';
 import {
   heeftKlasFilter,
   omschrijfKlasFilter,
+  ovsgGroepVoorBand,
   standaardFilter,
   type Leeftijd,
   type NetCode,
+  type OvsgGroep,
 } from '../lib/leerplandoelen';
 
 /*
@@ -28,12 +30,21 @@ export function useKlasFilter() {
   const [net, setNet] = useState<NetCode | 'all'>(klas.net);
   const [leeftijd, setLeeftijd] = useState<Leeftijd | 'all'>(klas.leeftijd);
   const [toonAlles, setToonAlles] = useState(false);
+  /*
+    OVSG deelt fijner in dan de gedeelde banden: instap (2,5) en 1ste
+    kleuterklas (3) vallen allebei in 2,5-4. Alleen bij OVSG is dit in gebruik.
+  */
+  const [ovsgGroep, setOvsgGroep] = useState<OvsgGroep | 'all'>(
+    ovsgGroepVoorBand(klas.leeftijd),
+  );
 
   // Van klas wisselen betekent terug naar het filter van die klas.
   useEffect(() => {
     setNet(klas.net);
     setLeeftijd(klas.leeftijd);
     setToonAlles(false);
+    // Band 2,5-4 kan instap of 1ste kleuterklas zijn; dan kiezen we niet voor.
+    setOvsgGroep(ovsgGroepVoorBand(klas.leeftijd));
   }, [klas.net, klas.leeftijd]);
 
   const kiesNet = useCallback((n: NetCode | 'all') => {
@@ -46,6 +57,13 @@ export function useKlasFilter() {
   const kiesLeeftijd = useCallback((l: Leeftijd | 'all') => {
     setToonAlles(false);
     setLeeftijd(l);
+    setOvsgGroep(ovsgGroepVoorBand(l));
+  }, []);
+
+  /* Kiest een OVSG-leerjaar; de gedeelde band volgt eruit. */
+  const kiesOvsgGroep = useCallback((g: OvsgGroep | 'all') => {
+    setToonAlles(false);
+    setOvsgGroep(g);
   }, []);
 
   // Terug naar de klasinstelling zodra het vinkje weer uit gaat.
@@ -68,6 +86,9 @@ export function useKlasFilter() {
     kiesLeeftijd,
     toonAlles,
     setToonAlles: wijzigToonAlles,
+    /** Alleen van toepassing als net === 'OVSG'. */
+    ovsgGroep: toonAlles ? ('all' as const) : ovsgGroep,
+    kiesOvsgGroep,
     /** Levert de klas zelf een filter op? Zo niet, valt er niets open te zetten. */
     klasFilterActief: heeftKlasFilter(klas),
     klasOmschrijving: omschrijfKlasFilter(klas),

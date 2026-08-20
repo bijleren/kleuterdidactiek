@@ -19,6 +19,48 @@ export type Precisie = 'direct' | 'afgeleid';
 export const LEEFTIJDEN: Leeftijd[] = ['2,5-4', '4-5', '5-6'];
 export const NET_CODES: NetCode[] = ['KATH', 'GO', 'OVSG'];
 
+/*
+  OVSG kent elk doel aan precies een leerjaar toe — geen enkel OVSG-doel loopt
+  over meerdere banden, terwijl er bij GO! 153 en bij Katholiek Onderwijs 48
+  doelen zijn die dat wel doen. Daardoor heeft OVSG een niveau meer dan de
+  gedeelde indeling aankan: instap (2,5) en 1ste kleuterklas (3) vallen allebei
+  in de band 2,5-4. Die twee zijn hier weer uit elkaar te halen.
+*/
+export const OVSG_GROEPEN = [
+  'instap (2,5)',
+  '1ste kleuterklas (3)',
+  '2de kleuterklas (4)',
+  '3de kleuterklas (5)',
+] as const;
+export type OvsgGroep = (typeof OVSG_GROEPEN)[number];
+
+export const OVSG_GROEP_LABELS: Record<OvsgGroep, string> = {
+  'instap (2,5)': 'Instap (2,5)',
+  '1ste kleuterklas (3)': '1ste kleuterklas (3)',
+  '2de kleuterklas (4)': '2de kleuterklas (4)',
+  '3de kleuterklas (5)': '3de kleuterklas (5)',
+};
+
+/** In welke gedeelde band valt een OVSG-groep. */
+export const OVSG_GROEP_BAND: Record<OvsgGroep, Leeftijd> = {
+  'instap (2,5)': '2,5-4',
+  '1ste kleuterklas (3)': '2,5-4',
+  '2de kleuterklas (4)': '4-5',
+  '3de kleuterklas (5)': '5-6',
+};
+
+/**
+ * De OVSG-groep die bij een band hoort, als die eenduidig is.
+ *
+ * Bij 2,5-4 kan het instap of 1ste kleuterklas zijn; dan valt er niets voor te
+ * kiezen en blijven allebei staan.
+ */
+export function ovsgGroepVoorBand(band: Leeftijd | 'all'): OvsgGroep | 'all' {
+  if (band === '4-5') return '2de kleuterklas (4)';
+  if (band === '5-6') return '3de kleuterklas (5)';
+  return 'all';
+}
+
 export const NET_LABELS: Record<NetCode, string> = {
   KATH: 'Katholiek Onderwijs',
   GO: 'GO!',
@@ -322,7 +364,8 @@ interface LeerplandoelRow {
  */
 export async function loadLeerplandoelen(
   net: NetCode,
-  leeftijd: Leeftijd | 'all'
+  leeftijd: Leeftijd | 'all',
+  ovsgGroep: OvsgGroep | 'all' = 'all'
 ): Promise<Leerplandoel[]> {
   const bouw = () => {
     let q = supabase
@@ -331,7 +374,13 @@ export async function loadLeerplandoelen(
         'id, doelnummer, doelnummers, omschrijving, path, path_labels, leeftijd_25_4, leeftijd_4_5, leeftijd_5_6, bron_volgorde, extra'
       )
       .eq('net_code', net);
-    if (leeftijd === '2,5-4') q = q.eq('leeftijd_25_4', true);
+    /*
+      Bij OVSG filteren we op hun eigen leerjaar in plaats van op de gedeelde
+      band: dat is fijnmaziger en bij OVSG altijd eenduidig.
+    */
+    if (net === 'OVSG' && ovsgGroep !== 'all') {
+      q = q.eq('extra->>leeftijdsgroep', ovsgGroep);
+    } else if (leeftijd === '2,5-4') q = q.eq('leeftijd_25_4', true);
     else if (leeftijd === '4-5') q = q.eq('leeftijd_4_5', true);
     else if (leeftijd === '5-6') q = q.eq('leeftijd_5_6', true);
     return q.order('bron_volgorde', { ascending: true }) as never;

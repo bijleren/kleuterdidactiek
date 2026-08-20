@@ -2,8 +2,11 @@ import {
   LEEFTIJDEN,
   NET_CODES,
   NET_LABELS,
+  OVSG_GROEPEN,
+  OVSG_GROEP_LABELS,
   type Leeftijd,
   type NetCode,
+  type OvsgGroep,
 } from '../lib/leerplandoelen';
 
 interface NetLeeftijdFilterProps {
@@ -26,6 +29,12 @@ interface NetLeeftijdFilterProps {
    * niets om te tonen — een leerplandoel hoort altijd bij een net.
    */
   netVerplicht?: boolean;
+  /**
+   * OVSG deelt fijner in dan de gedeelde banden. Geef deze twee mee en bij
+   * OVSG verschijnen vier leerjaren in plaats van drie banden.
+   */
+  ovsgGroep?: OvsgGroep | 'all';
+  onOvsgGroepChange?: (groep: OvsgGroep | 'all') => void;
 }
 
 /**
@@ -43,6 +52,8 @@ export default function NetLeeftijdFilter({
   klasFilterActief = false,
   klasOmschrijving,
   netVerplicht = false,
+  ovsgGroep = 'all',
+  onOvsgGroepChange,
 }: NetLeeftijdFilterProps) {
   const knop = (actief: boolean) =>
     `px-4 py-2 rounded-full text-sm font-semibold transition-all ${
@@ -98,25 +109,51 @@ export default function NetLeeftijdFilter({
         ))}
       </div>
 
-      {net !== 'all' && (
+      {/*
+        OVSG kent elk doel aan precies een leerjaar toe en heeft er vier waar de
+        gedeelde indeling er drie kent: instap (2,5) en 1ste kleuterklas (3)
+        vallen allebei in 2,5-4. Bij OVSG tonen we daarom hun eigen leerjaren.
+      */}
+      {net === 'OVSG' && onOvsgGroepChange ? (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-gray-500 w-20">Leeftijd</span>
+          <span className="text-xs font-semibold text-gray-500 w-20">Leerjaar</span>
           <button
-            className={knop(leeftijd === 'all')}
-            onClick={() => onLeeftijdChange('all')}
+            className={knop(ovsgGroep === 'all')}
+            onClick={() => onOvsgGroepChange('all')}
           >
             Alle
           </button>
-          {LEEFTIJDEN.map((l) => (
+          {OVSG_GROEPEN.map((g) => (
             <button
-              key={l}
-              className={knop(leeftijd === l)}
-              onClick={() => onLeeftijdChange(l)}
+              key={g}
+              className={knop(ovsgGroep === g)}
+              onClick={() => onOvsgGroepChange(g)}
             >
-              {l} jaar
+              {OVSG_GROEP_LABELS[g]}
             </button>
           ))}
         </div>
+      ) : (
+        net !== 'all' && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-gray-500 w-20">Leeftijd</span>
+            <button
+              className={knop(leeftijd === 'all')}
+              onClick={() => onLeeftijdChange('all')}
+            >
+              Alle
+            </button>
+            {LEEFTIJDEN.map((l) => (
+              <button
+                key={l}
+                className={knop(leeftijd === l)}
+                onClick={() => onLeeftijdChange(l)}
+              >
+                {l} jaar
+              </button>
+            ))}
+          </div>
+        )
       )}
 
       {net !== 'all' && (

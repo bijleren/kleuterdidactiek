@@ -41,6 +41,8 @@ export default function LeerplandoelenOverzicht({ groupId }: Props) {
     leeftijd: leeftijdFilter,
     kiesNet,
     kiesLeeftijd,
+    ovsgGroep,
+    kiesOvsgGroep,
     toonAlles,
     setToonAlles,
     klasFilterActief,
@@ -69,7 +71,7 @@ export default function LeerplandoelenOverzicht({ groupId }: Props) {
       return;
     }
     setLaden(true);
-    loadLeerplandoelen(netFilter, leeftijdFilter).then((d) => {
+    loadLeerplandoelen(netFilter, leeftijdFilter, ovsgGroep).then((d) => {
       if (!afgebroken) {
         setDoelen(d);
         setLaden(false);
@@ -78,7 +80,7 @@ export default function LeerplandoelenOverzicht({ groupId }: Props) {
     return () => {
       afgebroken = true;
     };
-  }, [netFilter, leeftijdFilter]);
+  }, [netFilter, leeftijdFilter, ovsgGroep]);
 
   const laadVoortgang = useCallback(async () => {
     const [{ data: prog, error: pErr }, { data: sess, error: sErr }] = await Promise.all([
@@ -255,6 +257,8 @@ export default function LeerplandoelenOverzicht({ groupId }: Props) {
 
         <NetLeeftijdFilter
           netVerplicht
+          ovsgGroep={ovsgGroep}
+          onOvsgGroepChange={kiesOvsgGroep}
           toonAlles={toonAlles}
           onToonAllesChange={setToonAlles}
           klasFilterActief={klasFilterActief}
