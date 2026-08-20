@@ -137,8 +137,6 @@ export default function AgendaPage() {
   const [showVocabPicker, setShowVocabPicker] = useState(false);
   const [vocabCategories, setVocabCategories] = useState<any[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [showTimeSlotModal, setShowTimeSlotModal] = useState(false);
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<{ hour: number; lessons: Lesson[] } | null>(null);
   const [formData, setFormData] = useState<LessonFormData>({
     title: '',
     description: '',
@@ -2152,109 +2150,6 @@ export default function AgendaPage() {
         </div>
       </Modal>
 
-      <Modal
-        isOpen={showTimeSlotModal}
-        onClose={() => {
-          setShowTimeSlotModal(false);
-          setSelectedTimeSlot(null);
-        }}
-        title={selectedTimeSlot ? `${selectedTimeSlot.hour.toString().padStart(2, '0')}:00 - Alle lessen` : 'Lessen'}
-      >
-        {selectedTimeSlot && (
-          <div className="space-y-4">
-            <div className="text-sm text-gray-600">
-              {selectedTimeSlot.lessons.length} {selectedTimeSlot.lessons.length === 1 ? 'les' : 'lessen'} om {selectedTimeSlot.hour.toString().padStart(2, '0')}:00
-            </div>
-
-            <div className="max-h-96 overflow-y-auto space-y-3">
-              {selectedTimeSlot.lessons.map((lesson) => (
-                <div
-                  key={lesson.id}
-                  className="bg-cream rounded-xl p-4 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <h3 className="font-baloo text-lg text-deep-purple">{lesson.title}</h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                        <Clock className="w-4 h-4" />
-                        <span>
-                          {new Date(lesson.start_time).toLocaleTimeString('nl-NL', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                          {' - '}
-                          {new Date(lesson.end_time).toLocaleTimeString('nl-NL', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setShowTimeSlotModal(false);
-                          viewLessonDetails(lesson);
-                        }}
-                        className="p-2 text-deep-purple hover:bg-white rounded-lg transition-colors"
-                        title="Bekijk details"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowTimeSlotModal(false);
-                          openEditModal(lesson);
-                        }}
-                        className="p-2 text-sky-blue hover:bg-white rounded-lg transition-colors"
-                        title="Bewerk les"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {lesson.description && (
-                    <p className="text-sm text-gray-600 mb-3">{lesson.description}</p>
-                  )}
-
-                  {lesson.items && lesson.items.length > 0 && (
-                    <div>
-                      <h4 className="text-xs font-semibold text-gray-700 mb-2">Lesonderdelen</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {lesson.items.map((item, idx) => {
-                          const Icon = itemTypeIcons[item.item_type];
-                          return (
-                            <div
-                              key={idx}
-                              className={`flex items-center gap-1 px-2 py-1 rounded-lg ${itemTypeColors[item.item_type]} text-white text-xs`}
-                            >
-                              <Icon className="w-3 h-3" />
-                              <span>{item.item_name}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-3 pt-4 border-t">
-              <button
-                onClick={() => {
-                  setShowTimeSlotModal(false);
-                  setSelectedTimeSlot(null);
-                }}
-                className="flex-1 px-4 py-2 bg-deep-purple text-white rounded-lg hover:bg-opacity-90 transition-colors"
-              >
-                Sluiten
-              </button>
-            </div>
-          </div>
-        )}
-      </Modal>
 
       <Modal
         isOpen={showDeleteModal}
