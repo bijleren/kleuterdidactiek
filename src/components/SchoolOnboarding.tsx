@@ -22,6 +22,7 @@ export default function SchoolOnboarding({ onComplete }: SchoolOnboardingProps) 
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
   const [postalCode, setPostalCode] = useState('');
+  const [netCode, setNetCode] = useState('');
   const [generatedCode, setGeneratedCode] = useState('');
 
   const generateSchoolCode = () =>
@@ -85,6 +86,7 @@ export default function SchoolOnboarding({ onComplete }: SchoolOnboardingProps) 
           address: address || null,
           city: city || null,
           postal_code: postalCode || null,
+          net_code: netCode || null,
           created_by: user.id,
         })
         .select()
@@ -295,6 +297,27 @@ export default function SchoolOnboarding({ onComplete }: SchoolOnboardingProps) 
                     className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-grass-green focus:outline-none transition-colors"
                     placeholder="Schoolstraat 123"
                   />
+                </div>
+
+                <div>
+                  <label htmlFor="netCode" className="block text-sm font-semibold text-gray-700 mb-2">
+                    Onderwijsnet (optioneel)
+                  </label>
+                  <select
+                    id="netCode"
+                    value={netCode}
+                    onChange={(e) => setNetCode(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-grass-green focus:outline-none transition-colors"
+                  >
+                    <option value="">Niet opgegeven — toon alle doelen</option>
+                    <option value="KATH">Katholiek Onderwijs Vlaanderen</option>
+                    <option value="GO">GO! onderwijs</option>
+                    <option value="OVSG">OVSG</option>
+                  </select>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Hiermee zien je collega's standaard de leerplandoelen van jullie net. Laat je dit
+                    leeg, dan blijven alle doelen zichtbaar. Je kan het later nog aanpassen.
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

@@ -7,13 +7,10 @@ import WeekBalk from './WeekBalk';
 import { SCHOOLJAAR_EIND, SCHOOLJAAR_START } from '../utils/schooljaar';
 import {
   NET_LABELS,
-  bewaarFilter,
-  leesNetEnLeeftijd,
   loadLeerplandoelen,
-  type Leeftijd,
   type Leerplandoel,
-  type NetCode,
 } from '../lib/leerplandoelen';
+import { useKlasFilter } from '../hooks/useKlasFilter';
 
 interface Props {
   groupId: string;
@@ -37,10 +34,16 @@ type Weergave = 'alle' | 'gewerkt' | 'niet' | 'geenoefenvorm';
  */
 export default function LeerplandoelenOverzicht({ groupId }: Props) {
   const navigate = useNavigate();
-  const [netFilter, setNetFilter] = useState<NetCode | 'all'>(() => leesNetEnLeeftijd().net);
-  const [leeftijdFilter, setLeeftijdFilter] = useState<Leeftijd | 'all'>(
-    () => leesNetEnLeeftijd().leeftijd
-  );
+  const {
+    net: netFilter,
+    leeftijd: leeftijdFilter,
+    kiesNet,
+    kiesLeeftijd,
+    toonAlles,
+    setToonAlles,
+    klasFilterActief,
+    klasOmschrijving,
+  } = useKlasFilter();
   const [doelen, setDoelen] = useState<Leerplandoel[]>([]);
   const [voortgang, setVoortgang] = useState<Map<string, Voortgang>>(new Map());
   /** Per minimumdoelcode: in welke didactische weken er aan gewerkt is. */
@@ -56,19 +59,6 @@ export default function LeerplandoelenOverzicht({ groupId }: Props) {
    * renderen. De teller per vak staat wel meteen in de kop.
    */
   const [open, setOpen] = useState<Set<string>>(new Set());
-
-  const kiesNet = (n: NetCode | 'all') => {
-    setNetFilter(n);
-    bewaarFilter('kd.netFilter', n);
-    if (n === 'all') {
-      setLeeftijdFilter('all');
-      bewaarFilter('kd.leeftijdFilter', 'all');
-    }
-  };
-  const kiesLeeftijd = (l: Leeftijd | 'all') => {
-    setLeeftijdFilter(l);
-    bewaarFilter('kd.leeftijdFilter', l);
-  };
 
   useEffect(() => {
     let afgebroken = false;
@@ -262,6 +252,10 @@ export default function LeerplandoelenOverzicht({ groupId }: Props) {
         </p>
 
         <NetLeeftijdFilter
+          toonAlles={toonAlles}
+          onToonAllesChange={setToonAlles}
+          klasFilterActief={klasFilterActief}
+          klasOmschrijving={klasOmschrijving}
           net={netFilter}
           leeftijd={leeftijdFilter}
           onNetChange={kiesNet}

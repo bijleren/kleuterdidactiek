@@ -23,6 +23,7 @@ export default function CreateGroupModal({
   const [formData, setFormData] = useState({
     name: '',
     grade_level: '',
+    leeftijdsgroep: '',
     description: '',
     school_year: new Date().getFullYear() + '-' + (new Date().getFullYear() + 1),
   });
@@ -74,6 +75,7 @@ export default function CreateGroupModal({
           school_id: schoolId,
           name: formData.name.trim(),
           grade_level: formData.grade_level.trim() || null,
+          leeftijdsgroep: formData.leeftijdsgroep || null,
           description: formData.description.trim() || null,
           school_year: formData.school_year.trim() || null,
           is_active: true,
@@ -149,6 +151,27 @@ export default function CreateGroupModal({
                   placeholder="Bijv. K1, K2, K3"
                   className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-grass-green focus:outline-none"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Leeftijdsgroep
+                </label>
+                <select
+                  value={formData.leeftijdsgroep}
+                  onChange={(e) =>
+                    setFormData({ ...formData, leeftijdsgroep: e.target.value })
+                  }
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-grass-green focus:outline-none"
+                >
+                  <option value="">Niet opgegeven — toon alle doelen</option>
+                  <option value="2,5-4">Instap en 1ste kleuterklas (2,5-4 jaar)</option>
+                  <option value="4-5">2de kleuterklas (4-5 jaar)</option>
+                  <option value="5-6">3de kleuterklas (5-6 jaar)</option>
+                </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  Bepaalt welke leerplandoelen je standaard ziet. Je kan altijd alle doelen tonen.
+                </p>
               </div>
 
               <div>

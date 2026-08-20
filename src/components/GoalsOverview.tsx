@@ -9,14 +9,11 @@ import NetLeeftijdFilter from './NetLeeftijdFilter';
 import { DoelNetBadges } from './NetBadges';
 import {
   NET_CODES,
-  bewaarFilter,
-  leesNetEnLeeftijd,
   loadDoelNetInfo,
   voldoetAanNetLeeftijd,
   type DoelNetInfo,
-  type Leeftijd,
-  type NetCode,
 } from '../lib/leerplandoelen';
+import { useKlasFilter } from '../hooks/useKlasFilter';
 
 interface GoalsOverviewProps {
   groupId: string;
@@ -110,19 +107,16 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
   const timelineRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [contentCounts, setContentCounts] = useState<Map<string, ContentCounts>>(new Map());
   const [doelNetInfo, setDoelNetInfo] = useState<Map<string, DoelNetInfo>>(new Map());
-  const [netFilter, setNetFilter] = useState<NetCode | 'all'>(() => leesNetEnLeeftijd().net);
-  const [leeftijdFilter, setLeeftijdFilter] = useState<Leeftijd | 'all'>(
-    () => leesNetEnLeeftijd().leeftijd
-  );
-
-  const kiesNet = (n: NetCode | 'all') => {
-    setNetFilter(n);
-    bewaarFilter('kd.netFilter', n);
-  };
-  const kiesLeeftijd = (l: Leeftijd | 'all') => {
-    setLeeftijdFilter(l);
-    bewaarFilter('kd.leeftijdFilter', l);
-  };
+  const {
+    net: netFilter,
+    leeftijd: leeftijdFilter,
+    kiesNet,
+    kiesLeeftijd,
+    toonAlles,
+    setToonAlles,
+    klasFilterActief,
+    klasOmschrijving,
+  } = useKlasFilter();
 
   useEffect(() => {
     loadGoals();
@@ -627,6 +621,10 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
 
         <div className="mb-4 pb-4 border-b border-gray-100">
           <NetLeeftijdFilter
+          toonAlles={toonAlles}
+          onToonAllesChange={setToonAlles}
+          klasFilterActief={klasFilterActief}
+          klasOmschrijving={klasOmschrijving}
             net={netFilter}
             leeftijd={leeftijdFilter}
             onNetChange={kiesNet}

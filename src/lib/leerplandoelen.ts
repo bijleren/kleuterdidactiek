@@ -410,36 +410,43 @@ export function voldoetAanNetLeeftijd(
   });
 }
 
-/** Leest een bewaarde filterkeuze uit localStorage, met terugval op een standaard. */
-export function leesFilter<T extends string>(sleutel: string, geldig: readonly T[], standaard: T | 'all'): T | 'all' {
-  try {
-    const v = localStorage.getItem(sleutel);
-    if (v === 'all') return 'all';
-    if (v && (geldig as readonly string[]).includes(v)) return v as T;
-  } catch {
-    /* localStorage kan geblokkeerd zijn; standaard volstaat dan */
-  }
-  return standaard;
+export interface KlasFilter {
+  net: NetCode | 'all';
+  leeftijd: Leeftijd | 'all';
 }
 
 /**
- * Leest de bewaarde filterkeuze van net en leeftijd samen.
+ * De filterstand die bij een klas hoort.
  *
- * Een leeftijdsgroep hoort bij een leerplan, niet bij de minimumdoelen. Staat
- * het net op 'all', dan wordt een bewaarde leeftijd genegeerd: anders zou er
- * een filter actief zijn dat nergens in de interface zichtbaar is.
+ * Beide velden zijn optioneel: een school die geen net invulde en een klas
+ * zonder leeftijdsband leveren 'all' op, en dus alle doelen. Het is een
+ * kijkfilter, geen beperking.
+ *
+ * Zonder net is er ook geen leeftijd: een leeftijdsband bestaat alleen binnen
+ * een leerplan. De minimumdoelen kennen er geen.
  */
-export function leesNetEnLeeftijd(): { net: NetCode | 'all'; leeftijd: Leeftijd | 'all' } {
-  const net = leesFilter<NetCode>('kd.netFilter', NET_CODES, 'all');
+export function standaardFilter(
+  netCode: string | null | undefined,
+  leeftijdsgroep: string | null | undefined,
+): KlasFilter {
+  const net = (NET_CODES as readonly string[]).includes(netCode ?? '')
+    ? (netCode as NetCode)
+    : 'all';
   const leeftijd =
-    net === 'all' ? 'all' : leesFilter<Leeftijd>('kd.leeftijdFilter', LEEFTIJDEN, 'all');
+    net !== 'all' && (LEEFTIJDEN as readonly string[]).includes(leeftijdsgroep ?? '')
+      ? (leeftijdsgroep as Leeftijd)
+      : 'all';
   return { net, leeftijd };
 }
 
-export function bewaarFilter(sleutel: string, waarde: string): void {
-  try {
-    localStorage.setItem(sleutel, waarde);
-  } catch {
-    /* bewaren is een gemak, geen vereiste */
-  }
+/** Of de klas zelf een filter oplevert; zo niet, is er niets om open te zetten. */
+export function heeftKlasFilter(f: KlasFilter): boolean {
+  return f.net !== 'all' || f.leeftijd !== 'all';
+}
+
+/** Korte omschrijving van de klasinstelling, voor uitleg in de interface. */
+export function omschrijfKlasFilter(f: KlasFilter): string {
+  if (f.net === 'all') return 'alle doelen';
+  const leeftijd = f.leeftijd === 'all' ? 'alle leeftijden' : `${f.leeftijd} jaar`;
+  return `${NET_LABELS[f.net]} · ${leeftijd}`;
 }

@@ -10,13 +10,11 @@ import NetLeeftijdFilter from './NetLeeftijdFilter';
 import { WoordNetBadges } from './NetBadges';
 import {
   NET_CODES,
-  bewaarFilter,
-  leesNetEnLeeftijd,
   loadWoordNetInfo,
-  type Leeftijd,
   type NetCode,
   type WoordNetInfo,
 } from '../lib/leerplandoelen';
+import { useKlasFilter } from '../hooks/useKlasFilter';
 
 interface VocabularyTrackerProps {
   groupId: string;
@@ -116,19 +114,16 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [woordNetInfo, setWoordNetInfo] = useState<Map<string, WoordNetInfo>>(new Map());
-  const [netFilter, setNetFilter] = useState<NetCode | 'all'>(() => leesNetEnLeeftijd().net);
-  const [leeftijdFilter, setLeeftijdFilter] = useState<Leeftijd | 'all'>(
-    () => leesNetEnLeeftijd().leeftijd
-  );
-
-  const kiesNet = (n: NetCode | 'all') => {
-    setNetFilter(n);
-    bewaarFilter('kd.netFilter', n);
-  };
-  const kiesLeeftijd = (l: Leeftijd | 'all') => {
-    setLeeftijdFilter(l);
-    bewaarFilter('kd.leeftijdFilter', l);
-  };
+  const {
+    net: netFilter,
+    leeftijd: leeftijdFilter,
+    kiesNet,
+    kiesLeeftijd,
+    toonAlles,
+    setToonAlles,
+    klasFilterActief,
+    klasOmschrijving,
+  } = useKlasFilter();
   const [toonAlleWoorden, setToonAlleWoorden] = useState(false);
 
   useEffect(() => {
@@ -873,6 +868,10 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
 
         <div className="mt-4 pt-4 border-t border-gray-100">
           <NetLeeftijdFilter
+          toonAlles={toonAlles}
+          onToonAllesChange={setToonAlles}
+          klasFilterActief={klasFilterActief}
+          klasOmschrijving={klasOmschrijving}
             net={netFilter}
             leeftijd={leeftijdFilter}
             onNetChange={kiesNet}

@@ -22,6 +22,7 @@ export interface Database {
           website: string | null
           logo_url: string | null
           premium_school: number
+          net_code: string | null
           created_at: string
           updated_at: string
           created_by: string | null
@@ -39,6 +40,7 @@ export interface Database {
           website?: string | null
           logo_url?: string | null
           premium_school?: number
+          net_code?: string | null
           created_at?: string
           updated_at?: string
           created_by?: string | null
@@ -56,6 +58,7 @@ export interface Database {
           website?: string | null
           logo_url?: string | null
           premium_school?: number
+          net_code?: string | null
           created_at?: string
           updated_at?: string
           created_by?: string | null
@@ -91,6 +94,7 @@ export interface Database {
           school_id: string
           name: string
           grade_level: string | null
+          leeftijdsgroep: string | null
           created_at: string
           updated_at: string
         }
@@ -99,6 +103,7 @@ export interface Database {
           school_id: string
           name: string
           grade_level?: string | null
+          leeftijdsgroep?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -107,6 +112,7 @@ export interface Database {
           school_id?: string
           name?: string
           grade_level?: string | null
+          leeftijdsgroep?: string | null
           created_at?: string
           updated_at?: string
         }

@@ -13,6 +13,13 @@ interface NetLeeftijdFilterProps {
   onLeeftijdChange: (leeftijd: Leeftijd | 'all') => void;
   /** Aantal items dat na filtering overblijft; alleen ter info. */
   aantal?: number;
+  /** Staat het vinkje "alle doelen" aan? */
+  toonAlles?: boolean;
+  onToonAllesChange?: (aan: boolean) => void;
+  /** Levert de klas zelf een filter op? Zonder filter heeft het vinkje geen zin. */
+  klasFilterActief?: boolean;
+  /** Korte omschrijving van de klasinstelling, bv. "GO! · 5-6 jaar". */
+  klasOmschrijving?: string;
 }
 
 /**
@@ -25,6 +32,10 @@ export default function NetLeeftijdFilter({
   onNetChange,
   onLeeftijdChange,
   aantal,
+  toonAlles = false,
+  onToonAllesChange,
+  klasFilterActief = false,
+  klasOmschrijving,
 }: NetLeeftijdFilterProps) {
   const knop = (actief: boolean) =>
     `px-4 py-2 rounded-full text-sm font-semibold transition-all ${
@@ -45,6 +56,25 @@ export default function NetLeeftijdFilter({
 
   return (
     <div className="space-y-3">
+      {klasFilterActief && onToonAllesChange && (
+        <label className="flex items-start gap-2 text-sm text-gray-700 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={toonAlles}
+            onChange={(e) => onToonAllesChange(e.target.checked)}
+            className="mt-0.5 w-4 h-4 rounded border-gray-300 text-deep-purple focus:ring-deep-purple"
+          />
+          <span>
+            Toon alle doelen
+            {klasOmschrijving && (
+              <span className="text-gray-500">
+                {' '}— anders zie je wat bij deze klas hoort ({klasOmschrijving})
+              </span>
+            )}
+          </span>
+        </label>
+      )}
+
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-semibold text-gray-500 w-20">Doelen</span>
         <button className={knop(net === 'all')} onClick={() => kiesNet('all')}>

@@ -10,12 +10,16 @@ interface School {
   name: string;
   school_code?: string;
   premium_school?: number;
+  /** Onderwijsnet van de school; null = niet opgegeven, dan geen netfilter. */
+  net_code?: string | null;
 }
 
 interface Group {
   id: string;
   name: string;
   grade_level?: string | null;
+  /** Leeftijdsband van de klas; null = niet opgegeven, dan geen leeftijdsfilter. */
+  leeftijdsgroep?: string | null;
   school_id: string;
 }
 
@@ -96,7 +100,7 @@ export function SchoolProvider({ children }: { children: ReactNode }) {
       const schoolIds = userSchoolsData.map(us => us.school_id);
       const { data: schoolsData, error: schoolsError } = await supabase
         .from('schools')
-        .select('id, name, school_code, premium_school')
+        .select('id, name, school_code, premium_school, net_code')
         .in('id', schoolIds);
 
       if (schoolsError) {
