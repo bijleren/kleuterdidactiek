@@ -111,6 +111,13 @@ const itemTypeLabels = {
   goal: 'Doel',
 };
 
+/*
+  Standaardduur van een les. Klik je in de agenda, dan krijg je een blok van
+  dit aantal minuten; de begintijd volgt uit waar je klikt, afgerond op vijf
+  minuten.
+*/
+const STANDAARD_LESDUUR_MINUTEN = 50;
+
 export default function AgendaPage() {
   const { selectedGroupId, selectedSchool } = useSchool();
   const { user } = useAuth();
@@ -771,7 +778,7 @@ export default function AgendaPage() {
     }
   };
 
-  const openCreateModal = (date?: Date, hour?: number, templateBlock?: DayTemplateBlock) => {
+  const openCreateModal = (date?: Date, hour?: number, templateBlock?: DayTemplateBlock, minute = 0) => {
     setEditingLesson(null);
     const startTime = date ? new Date(date) : new Date();
 
@@ -791,9 +798,8 @@ export default function AgendaPage() {
         items: [],
       });
     } else if (hour !== undefined) {
-      startTime.setHours(hour, 0, 0, 0);
-      const endTime = new Date(startTime);
-      endTime.setHours(startTime.getHours() + 1, 0, 0, 0);
+      startTime.setHours(hour, minute, 0, 0);
+      const endTime = new Date(startTime.getTime() + STANDAARD_LESDUUR_MINUTEN * 60 * 1000);
 
       setFormData({
         title: '',
@@ -804,8 +810,7 @@ export default function AgendaPage() {
       });
     } else {
       startTime.setHours(9, 0, 0, 0);
-      const endTime = new Date(startTime);
-      endTime.setHours(startTime.getHours() + 1, 0, 0, 0);
+      const endTime = new Date(startTime.getTime() + STANDAARD_LESDUUR_MINUTEN * 60 * 1000);
 
       setFormData({
         title: '',
@@ -1463,7 +1468,7 @@ export default function AgendaPage() {
               }}
               onSlotClick={(date, time, templateBlock) => {
                 const [hours, minutes] = time.split(':');
-                openCreateModal(date, parseInt(hours), templateBlock);
+                openCreateModal(date, parseInt(hours), templateBlock, parseInt(minutes));
               }}
               itemTypeIcons={itemTypeIcons}
               itemTypeColors={itemTypeColors}

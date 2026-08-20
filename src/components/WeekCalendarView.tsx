@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Clock, Plus } from 'lucide-react';
 
 interface Lesson {
@@ -31,6 +32,10 @@ interface WeekCalendarViewProps {
 const PIXELS_PER_MINUTE = 1.5;
 const HOUR_HEIGHT = 60 * PIXELS_PER_MINUTE;
 
+/* Klikken rondt af op een kwartierlijn van vijf minuten; een les duurt standaard 50 minuten. */
+const SNAP_MINUTEN = 5;
+const STANDAARD_LESDUUR = 50;
+
 export default function WeekCalendarView({
   currentWeekStart,
   lessons,
@@ -40,6 +45,9 @@ export default function WeekCalendarView({
   itemTypeIcons,
   itemTypeColors
 }: WeekCalendarViewProps) {
+  /** Waar de muis staat in een lege dag, als minuut sinds middernacht. */
+  const [zweef, setZweef] = useState<{ dag: number; minuut: number } | null>(null);
+
   const timeToMinutes = (timeStr: string): number => {
     const [hours, minutes] = timeStr.split(':').map(Number);
     return hours * 60 + minutes;
@@ -115,6 +123,20 @@ export default function WeekCalendarView({
   const { startTime, firstLessonTime, lastLessonTime } = getTimeSlots();
   const timeMarkers = generateTimeMarkers();
   const startMinutes = timeToMinutes(startTime);
+
+  /* Van pixels naar een minuut op het rooster, afgerond op SNAP_MINUTEN. */
+  const snapMinuut = (offsetY: number): number => {
+    const ruw = startMinutes + offsetY / PIXELS_PER_MINUTE;
+    const afgerond = Math.round(ruw / SNAP_MINUTEN) * SNAP_MINUTEN;
+    const laatste = timeToMinutes('18:00:00') - STANDAARD_LESDUUR;
+    return Math.min(Math.max(afgerond, startMinutes), laatste);
+  };
+
+  const minuutNaarTijd = (m: number): string =>
+    `${Math.floor(m / 60).toString().padStart(2, '0')}:${(m % 60).toString().padStart(2, '0')}:00`;
+
+  const minuutNaarLabel = (m: number): string =>
+    `${Math.floor(m / 60).toString().padStart(2, '0')}:${(m % 60).toString().padStart(2, '0')}`;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-8 gap-0 border border-gray-200 rounded-lg overflow-hidden">
@@ -206,27 +228,38 @@ export default function WeekCalendarView({
               {/*
                 Zonder dagindeling was een lege dag helemaal niet aanklikbaar:
                 de zones "voor school" en "na school" verschijnen alleen als er
-                al een les staat. Daarom hier een band per uur, zodat je overal
-                een les kan beginnen. Zodra er wel blokken zijn, nemen die het
-                over. Geen z-index, zodat lessen erboven klikbaar blijven.
+                al een les staat. Daarom hier een vrij klikvlak over de hele dag,
+                dat afrondt op vijf minuten. Zodra er wel blokken zijn, nemen die
+                het over. Geen z-index, zodat lessen erboven klikbaar blijven.
               */}
-              {dayTemplateBlocks.length === 0 &&
-                timeMarkers.slice(0, -1).map((marker) => {
-                  const markerMinutes = timeToMinutes(marker.time);
-                  const topPosition = (markerMinutes - startMinutes) * PIXELS_PER_MINUTE;
-                  return (
+              {dayTemplateBlocks.length === 0 && (
+                <div
+                  className="absolute inset-0 cursor-pointer group"
+                  onMouseMove={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setZweef({ dag: index, minuut: snapMinuut(e.clientY - rect.top) });
+                  }}
+                  onMouseLeave={() => setZweef((z) => (z?.dag === index ? null : z))}
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    onSlotClick(date, minuutNaarTijd(snapMinuut(e.clientY - rect.top)));
+                  }}
+                >
+                  {zweef?.dag === index && (
                     <div
-                      key={`uur-${marker.time}`}
-                      className="absolute w-full cursor-pointer hover:bg-blue-50/60 transition-colors group border-t border-transparent"
-                      style={{ top: `${topPosition}px`, height: `${60 * PIXELS_PER_MINUTE}px` }}
-                      onClick={() => onSlotClick(date, marker.time)}
+                      className="absolute w-full border-t-2 border-deep-purple/70 bg-deep-purple/5 pointer-events-none"
+                      style={{
+                        top: `${(zweef.minuut - startMinutes) * PIXELS_PER_MINUTE}px`,
+                        height: `${STANDAARD_LESDUUR * PIXELS_PER_MINUTE}px`,
+                      }}
                     >
-                      <div className="absolute inset-0 flex items-center justify-center text-xs text-deep-purple font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
-                        + Les om {marker.display}
-                      </div>
+                      <span className="absolute left-1 top-1 text-[11px] font-semibold text-deep-purple">
+                        + {minuutNaarLabel(zweef.minuut)}
+                      </span>
                     </div>
-                  );
-                })}
+                  )}
+                </div>
+              )}
 
               {dayTemplateBlocks.map((block) => {
                 const blockStartMinutes = timeToMinutes(block.start_time);
