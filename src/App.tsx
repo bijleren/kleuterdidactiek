@@ -2,30 +2,45 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SchoolProvider } from './contexts/SchoolContext';
 import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import Dashboard from './pages/Dashboard';
-import GroupsPage from './pages/GroupsPage';
-import KleuterdoelenPage from './pages/KleuterdoelenPage';
-import AnalyticsPage from './pages/AnalyticsPage';
-import AgendaPage from './pages/AgendaPage';
-import StudentsPage from './pages/StudentsPage';
-import ActiviTijdPage from './pages/ActiviTijdPage';
-import SchoolOnboarding from './components/SchoolOnboarding';
-import OnboardingPage from './pages/OnboardingPage';
-import VoorWiePage from './pages/VoorWiePage';
-import PrijsPage from './pages/PrijsPage';
-import HoeWerktHetPage from './pages/HoeWerktHetPage';
-import WaaromPage from './pages/WaaromPage';
-import ContactPage from './pages/ContactPage';
-import PrivacyPage from './pages/PrivacyPage';
-import TermsPage from './pages/TermsPage';
-import SchoolAnalyticsPage from './pages/SchoolAnalyticsPage';
-import NieuweScholenPage from './pages/NieuweScholenPage';
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { X, Mail } from 'lucide-react';
+
+/*
+  Alleen de landingspagina laadt mee in de eerste bundel; die is voor de meeste
+  bezoekers het eerste scherm. De rest komt per route binnen, zodat een
+  leerkracht die naar Activi-Tijd gaat niet eerst de agenda, de analyses en de
+  marketingpagina's moet downloaden.
+*/
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const GroupsPage = lazy(() => import('./pages/GroupsPage'));
+const KleuterdoelenPage = lazy(() => import('./pages/KleuterdoelenPage'));
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
+const AgendaPage = lazy(() => import('./pages/AgendaPage'));
+const StudentsPage = lazy(() => import('./pages/StudentsPage'));
+const ActiviTijdPage = lazy(() => import('./pages/ActiviTijdPage'));
+const SchoolOnboarding = lazy(() => import('./components/SchoolOnboarding'));
+const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
+const VoorWiePage = lazy(() => import('./pages/VoorWiePage'));
+const PrijsPage = lazy(() => import('./pages/PrijsPage'));
+const HoeWerktHetPage = lazy(() => import('./pages/HoeWerktHetPage'));
+const WaaromPage = lazy(() => import('./pages/WaaromPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const SchoolAnalyticsPage = lazy(() => import('./pages/SchoolAnalyticsPage'));
+const NieuweScholenPage = lazy(() => import('./pages/NieuweScholenPage'));
+
+function PaginaLaadt() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FFF8E7] via-[#FFF5E6] to-[#E8F6F3]">
+      <div className="text-2xl font-baloo text-[#5D5FEF]">Laden...</div>
+    </div>
+  );
+}
 
 function LaunchSignupWidget() {
   const { user, loading } = useAuth();
@@ -106,6 +121,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   return (
     <>
+      <Suspense fallback={<PaginaLaadt />}>
       <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/voor-wie" element={<VoorWiePage />} />
@@ -263,6 +279,7 @@ function AppRoutes() {
         }
       />
     </Routes>
+      </Suspense>
       <LaunchSignupWidget />
     </>
   );
