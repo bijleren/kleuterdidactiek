@@ -16,6 +16,7 @@ import ActivityAnalytics from '../components/ActivityAnalytics';
 import RoutinesManager from '../components/RoutinesManager';
 import LeerdoelActiviteiten from '../components/LeerdoelActiviteiten';
 import LichamelijkeOpvoeding from '../components/LichamelijkeOpvoeding';
+import ThemaOverzicht from '../components/ThemaOverzicht';
 import { supabase } from '../lib/supabase';
 import { useSchool } from '../contexts/SchoolContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -40,7 +41,7 @@ interface ActivityBoard {
   archived_at?: string | null;
 }
 
-type TabType = 'vocabulary' | 'games' | 'writing' | 'videos' | 'materials' | 'tasks' | 'activities' | 'routines' | 'leerdoelactiviteit' | 'bewegen' | 'goals' | null;
+type TabType = 'vocabulary' | 'games' | 'writing' | 'videos' | 'materials' | 'tasks' | 'activities' | 'routines' | 'leerdoelactiviteit' | 'bewegen' | 'thema' | 'goals' | null;
 /** Binnen het doelenscherm: de minimumdoelen van de app, of de leerplandoelen per net. */
 type DoelenWeergave = 'minimum' | 'leerplan';
 
@@ -65,7 +66,7 @@ export default function KleuterdoelenPage() {
 
   useEffect(() => {
     const tabParam = searchParams.get('tab') as TabType;
-    if (tabParam && ['vocabulary', 'games', 'writing', 'videos', 'materials', 'tasks', 'activities', 'routines', 'leerdoelactiviteit', 'bewegen', 'goals'].includes(tabParam)) {
+    if (tabParam && ['vocabulary', 'games', 'writing', 'videos', 'materials', 'tasks', 'activities', 'routines', 'leerdoelactiviteit', 'bewegen', 'thema', 'goals'].includes(tabParam)) {
       setActiveTab(tabParam);
     } else if (location.pathname === '/doelen' || location.pathname === '/leerdoelen') {
       setActiveTab('goals');
@@ -195,6 +196,7 @@ export default function KleuterdoelenPage() {
     { id: 'routines' as TabType, label: 'Routines', icon: '🔄', color: 'bg-blue-500' },
     { id: 'leerdoelactiviteit' as TabType, label: 'Leerdoelactiviteit', icon: '💡', color: 'bg-deep-purple' },
     { id: 'bewegen' as TabType, label: 'Lichamelijke opvoeding', icon: '🤸', color: 'bg-coral-pink' },
+    { id: 'thema' as TabType, label: 'Thema', icon: '🌊', color: 'bg-sky-blue' },
   ];
 
   const tabs = allTabs;
@@ -274,6 +276,7 @@ export default function KleuterdoelenPage() {
           )}
           {activeTab === 'leerdoelactiviteit' && <LeerdoelActiviteiten />}
           {activeTab === 'bewegen' && groupId && <LichamelijkeOpvoeding groupId={groupId} />}
+          {activeTab === 'thema' && <ThemaOverzicht />}
           {activeTab === 'routines' && groupId && group && <RoutinesManager schoolId={group.school_id} groupId={groupId} goalFilter={goalFilter} />}
           {activeTab === 'goals' && groupId && (
             <div className="space-y-6">
