@@ -120,6 +120,8 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
     leeftijd: leeftijdFilter,
     kiesNet,
     kiesLeeftijd,
+    ovsgGroep,
+    kiesOvsgGroep,
     toonAlles,
     setToonAlles,
     klasFilterActief,
@@ -133,18 +135,22 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
 
   /** Hoort dit woord bij het gekozen net en de gekozen leeftijdsgroep? */
   const woordVoldoet = (woord: string): boolean => {
-    if (netFilter === 'all' && leeftijdFilter === 'all') return true;
+    if (netFilter === 'all' && leeftijdFilter === 'all' && ovsgGroep === 'all') return true;
     const info = woordNetInfo.get(woord.toLowerCase());
     if (!info) return false;
     const netten: NetCode[] = netFilter === 'all' ? NET_CODES : [netFilter];
     return netten.some((n) => {
       const per = info.perNet[n];
       if (!per || per.leeftijden.length === 0) return false;
+      /* Bij OVSG filteren we op hun eigen leerjaar in plaats van op de band. */
+      if (n === 'OVSG' && ovsgGroep !== 'all') {
+        return per.ovsgGroepen.includes(ovsgGroep);
+      }
       return leeftijdFilter === 'all' || per.leeftijden.includes(leeftijdFilter);
     });
   };
 
-  const filterActief = netFilter !== 'all' || leeftijdFilter !== 'all';
+  const filterActief = netFilter !== 'all' || leeftijdFilter !== 'all' || ovsgGroep !== 'all';
   const [directVideoUrl, setDirectVideoUrl] = useState('');
   const [directVideoTitle, setDirectVideoTitle] = useState('');
   const [addingVideo, setAddingVideo] = useState(false);
@@ -871,6 +877,8 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
 
         <div className="mt-4 pt-4 border-t border-gray-100">
           <NetLeeftijdFilter
+          ovsgGroep={ovsgGroep}
+          onOvsgGroepChange={kiesOvsgGroep}
           toonAlles={toonAlles}
           onToonAllesChange={setToonAlles}
           klasFilterActief={klasFilterActief}

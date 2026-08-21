@@ -89,7 +89,9 @@ export interface DoelNetInfo {
 /** Per woord: bij welk net en welke leeftijd het hoort, en hoe hard die uitspraak is. */
 export interface WoordNetInfo {
   word: string;
-  perNet: Partial<Record<NetCode, { leeftijden: Leeftijd[]; precisie: Precisie }>>;
+  perNet: Partial<
+    Record<NetCode, { leeftijden: Leeftijd[]; precisie: Precisie; ovsgGroepen: OvsgGroep[] }>
+  >;
 }
 
 /**
@@ -125,6 +127,8 @@ interface WoordRow {
   leeftijd_4_5: boolean;
   leeftijd_5_6: boolean;
   precisie: string;
+  /** Alleen gevuld bij OVSG; die kent zijn doelen aan een leerjaar toe. */
+  ovsg_groepen: string[] | null;
 }
 
 /**
@@ -145,7 +149,7 @@ const PAGINA = 1000;
  * Verhoog CACHE_VERSIE na het herladen van een net, dan halen alle browsers de
  * nieuwe gegevens op in plaats van te wachten tot de bewaartijd verstrijkt.
  */
-const CACHE_VERSIE = 'v1-2026-08-17';
+const CACHE_VERSIE = 'v2-2026-08-21';
 const CACHE_UREN = 24;
 
 function uitCache<T>(sleutel: string): T | null {
@@ -292,7 +296,7 @@ export async function loadWoordNetInfo(): Promise<Map<string, WoordNetInfo>> {
     const uit = await haalAlles<WoordRow>(() =>
       supabase
         .from('v_woord_per_net_en_leeftijd')
-        .select('word, net_code, leeftijd_25_4, leeftijd_4_5, leeftijd_5_6, precisie')
+        .select('word, net_code, leeftijd_25_4, leeftijd_4_5, leeftijd_5_6, precisie, ovsg_groepen')
         .order('word') as never
     );
     if (uit.error) {
@@ -314,6 +318,9 @@ export async function loadWoordNetInfo(): Promise<Map<string, WoordNetInfo>> {
     info.perNet[row.net_code] = {
       leeftijden: leeftijdenVan(row),
       precisie: row.precisie === 'direct' ? 'direct' : 'afgeleid',
+      ovsgGroepen: ((row.ovsg_groepen ?? []) as string[]).filter((g): g is OvsgGroep =>
+        (OVSG_GROEPEN as readonly string[]).includes(g),
+      ),
     };
   }
 
