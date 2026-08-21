@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, BookOpen, Film, Plus, Search, Sparkles, X } from 'lucide-react';
+import { ArrowLeft, BookOpen, Film, Pencil, Plus, Search, Sparkles, Trash2, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useSchool } from '../contexts/SchoolContext';
 import Modal from './Modal';
@@ -46,6 +46,15 @@ export default function ThemaOverzicht() {
   const [fout, setFout] = useState('');
   const [zoek, setZoek] = useState('');
 
+  /*
+    Platformbeheerder, niet schoolbeheerder: is_current_user_admin() kijkt in
+    admin_users op e-mail. Alleen zij mogen de platformthema's aanpassen.
+  */
+  const [isPlatformbeheerder, setIsPlatformbeheerder] = useState(false);
+  const [bewerken, setBewerken] = useState<Thema | null>(null);
+  const [bewerkVorm, setBewerkVorm] = useState({ naam: '', beschrijving: '', emoji: '' });
+  const [teVerwijderen, setTeVerwijderen] = useState<Thema | null>(null);
+
   const [nieuwWoord, setNieuwWoord] = useState('');
   const [toonNieuwThema, setToonNieuwThema] = useState(false);
   const [nieuwThema, setNieuwThema] = useState({ naam: '', beschrijving: '', emoji: '🎨' });
@@ -54,12 +63,14 @@ export default function ThemaOverzicht() {
     setLaden(true);
     setFout('');
     try {
-      const [tRes, wRes] = await Promise.all([
+      const [tRes, wRes, aRes] = await Promise.all([
         supabase.from('themas').select('*').eq('is_actief', true).order('sort_order').order('naam'),
         supabase.from('vocabulary_words').select('word, goal_codes'),
+        supabase.rpc('is_current_user_admin'),
       ]);
       if (tRes.error) throw tRes.error;
       if (wRes.error) throw wRes.error;
+      setIsPlatformbeheerder(aRes.data === true);
 
       const lijst = (tRes.data ?? []) as unknown as Thema[];
       setThemas(lijst);
@@ -109,7 +120,14 @@ export default function ThemaOverzicht() {
     );
   }, [themas, items, zoek]);
 
-  const eigenThema = (t: Thema) => t.school_id !== null && t.school_id === selectedSchool?.id;
+  /*
+    Een leerkracht beheert de thema's van haar eigen school; een
+    platformbeheerder daarnaast ook de thema's zonder school. Zelfde regel als
+    in de RLS, zodat de knoppen niet iets beloven wat de databank weigert.
+  */
+  const magBeheren = (t: Thema) =>
+    (t.school_id !== null && t.school_id === selectedSchool?.id) ||
+    (t.school_id === null && isPlatformbeheerder);
 
   const voegWoordToe = async () => {
     const woord = nieuwWoord.trim();
@@ -151,6 +169,47 @@ export default function ThemaOverzicht() {
     }
   };
 
+  const openBewerken = (t: Thema) => {
+    setBewerken(t);
+    setBewerkVorm({ naam: t.naam, beschrijving: t.beschrijving ?? '', emoji: t.emoji });
+  };
+
+  const bewaarBewerking = async () => {
+    if (!bewerken || !bewerkVorm.naam.trim()) return;
+    try {
+      const wijziging = {
+        naam: bewerkVorm.naam.trim(),
+        beschrijving: bewerkVorm.beschrijving.trim() || null,
+        emoji: bewerkVorm.emoji || '🎨',
+      };
+      const { error } = await supabase.from('themas').update(wijziging as never).eq('id', bewerken.id);
+      if (error) throw error;
+      const bijgewerkt = { ...bewerken, ...wijziging };
+      setThemas((s) => s.map((t) => (t.id === bewerken.id ? bijgewerkt : t)));
+      setGekozen((g) => (g && g.id === bewerken.id ? bijgewerkt : g));
+      setBewerken(null);
+    } catch (e) {
+      console.error('Thema bewaren mislukt', e);
+      setFout('Het thema kon niet bewaard worden.');
+    }
+  };
+
+  const verwijderThema = async () => {
+    if (!teVerwijderen) return;
+    try {
+      // De items verdwijnen mee via on delete cascade.
+      const { error } = await supabase.from('themas').delete().eq('id', teVerwijderen.id);
+      if (error) throw error;
+      setThemas((s) => s.filter((t) => t.id !== teVerwijderen.id));
+      setItems((s) => s.filter((i) => i.thema_id !== teVerwijderen.id));
+      setGekozen((g) => (g && g.id === teVerwijderen.id ? null : g));
+      setTeVerwijderen(null);
+    } catch (e) {
+      console.error('Thema verwijderen mislukt', e);
+      setFout('Het thema kon niet verwijderd worden.');
+    }
+  };
+
   const maakThema = async () => {
     if (!nieuwThema.naam.trim() || !selectedSchool) return;
     try {
@@ -181,7 +240,7 @@ export default function ThemaOverzicht() {
     const woorden = itemsVan(gekozen.id, 'woord');
     const materialen = itemsVan(gekozen.id, 'materiaal');
     const videos = itemsVan(gekozen.id, 'video');
-    const mag = eigenThema(gekozen);
+    const mag = magBeheren(gekozen);
 
     return (
       <div className="space-y-4">
@@ -204,6 +263,22 @@ export default function ThemaOverzicht() {
                 {woorden.length} woorden, {materialen.length} materialen, {videos.length} video&apos;s
               </p>
             </div>
+            {mag && (
+              <div className="flex gap-2 flex-shrink-0">
+                <button
+                  onClick={() => openBewerken(gekozen)}
+                  className="px-3 py-1.5 rounded-full text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors flex items-center gap-1.5"
+                >
+                  <Pencil className="w-3.5 h-3.5" /> Bewerken
+                </button>
+                <button
+                  onClick={() => setTeVerwijderen(gekozen)}
+                  className="px-3 py-1.5 rounded-full text-sm font-semibold bg-red-50 text-red-700 hover:bg-red-100 transition-colors flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Verwijderen
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -321,6 +396,82 @@ export default function ThemaOverzicht() {
             )}
           </div>
         </div>
+
+      <Modal isOpen={bewerken !== null} onClose={() => setBewerken(null)} title="Thema bewerken">
+        <div className="space-y-4">
+          {bewerken?.school_id === null && (
+            <p className="text-xs text-amber-800 bg-amber-50 border-2 border-amber-200 rounded-xl px-3 py-2">
+              Dit is een thema van het platform. Je past het aan voor alle scholen.
+            </p>
+          )}
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={bewerkVorm.emoji}
+              onChange={(e) => setBewerkVorm({ ...bewerkVorm, emoji: e.target.value })}
+              className="w-16 px-3 py-3 rounded-xl border-2 border-gray-200 text-center text-2xl focus:border-deep-purple focus:outline-none"
+              aria-label="Emoji"
+            />
+            <input
+              type="text"
+              value={bewerkVorm.naam}
+              onChange={(e) => setBewerkVorm({ ...bewerkVorm, naam: e.target.value })}
+              placeholder="Naam van het thema"
+              className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-deep-purple focus:outline-none"
+            />
+          </div>
+          <textarea
+            value={bewerkVorm.beschrijving}
+            onChange={(e) => setBewerkVorm({ ...bewerkVorm, beschrijving: e.target.value })}
+            placeholder="Waar gaat dit thema over?"
+            rows={3}
+            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-deep-purple focus:outline-none resize-none"
+          />
+          <div className="flex gap-3">
+            <button
+              onClick={() => setBewerken(null)}
+              className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+            >
+              Annuleren
+            </button>
+            <button
+              onClick={bewaarBewerking}
+              disabled={!bewerkVorm.naam.trim()}
+              className="flex-1 px-4 py-3 rounded-xl bg-deep-purple text-white font-semibold disabled:opacity-40 transition-colors"
+            >
+              Bewaren
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={teVerwijderen !== null} onClose={() => setTeVerwijderen(null)} title="Thema verwijderen?">
+        <div className="space-y-4">
+          <p className="text-sm text-gray-700">
+            <span className="font-semibold">{teVerwijderen?.naam}</span> verdwijnt, samen met alle
+            woorden, materialen en video&apos;s die eraan hangen. Dit kan niet ongedaan gemaakt worden.
+          </p>
+          {teVerwijderen?.school_id === null && (
+            <p className="text-xs text-amber-800 bg-amber-50 border-2 border-amber-200 rounded-xl px-3 py-2">
+              Dit is een thema van het platform. Het verdwijnt voor alle scholen.
+            </p>
+          )}
+          <div className="flex gap-3">
+            <button
+              onClick={() => setTeVerwijderen(null)}
+              className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+            >
+              Annuleren
+            </button>
+            <button
+              onClick={verwijderThema}
+              className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors"
+            >
+              Ja, verwijderen
+            </button>
+          </div>
+        </div>
+      </Modal>
       </div>
     );
   }
@@ -396,6 +547,82 @@ export default function ThemaOverzicht() {
           <p className="text-gray-500">Geen thema&apos;s gevonden.</p>
         </div>
       )}
+
+      <Modal isOpen={bewerken !== null} onClose={() => setBewerken(null)} title="Thema bewerken">
+        <div className="space-y-4">
+          {bewerken?.school_id === null && (
+            <p className="text-xs text-amber-800 bg-amber-50 border-2 border-amber-200 rounded-xl px-3 py-2">
+              Dit is een thema van het platform. Je past het aan voor alle scholen.
+            </p>
+          )}
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={bewerkVorm.emoji}
+              onChange={(e) => setBewerkVorm({ ...bewerkVorm, emoji: e.target.value })}
+              className="w-16 px-3 py-3 rounded-xl border-2 border-gray-200 text-center text-2xl focus:border-deep-purple focus:outline-none"
+              aria-label="Emoji"
+            />
+            <input
+              type="text"
+              value={bewerkVorm.naam}
+              onChange={(e) => setBewerkVorm({ ...bewerkVorm, naam: e.target.value })}
+              placeholder="Naam van het thema"
+              className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-deep-purple focus:outline-none"
+            />
+          </div>
+          <textarea
+            value={bewerkVorm.beschrijving}
+            onChange={(e) => setBewerkVorm({ ...bewerkVorm, beschrijving: e.target.value })}
+            placeholder="Waar gaat dit thema over?"
+            rows={3}
+            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-deep-purple focus:outline-none resize-none"
+          />
+          <div className="flex gap-3">
+            <button
+              onClick={() => setBewerken(null)}
+              className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+            >
+              Annuleren
+            </button>
+            <button
+              onClick={bewaarBewerking}
+              disabled={!bewerkVorm.naam.trim()}
+              className="flex-1 px-4 py-3 rounded-xl bg-deep-purple text-white font-semibold disabled:opacity-40 transition-colors"
+            >
+              Bewaren
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={teVerwijderen !== null} onClose={() => setTeVerwijderen(null)} title="Thema verwijderen?">
+        <div className="space-y-4">
+          <p className="text-sm text-gray-700">
+            <span className="font-semibold">{teVerwijderen?.naam}</span> verdwijnt, samen met alle
+            woorden, materialen en video&apos;s die eraan hangen. Dit kan niet ongedaan gemaakt worden.
+          </p>
+          {teVerwijderen?.school_id === null && (
+            <p className="text-xs text-amber-800 bg-amber-50 border-2 border-amber-200 rounded-xl px-3 py-2">
+              Dit is een thema van het platform. Het verdwijnt voor alle scholen.
+            </p>
+          )}
+          <div className="flex gap-3">
+            <button
+              onClick={() => setTeVerwijderen(null)}
+              className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+            >
+              Annuleren
+            </button>
+            <button
+              onClick={verwijderThema}
+              className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors"
+            >
+              Ja, verwijderen
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal isOpen={toonNieuwThema} onClose={() => setToonNieuwThema(false)} title="Nieuw thema">
         <div className="space-y-4">
