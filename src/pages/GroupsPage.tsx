@@ -99,14 +99,14 @@ export default function GroupsPage() {
           <div className="flex gap-3">
             <button
               onClick={() => setShowStudentManagement(true)}
-              className="bg-gradient-to-r from-sky-blue to-[#B5E9F7] text-white px-6 py-3 rounded-full font-baloo flex items-center gap-2 shadow-lg hover:scale-105 transition-transform"
+              className="bg-sky-blue text-white px-6 py-3 rounded-full font-baloo flex items-center gap-2 shadow-lg hover:scale-105 transition-transform"
             >
               <UserCog className="w-5 h-5" />
               Studenten Beheer
             </button>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white px-6 py-3 rounded-full font-baloo flex items-center gap-2 shadow-lg hover:scale-105 transition-transform"
+              className="bg-grass-green text-white px-6 py-3 rounded-full font-baloo flex items-center gap-2 shadow-lg hover:scale-105 transition-transform"
             >
               <Plus className="w-5 h-5" />
               Nieuwe Groep
@@ -131,7 +131,7 @@ export default function GroupsPage() {
             </p>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white px-8 py-4 rounded-full font-baloo text-xl shadow-lg hover:scale-105 transition-transform"
+              className="bg-grass-green text-white px-8 py-4 rounded-full font-baloo text-xl shadow-lg hover:scale-105 transition-transform"
             >
               <Plus className="w-6 h-6 inline mr-2" />
               Maak Eerste Groep

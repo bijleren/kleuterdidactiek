@@ -709,7 +709,7 @@ export default function ActivityBoardView({ board, onBack, schoolId }: ActivityB
                 <>
                   <button
                     onClick={() => setShowPresetModal(true)}
-                    className="px-4 py-2 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 text-sm"
+                    className="px-4 py-2 bg-sky-blue text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 text-sm"
                   >
                     <Plus className="w-4 h-4" />
                     <span className="hidden sm:inline">Activiteit</span>
@@ -853,7 +853,7 @@ export default function ActivityBoardView({ board, onBack, schoolId }: ActivityB
                 <p className="text-gray-600 mb-4">Voeg activiteiten toe om te beginnen</p>
                 <button
                   onClick={() => setShowPresetModal(true)}
-                  className="px-6 py-3 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white rounded-xl font-semibold hover:scale-105 transition-transform inline-flex items-center gap-2"
+                  className="px-6 py-3 bg-sky-blue text-white rounded-xl font-semibold hover:scale-105 transition-transform inline-flex items-center gap-2"
                 >
                   <Plus className="w-5 h-5" />
                   Eerste Activiteit
@@ -1030,7 +1030,7 @@ export default function ActivityBoardView({ board, onBack, schoolId }: ActivityB
               </button>
               <button
                 onClick={() => handleExtendTime(15)}
-                className="flex-1 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform"
+                className="flex-1 bg-sky-blue text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform"
               >
                 Verleng 15 min
               </button>
@@ -1185,7 +1185,7 @@ export default function ActivityBoardView({ board, onBack, schoolId }: ActivityB
               <button
                 onClick={editingActivity ? handleUpdateActivity : handleCreateActivity}
                 disabled={!activityFormData.name.trim()}
-                className="flex-1 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform disabled:opacity-50"
+                className="flex-1 bg-sky-blue text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform disabled:opacity-50"
               >
                 {editingActivity ? 'Bijwerken' : 'Toevoegen'}
               </button>

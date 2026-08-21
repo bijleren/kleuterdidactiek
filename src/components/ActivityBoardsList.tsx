@@ -440,7 +440,7 @@ export default function ActivityBoardsList({
             {groupId && (
               <button
                 onClick={() => setShowPresetsPage(true)}
-                className="px-4 py-2.5 bg-gradient-to-r from-lavender to-[#E8B4FF] text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm"
+                className="px-4 py-2.5 bg-lavender text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm"
               >
                 <Plus className="w-4 h-4" />
                 Hoeken
@@ -452,7 +452,7 @@ export default function ActivityBoardsList({
                 setAdHocName('');
                 setAdHocDuration(45);
               }}
-              className="px-4 py-2.5 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm"
+              className="px-4 py-2.5 bg-sky-blue text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm"
             >
               <Plus className="w-4 h-4" />
               Leeg Bord
@@ -460,7 +460,7 @@ export default function ActivityBoardsList({
             {groupId && (
               <button
                 onClick={() => setShowScheduleManager(true)}
-                className="px-4 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm"
+                className="px-4 py-2.5 bg-amber-400 text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm"
               >
                 <Calendar className="w-4 h-4" />
                 Roosters
@@ -469,7 +469,7 @@ export default function ActivityBoardsList({
             {groupId && (
               <button
                 onClick={async () => { await loadRulesData(); setShowRulesModal(true); }}
-                className="px-4 py-2.5 bg-gradient-to-r from-deep-purple to-[#8B6CE0] text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm"
+                className="px-4 py-2.5 bg-deep-purple text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm"
               >
                 <Shield className="w-4 h-4" />
                 Regels
@@ -477,7 +477,7 @@ export default function ActivityBoardsList({
             )}
             <button
               onClick={onShowAnalytics}
-              className="px-4 py-2.5 bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm"
+              className="px-4 py-2.5 bg-grass-green text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm"
             >
               <BarChart3 className="w-4 h-4" />
               Analytics
@@ -600,7 +600,7 @@ export default function ActivityBoardsList({
                 setEditingTemplate(null);
                 setShowTemplateBuilder(true);
               }}
-              className="px-5 py-2.5 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white rounded-xl font-semibold text-sm hover:scale-105 transition-transform shadow-md inline-flex items-center gap-2"
+              className="px-5 py-2.5 bg-sky-blue text-white rounded-xl font-semibold text-sm hover:scale-105 transition-transform shadow-md inline-flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
               Eerste template
@@ -668,7 +668,7 @@ export default function ActivityBoardsList({
                     setScheduleDate('');
                     setScheduleTime('');
                   }}
-                  className="w-full px-4 py-2.5 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white rounded-xl font-semibold text-sm hover:scale-[1.02] transition-transform flex items-center justify-center gap-2 shadow-md"
+                  className="w-full px-4 py-2.5 bg-sky-blue text-white rounded-xl font-semibold text-sm hover:scale-[1.02] transition-transform flex items-center justify-center gap-2 shadow-md"
                 >
                   <Play className="w-4 h-4" />
                   Activeren
@@ -814,7 +814,7 @@ export default function ActivityBoardsList({
               <button
                 onClick={handleActivateTemplate}
                 disabled={activateMode === 'schedule' && (!scheduleDate || !scheduleTime)}
-                className="flex-1 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform disabled:opacity-50"
+                className="flex-1 bg-sky-blue text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform disabled:opacity-50"
               >
                 {activateMode === 'now' ? 'Start' : 'Inplannen'}
               </button>
@@ -869,7 +869,7 @@ export default function ActivityBoardsList({
               <button
                 onClick={handleCreateAdHoc}
                 disabled={!adHocName.trim()}
-                className="flex-1 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform disabled:opacity-50"
+                className="flex-1 bg-sky-blue text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform disabled:opacity-50"
               >
                 Start
               </button>
@@ -897,7 +897,7 @@ export default function ActivityBoardsList({
               </button>
               <button
                 onClick={() => handleDeleteTemplate(showDeleteTemplate)}
-                className="flex-1 bg-gradient-to-r from-coral-pink to-[#FF8E8E] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform"
+                className="flex-1 bg-coral-pink text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform"
               >
                 Verwijder
               </button>
@@ -996,7 +996,7 @@ function ActiveBoardCard({
       <div className="flex gap-2">
         <button
           onClick={onOpen}
-          className="flex-1 px-4 py-2.5 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white rounded-xl font-semibold text-sm hover:scale-[1.02] transition-transform flex items-center justify-center gap-1.5"
+          className="flex-1 px-4 py-2.5 bg-sky-blue text-white rounded-xl font-semibold text-sm hover:scale-[1.02] transition-transform flex items-center justify-center gap-1.5"
         >
           <Users className="w-4 h-4" />
           Open

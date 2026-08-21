@@ -155,13 +155,13 @@ export default function GamePlayer({
             <div className="flex gap-4 justify-center">
               <button
                 onClick={handleRestart}
-                className="px-8 py-4 rounded-full font-baloo text-white bg-gradient-to-r from-sky-blue to-[#7EDCD5] hover:scale-105 transition-transform shadow-lg text-lg"
+                className="px-8 py-4 rounded-full font-baloo text-white bg-sky-blue hover:scale-105 transition-transform shadow-lg text-lg"
               >
                 🔄 Opnieuw Spelen
               </button>
               <button
                 onClick={handleClose}
-                className="px-8 py-4 rounded-full font-baloo text-white bg-gradient-to-r from-coral-pink to-[#FF8E8E] hover:scale-105 transition-transform shadow-lg text-lg"
+                className="px-8 py-4 rounded-full font-baloo text-white bg-coral-pink hover:scale-105 transition-transform shadow-lg text-lg"
               >
                 ✓ Sluiten
               </button>

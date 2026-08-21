@@ -529,7 +529,7 @@ export default function AnalyticsPage() {
             </p>
             <a
               href="/dashboard"
-              className="inline-block bg-gradient-to-r from-deep-purple to-lavender text-white px-6 py-3 rounded-full font-baloo hover:scale-105 transition-transform"
+              className="inline-block bg-deep-purple text-white px-6 py-3 rounded-full font-baloo hover:scale-105 transition-transform"
             >
               Ga naar Dashboard
             </a>
@@ -567,7 +567,7 @@ export default function AnalyticsPage() {
             onClick={() => setView('overview')}
             className={`px-6 py-3 rounded-full font-baloo transition-all ${
               view === 'overview'
-                ? 'bg-gradient-to-r from-deep-purple to-lavender text-white'
+                ? 'bg-deep-purple text-white'
                 : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-deep-purple'
             }`}
           >
@@ -577,7 +577,7 @@ export default function AnalyticsPage() {
             onClick={() => setView('goals')}
             className={`px-6 py-3 rounded-full font-baloo transition-all ${
               view === 'goals'
-                ? 'bg-gradient-to-r from-deep-purple to-lavender text-white'
+                ? 'bg-deep-purple text-white'
                 : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-deep-purple'
             }`}
           >
@@ -587,7 +587,7 @@ export default function AnalyticsPage() {
             onClick={() => setView('calendar')}
             className={`px-6 py-3 rounded-full font-baloo transition-all ${
               view === 'calendar'
-                ? 'bg-gradient-to-r from-deep-purple to-lavender text-white'
+                ? 'bg-deep-purple text-white'
                 : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-deep-purple'
             }`}
           >
@@ -691,7 +691,7 @@ export default function AnalyticsPage() {
                 </h3>
                 <button
                   onClick={exportOverview}
-                  className="px-4 py-2 rounded-full bg-gradient-to-r from-grass-green to-[#7DD87D] text-white font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg"
+                  className="px-4 py-2 rounded-full bg-grass-green text-white font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg"
                 >
                   <Download className="w-4 h-4" />
                   Export naar Excel
@@ -770,7 +770,7 @@ export default function AnalyticsPage() {
                 </h3>
                 <button
                   onClick={exportGoals}
-                  className="px-4 py-2 rounded-full bg-gradient-to-r from-grass-green to-[#7DD87D] text-white font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg"
+                  className="px-4 py-2 rounded-full bg-grass-green text-white font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg"
                 >
                   <Download className="w-4 h-4" />
                   Export naar Excel
@@ -833,7 +833,7 @@ export default function AnalyticsPage() {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={exportCalendar}
-                    className="px-4 py-2 rounded-full bg-gradient-to-r from-grass-green to-[#7DD87D] text-white font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg"
+                    className="px-4 py-2 rounded-full bg-grass-green text-white font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg"
                   >
                     <Download className="w-4 h-4" />
                     Export
@@ -995,7 +995,7 @@ export default function AnalyticsPage() {
                 </div>
                 <button
                   onClick={copyGoalsToClipboard}
-                  className="w-full px-6 py-3 bg-gradient-to-r from-deep-purple to-lavender text-white rounded-xl font-baloo hover:scale-[1.02] transition-transform shadow-lg text-lg"
+                  className="w-full px-6 py-3 bg-deep-purple text-white rounded-xl font-baloo hover:scale-[1.02] transition-transform shadow-lg text-lg"
                 >
                   📋 Kopiëren naar Klembord
                 </button>

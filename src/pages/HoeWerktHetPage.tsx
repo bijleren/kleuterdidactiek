@@ -199,7 +199,7 @@ export default function HoeWerktHetPage() {
                 exporteerbare overzichten voor oudergesprekken of zorgteamoverleg.
               </p>
               <div className="flex flex-wrap gap-3">
-                <Link to="/register" className="bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-5 py-2.5 rounded-full font-semibold text-sm hover:scale-105 transition-transform flex items-center gap-2">
+                <Link to="/register" className="bg-sky-blue text-white px-5 py-2.5 rounded-full font-semibold text-sm hover:scale-105 transition-transform flex items-center gap-2">
                   <BookOpen className="w-4 h-4" />
                   Bekijk de woordenschatlijst
                 </Link>

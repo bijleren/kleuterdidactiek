@@ -435,7 +435,7 @@ export default function MaterialsManager({ groupId, schoolId: propSchoolId, goal
               resetForm();
               setShowAddModal(true);
             }}
-            className="px-4 py-2 bg-gradient-to-r from-deep-purple to-[#7B7FFF] text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm whitespace-nowrap"
+            className="px-4 py-2 bg-deep-purple text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
             Nieuw materiaal
@@ -782,7 +782,7 @@ export default function MaterialsManager({ groupId, schoolId: propSchoolId, goal
                 onClick={() => {
                   handleLogPractice(selectedMaterial.id);
                 }}
-                className="w-full px-6 py-3 bg-gradient-to-r from-grass-green to-green-400 text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center justify-center gap-2"
+                className="w-full px-6 py-3 bg-grass-green text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center justify-center gap-2"
               >
                 <CheckCircle className="w-5 h-5" />
                 Gebruikt in de les

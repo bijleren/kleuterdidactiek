@@ -111,7 +111,7 @@ export default function ContactPage() {
                   </p>
                   <button
                     onClick={() => navigate('/')}
-                    className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-blue to-lavender text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-transform"
+                    className="inline-flex items-center gap-2 bg-sky-blue text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-transform"
                   >
                     <Home className="w-5 h-5" />
                     Terug naar homepagina
@@ -211,7 +211,7 @@ export default function ContactPage() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full bg-gradient-to-r from-sky-blue to-lavender text-white px-8 py-4 rounded-2xl font-baloo text-lg hover:scale-105 transition-transform shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    className="w-full bg-sky-blue text-white px-8 py-4 rounded-2xl font-baloo text-lg hover:scale-105 transition-transform shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   >
                     <Send className="w-5 h-5" />
                     {submitting ? 'Versturen...' : 'Verstuur bericht'}

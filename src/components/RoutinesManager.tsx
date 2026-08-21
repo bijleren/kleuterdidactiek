@@ -565,7 +565,7 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
           </div>
           <button
             onClick={openCreateForm}
-            className="px-4 py-2 bg-gradient-to-r from-deep-purple to-[#7B7FFF] text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm whitespace-nowrap"
+            className="px-4 py-2 bg-deep-purple text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
             Nieuwe Routine
@@ -817,7 +817,7 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
             </button>
             <button
               type="submit"
-              className="flex-1 bg-gradient-to-r from-deep-purple to-[#7B7FFF] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform"
+              className="flex-1 bg-deep-purple text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform"
             >
               {editingRoutine ? 'Opslaan' : 'Aanmaken'}
             </button>
@@ -846,7 +846,7 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
             </button>
             <button
               onClick={confirmDelete}
-              className="flex-1 bg-gradient-to-r from-coral-pink to-[#FF8E8E] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform"
+              className="flex-1 bg-coral-pink text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform"
             >
               Verwijderen
             </button>
@@ -1011,7 +1011,7 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
             <button
               type="submit"
               disabled={scheduleForm.day_of_week.length === 0}
-              className="flex-1 bg-gradient-to-r from-deep-purple to-[#7B7FFF] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform disabled:opacity-50"
+              className="flex-1 bg-deep-purple text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform disabled:opacity-50"
             >
               Opslaan
             </button>

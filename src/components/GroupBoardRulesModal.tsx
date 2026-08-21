@@ -293,7 +293,7 @@ export default function GroupBoardRulesModal({ groupId, students, activities, pr
                   <button
                     onClick={addPairRestriction}
                     disabled={!newPairA || !newPairB || savingPair}
-                    className="px-4 py-2 bg-gradient-to-r from-deep-purple to-[#8B6CE0] text-white rounded-xl font-semibold hover:scale-105 transition-transform disabled:opacity-40 disabled:scale-100 flex-shrink-0"
+                    className="px-4 py-2 bg-deep-purple text-white rounded-xl font-semibold hover:scale-105 transition-transform disabled:opacity-40 disabled:scale-100 flex-shrink-0"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -398,7 +398,7 @@ export default function GroupBoardRulesModal({ groupId, students, activities, pr
                       <button
                         onClick={addPresetBlock}
                         disabled={!newBlockPreset || !newBlockStudentAll || savingBlockAll}
-                        className="px-4 py-2 bg-gradient-to-r from-deep-purple to-[#8B6CE0] text-white rounded-xl font-semibold hover:scale-105 transition-transform disabled:opacity-40 disabled:scale-100 flex-shrink-0"
+                        className="px-4 py-2 bg-deep-purple text-white rounded-xl font-semibold hover:scale-105 transition-transform disabled:opacity-40 disabled:scale-100 flex-shrink-0"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
@@ -484,7 +484,7 @@ export default function GroupBoardRulesModal({ groupId, students, activities, pr
                           <button
                             onClick={addActivityBlock}
                             disabled={!newBlockActivity || !newBlockStudent || savingBlock}
-                            className="px-4 py-2 bg-gradient-to-r from-deep-purple to-[#8B6CE0] text-white rounded-xl font-semibold hover:scale-105 transition-transform disabled:opacity-40 disabled:scale-100 flex-shrink-0"
+                            className="px-4 py-2 bg-deep-purple text-white rounded-xl font-semibold hover:scale-105 transition-transform disabled:opacity-40 disabled:scale-100 flex-shrink-0"
                           >
                             <Plus className="w-4 h-4" />
                           </button>

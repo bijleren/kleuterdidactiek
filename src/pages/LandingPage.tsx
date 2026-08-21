@@ -117,7 +117,7 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-wrap gap-4 justify-center mb-12">
-            <Link to="/register" className="bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-8 py-4 rounded-full font-baloo text-lg shadow-xl hover:scale-105 transition-transform flex items-center gap-2">
+            <Link to="/register" className="bg-sky-blue text-white px-8 py-4 rounded-full font-baloo text-lg shadow-xl hover:scale-105 transition-transform flex items-center gap-2">
               Gratis starten
               <ArrowRight className="w-5 h-5" />
             </Link>
@@ -231,7 +231,7 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 <div className="flex flex-wrap gap-3">
-                  <Link to="/register" className="bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-6 py-3 rounded-full font-semibold text-sm hover:scale-105 transition-transform flex items-center gap-2">
+                  <Link to="/register" className="bg-sky-blue text-white px-6 py-3 rounded-full font-semibold text-sm hover:scale-105 transition-transform flex items-center gap-2">
                     <FileText className="w-4 h-4" />
                     Bekijk de online lijst
                   </Link>
@@ -430,7 +430,7 @@ export default function LandingPage() {
             </div>
             <Link
               to="/nieuwe-scholen"
-              className="flex-shrink-0 bg-gradient-to-r from-deep-purple to-[#7B7FFF] text-white px-7 py-3 rounded-full font-baloo text-base shadow-lg hover:scale-105 transition-transform flex items-center gap-2 whitespace-nowrap"
+              className="flex-shrink-0 bg-deep-purple text-white px-7 py-3 rounded-full font-baloo text-base shadow-lg hover:scale-105 transition-transform flex items-center gap-2 whitespace-nowrap"
             >
               Meer info
               <ArrowRight className="w-4 h-4" />

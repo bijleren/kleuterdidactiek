@@ -504,7 +504,7 @@ export default function SchoolAnalyticsPage() {
               }}
               className={`px-6 py-3 rounded-full font-baloo transition-all ${
                 view === 'overview'
-                  ? 'bg-gradient-to-r from-deep-purple to-lavender text-white'
+                  ? 'bg-deep-purple text-white'
                   : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-deep-purple'
               }`}
             >
@@ -514,7 +514,7 @@ export default function SchoolAnalyticsPage() {
               onClick={() => setView('yearly-grid')}
               className={`px-6 py-3 rounded-full font-baloo transition-all flex items-center gap-2 ${
                 view === 'yearly-grid'
-                  ? 'bg-gradient-to-r from-deep-purple to-lavender text-white'
+                  ? 'bg-deep-purple text-white'
                   : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-deep-purple'
               }`}
             >
@@ -526,7 +526,7 @@ export default function SchoolAnalyticsPage() {
                 onClick={() => setView('goal-detail')}
                 className={`px-6 py-3 rounded-full font-baloo transition-all ${
                   view === 'goal-detail'
-                    ? 'bg-gradient-to-r from-deep-purple to-lavender text-white'
+                    ? 'bg-deep-purple text-white'
                     : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-deep-purple'
                 }`}
               >
@@ -538,7 +538,7 @@ export default function SchoolAnalyticsPage() {
           {view === 'yearly-grid' && selectedGoal ? (
             <button
               onClick={exportToExcel}
-              className="px-6 py-3 rounded-full bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg"
+              className="px-6 py-3 rounded-full bg-grass-green text-white font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg"
             >
               <Download className="w-5 h-5" />
               Export naar Excel
@@ -546,7 +546,7 @@ export default function SchoolAnalyticsPage() {
           ) : view !== 'yearly-grid' && (
             <button
               onClick={exportToCSV}
-              className="px-6 py-3 rounded-full bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg"
+              className="px-6 py-3 rounded-full bg-grass-green text-white font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg"
             >
               <Download className="w-5 h-5" />
               Export naar CSV
@@ -731,7 +731,7 @@ export default function SchoolAnalyticsPage() {
                           setSelectedGoal(goal.goal_code);
                           loadYearlyGridData();
                         }}
-                        className="w-full bg-gradient-to-r from-cream to-white p-4 rounded-2xl hover:shadow-lg transition-all border-2 border-gray-100 hover:border-deep-purple text-left"
+                        className="w-full bg-cream p-4 rounded-2xl hover:shadow-lg transition-all border-2 border-gray-100 hover:border-deep-purple text-left"
                       >
                         <div className="flex items-center gap-4">
                           <div className={`${getGoalColor(goal.goal_code)} w-3 h-12 rounded-full`}></div>

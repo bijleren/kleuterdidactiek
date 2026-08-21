@@ -225,7 +225,7 @@ export default function SchoolOnboarding({ onComplete }: SchoolOnboardingProps) 
                 <button
                   type="submit"
                   disabled={loading || schoolCode.length !== 6}
-                  className="w-full bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white py-4 rounded-xl font-baloo text-xl shadow-lg hover:scale-105 transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="w-full bg-sky-blue text-white py-4 rounded-xl font-baloo text-xl shadow-lg hover:scale-105 transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   {loading ? 'Verbinden...' : 'Verbinden met school'}
                 </button>
@@ -358,7 +358,7 @@ export default function SchoolOnboarding({ onComplete }: SchoolOnboardingProps) 
                 <button
                   type="submit"
                   disabled={loading || !schoolName}
-                  className="w-full bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white py-4 rounded-xl font-baloo text-xl shadow-lg hover:scale-105 transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="w-full bg-grass-green text-white py-4 rounded-xl font-baloo text-xl shadow-lg hover:scale-105 transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   {loading ? 'School aanmaken...' : 'School aanmaken'}
                 </button>

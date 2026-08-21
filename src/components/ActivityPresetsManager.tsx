@@ -792,7 +792,7 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
           <div className="flex gap-2">
             <button
               onClick={() => navigate('/activi-tijd')}
-              className="px-4 py-2 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm"
+              className="px-4 py-2 bg-sky-blue text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm"
             >
               <Layout className="w-4 h-4" />
               <span>Activiteitenborden</span>
@@ -802,7 +802,7 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
                 resetForm();
                 setShowCreateModal(true);
               }}
-              className="px-4 py-2 bg-gradient-to-r from-lavender to-[#E8B4FF] text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm"
+              className="px-4 py-2 bg-lavender text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm"
             >
               <Plus className="w-4 h-4" />
               <span>Nieuwe Hoek</span>
@@ -910,7 +910,7 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
                   <div className="flex gap-2 mt-3">
                     <button
                       onClick={() => handleAddToLessonBoard(preset)}
-                      className="flex-1 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-3 py-2 rounded-xl text-xs font-semibold hover:scale-105 transition-transform flex items-center justify-center gap-1.5"
+                      className="flex-1 bg-sky-blue text-white px-3 py-2 rounded-xl text-xs font-semibold hover:scale-105 transition-transform flex items-center justify-center gap-1.5"
                       title="Voeg toe aan activiteitenbord van huidige les"
                     >
                       <Check className="w-3.5 h-3.5" />
@@ -921,7 +921,7 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
                         setShowAddToAgendaModal(preset);
                         setAgendaData(prev => ({ ...prev, title: preset.name }));
                       }}
-                      className="flex-1 bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white px-3 py-2 rounded-xl text-xs font-semibold hover:scale-105 transition-transform flex items-center justify-center gap-1.5"
+                      className="flex-1 bg-grass-green text-white px-3 py-2 rounded-xl text-xs font-semibold hover:scale-105 transition-transform flex items-center justify-center gap-1.5"
                     >
                       <Calendar className="w-3.5 h-3.5" />
                       Agenda
@@ -1092,7 +1092,7 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
               <button
                 onClick={showEditModal ? handleUpdatePreset : handleCreatePreset}
                 disabled={!formData.name.trim()}
-                className="flex-1 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-sky-blue text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {showEditModal ? 'Bijwerken' : 'Toevoegen'}
               </button>
@@ -1154,7 +1154,7 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
               </button>
               <button
                 onClick={handleMarkAsDone}
-                className="flex-1 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
+                className="flex-1 bg-sky-blue text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
               >
                 <Check className="w-5 h-5" />
                 Registreer
@@ -1234,7 +1234,7 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
               </button>
               <button
                 onClick={handleAddToAgenda}
-                className="flex-1 bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
+                className="flex-1 bg-grass-green text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
               >
                 <Calendar className="w-5 h-5" />
                 Toevoegen
@@ -1293,7 +1293,7 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
               </button>
               <button
                 onClick={handleCreateLessonAndAddPreset}
-                className="flex-1 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
+                className="flex-1 bg-sky-blue text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
               >
                 <Clock className="w-5 h-5" />
                 Les Aanmaken
@@ -1322,7 +1322,7 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
               </button>
               <button
                 onClick={() => handleDeletePreset(showDeleteConfirm)}
-                className="flex-1 bg-gradient-to-r from-coral-pink to-[#FF8E8E] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform"
+                className="flex-1 bg-coral-pink text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform"
               >
                 Verwijder
               </button>

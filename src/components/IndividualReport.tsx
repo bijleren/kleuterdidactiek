@@ -282,7 +282,7 @@ export default function IndividualReport({ groupId }: IndividualReportProps) {
               href="https://bijleer.school"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-blue to-[#B5E9F7] text-white px-6 py-3 rounded-2xl font-baloo shadow-lg hover:scale-105 transition-transform"
+              className="inline-flex items-center gap-2 bg-sky-blue text-white px-6 py-3 rounded-2xl font-baloo shadow-lg hover:scale-105 transition-transform"
             >
               <ExternalLink className="w-5 h-5" />
               Ga naar bijleer.school

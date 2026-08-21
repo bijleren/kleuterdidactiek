@@ -266,7 +266,7 @@ export default function NieuweScholenPage() {
             </p>
             <Link
               to="/contact"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-7 py-3 rounded-full font-baloo text-base shadow-lg hover:scale-105 transition-transform"
+              className="inline-flex items-center gap-2 bg-sky-blue text-white px-7 py-3 rounded-full font-baloo text-base shadow-lg hover:scale-105 transition-transform"
             >
               <Mail className="w-4 h-4" />
               Stuur feedback

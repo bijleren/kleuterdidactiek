@@ -95,7 +95,7 @@ export function ConfirmModal({
   message,
   confirmText = 'Bevestigen',
   cancelText = 'Annuleren',
-  confirmColor = 'from-grass-green to-[#B5F0BE]',
+  confirmColor = 'bg-grass-green',
 }: ConfirmModalProps) {
   const handleConfirm = () => {
     onConfirm();
@@ -116,7 +116,7 @@ export function ConfirmModal({
           </button>
           <button
             onClick={handleConfirm}
-            className={`px-6 py-3 rounded-full font-baloo text-white bg-gradient-to-r ${confirmColor} hover:scale-105 transition-transform shadow-lg`}
+            className={`px-6 py-3 rounded-full font-baloo text-white ${confirmColor} hover:scale-105 transition-transform shadow-lg`}
           >
             {confirmText}
           </button>
@@ -182,7 +182,7 @@ export function PromptModal({
             </button>
             <button
               type="submit"
-              className="px-6 py-3 rounded-full font-baloo text-white bg-gradient-to-r from-sky-blue to-[#7EDCD5] hover:scale-105 transition-transform shadow-lg"
+              className="px-6 py-3 rounded-full font-baloo text-white bg-sky-blue hover:scale-105 transition-transform shadow-lg"
             >
               {submitText}
             </button>
@@ -215,7 +215,7 @@ export function AlertModal({
         <p className="text-gray-700 mb-6 whitespace-pre-wrap">{message}</p>
         <button
           onClick={onClose}
-          className="px-6 py-3 rounded-full font-baloo text-white bg-gradient-to-r from-grass-green to-[#B5F0BE] hover:scale-105 transition-transform shadow-lg"
+          className="px-6 py-3 rounded-full font-baloo text-white bg-grass-green hover:scale-105 transition-transform shadow-lg"
         >
           {buttonText}
         </button>

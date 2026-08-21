@@ -404,7 +404,7 @@ export default function ClassroomSketchModal({
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white font-bold text-sm hover:scale-105 transition-transform flex items-center gap-2 shadow-lg disabled:opacity-50"
+            className="px-5 py-2.5 rounded-xl bg-sky-blue text-white font-bold text-sm hover:scale-105 transition-transform flex items-center gap-2 shadow-lg disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
             {saving ? 'Opslaan...' : 'Opslaan als kaart'}

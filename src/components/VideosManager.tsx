@@ -503,7 +503,7 @@ export default function VideosManager({ groupId, schoolId: propSchoolId, goalFil
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-4 py-2 bg-gradient-to-r from-deep-purple to-[#7B7FFF] text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm"
+            className="px-4 py-2 bg-deep-purple text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg text-sm"
           >
             <Plus className="w-4 h-4" />
             <span>Video Toevoegen</span>
@@ -827,7 +827,7 @@ export default function VideosManager({ groupId, schoolId: propSchoolId, goalFil
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-grass-green to-green-400 text-white rounded-xl font-semibold hover:scale-105 transition-transform"
+                  className="flex-1 px-6 py-3 bg-grass-green text-white rounded-xl font-semibold hover:scale-105 transition-transform"
                 >
                   {editingVideoId ? 'Video Opslaan' : 'Video Toevoegen'}
                 </button>
@@ -931,7 +931,7 @@ export default function VideosManager({ groupId, schoolId: propSchoolId, goalFil
                 setShowVideoModal(false);
                 setSelectedVideo(null);
               }}
-              className="w-full px-6 py-3 bg-gradient-to-r from-grass-green to-green-400 text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center justify-center gap-2"
+              className="w-full px-6 py-3 bg-grass-green text-white rounded-xl font-semibold hover:scale-105 transition-transform flex items-center justify-center gap-2"
             >
               <CheckCircle className="w-5 h-5" />
               Gebruikt in de les

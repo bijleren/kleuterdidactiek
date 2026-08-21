@@ -141,7 +141,7 @@ export default function KleuterdoelenPage() {
             </div>
             <Link
               to="/groups"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white px-8 py-4 rounded-2xl font-baloo text-lg shadow-lg hover:scale-105 transition-transform"
+              className="inline-flex items-center gap-2 bg-grass-green text-white px-8 py-4 rounded-2xl font-baloo text-lg shadow-lg hover:scale-105 transition-transform"
             >
               <Plus className="w-5 h-5" />
               Maak eerste klas aan
@@ -161,7 +161,7 @@ export default function KleuterdoelenPage() {
           </h2>
           <Link
             to="/groups"
-            className="inline-block bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform"
+            className="inline-block bg-sky-blue text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform"
           >
             Terug naar Groepen
           </Link>
@@ -185,16 +185,16 @@ export default function KleuterdoelenPage() {
   const isGoalsOnlyMode = activeTab === 'goals';
 
   const allTabs = [
-    { id: 'vocabulary' as TabType, label: 'Woordenschat', icon: '📚', color: 'from-coral-pink to-[#FF8E8E]' },
-    { id: 'games' as TabType, label: 'Speel', icon: '🎮', color: 'from-grass-green to-[#B5F0BE]' },
-    { id: 'writing' as TabType, label: 'Schrijf', icon: '✏️', color: 'from-sky-blue to-[#7EDCD5]' },
-    { id: 'tasks' as TabType, label: 'Doe', icon: '✋', color: 'from-soft-orange to-[#FFCC80]' },
-    { id: 'videos' as TabType, label: 'Kijk', icon: '🎬', color: 'from-sunny-yellow to-[#FFD966]' },
-    { id: 'materials' as TabType, label: 'Materiaal', icon: '📖', color: 'from-deep-purple to-[#9B9EFF]' },
-    { id: 'activities' as TabType, label: 'Hoekenwerk', icon: '🎨', color: 'from-lavender to-[#E8B4FF]' },
-    { id: 'routines' as TabType, label: 'Routines', icon: '🔄', color: 'from-blue-500 to-[#60A5FA]' },
-    { id: 'leerdoelactiviteit' as TabType, label: 'Leerdoelactiviteit', icon: '💡', color: 'from-deep-purple to-[#7EDCD5]' },
-    { id: 'bewegen' as TabType, label: 'Lichamelijke opvoeding', icon: '🤸', color: 'from-coral-pink to-[#FFCC80]' },
+    { id: 'vocabulary' as TabType, label: 'Woordenschat', icon: '📚', color: 'bg-coral-pink' },
+    { id: 'games' as TabType, label: 'Speel', icon: '🎮', color: 'bg-grass-green' },
+    { id: 'writing' as TabType, label: 'Schrijf', icon: '✏️', color: 'bg-sky-blue' },
+    { id: 'tasks' as TabType, label: 'Doe', icon: '✋', color: 'bg-soft-orange' },
+    { id: 'videos' as TabType, label: 'Kijk', icon: '🎬', color: 'bg-sunny-yellow' },
+    { id: 'materials' as TabType, label: 'Materiaal', icon: '📖', color: 'bg-deep-purple' },
+    { id: 'activities' as TabType, label: 'Hoekenwerk', icon: '🎨', color: 'bg-lavender' },
+    { id: 'routines' as TabType, label: 'Routines', icon: '🔄', color: 'bg-blue-500' },
+    { id: 'leerdoelactiviteit' as TabType, label: 'Leerdoelactiviteit', icon: '💡', color: 'bg-deep-purple' },
+    { id: 'bewegen' as TabType, label: 'Lichamelijke opvoeding', icon: '🤸', color: 'bg-coral-pink' },
   ];
 
   const tabs = allTabs;
@@ -216,7 +216,7 @@ export default function KleuterdoelenPage() {
                   }}
                   className={`px-6 py-3 rounded-full font-baloo text-lg font-semibold shadow-lg transition-all duration-200 flex items-center gap-2 whitespace-nowrap ${
                     activeTab === tab.id
-                      ? `bg-gradient-to-r ${tab.color} text-white scale-105`
+                      ? `${tab.color} text-white scale-105`
                       : 'bg-white text-gray-700 hover:scale-105'
                   }`}
                 >

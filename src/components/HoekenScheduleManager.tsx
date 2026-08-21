@@ -169,7 +169,7 @@ export default function HoekenScheduleManager({
                 resetForm();
                 setShowCreateForm(true);
               }}
-              className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white rounded-xl text-sm font-semibold hover:scale-105 transition-transform shadow-md"
+              className="flex items-center gap-1.5 px-4 py-2 bg-sky-blue text-white rounded-xl text-sm font-semibold hover:scale-105 transition-transform shadow-md"
             >
               <Plus className="w-4 h-4" />
               Nieuw rooster
@@ -289,7 +289,7 @@ export default function HoekenScheduleManager({
               <button
                 onClick={handleCreate}
                 disabled={!formData.template_id || formData.day_of_week.length === 0}
-                className="flex-1 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-4 py-2.5 rounded-full font-semibold text-sm shadow-lg hover:scale-105 transition-transform disabled:opacity-50"
+                className="flex-1 bg-sky-blue text-white px-4 py-2.5 rounded-full font-semibold text-sm shadow-lg hover:scale-105 transition-transform disabled:opacity-50"
               >
                 Opslaan
               </button>

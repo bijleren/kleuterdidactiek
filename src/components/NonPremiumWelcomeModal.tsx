@@ -105,7 +105,7 @@ export default function NonPremiumWelcomeModal({ isOpen, onClose, onOpenFeedback
             </button>
             <button
               onClick={onClose}
-              className="flex-1 bg-gradient-to-r from-deep-purple to-[#9B9EFF] text-white px-5 py-3 rounded-xl font-semibold text-sm shadow-md hover:scale-105 transition-transform"
+              className="flex-1 bg-deep-purple text-white px-5 py-3 rounded-xl font-semibold text-sm shadow-md hover:scale-105 transition-transform"
             >
               Aan de slag!
             </button>

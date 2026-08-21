@@ -98,7 +98,7 @@ export default function Dashboard() {
             <h3 className="text-2xl font-baloo text-deep-purple">Jouw Groepen/Klassen</h3>
             <Link
               to="/groups"
-              className="bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform flex items-center gap-2"
+              className="bg-grass-green text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform flex items-center gap-2"
             >
               <Users className="w-5 h-5" />
               Beheer Groepen/Klassen
@@ -112,7 +112,7 @@ export default function Dashboard() {
               </p>
               <Link
                 to="/groups"
-                className="inline-block bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform"
+                className="inline-block bg-grass-green text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform"
               >
                 Maak je eerste groep aan
               </Link>

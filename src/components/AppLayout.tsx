@@ -358,7 +358,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
                 <button
                   onClick={() => { setSchoolModalView('create'); resetCreateForm(); }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white rounded-2xl font-baloo text-base shadow hover:scale-105 transition-transform"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-grass-green text-white rounded-2xl font-baloo text-base shadow hover:scale-105 transition-transform"
                 >
                   <Plus className="w-4 h-4" />
                   Nieuwe school aanmaken
@@ -450,7 +450,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                     <button
                       type="submit"
                       disabled={createLoading || !newSchoolName}
-                      className="w-full bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white py-3 rounded-2xl font-baloo text-base shadow hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100"
+                      className="w-full bg-grass-green text-white py-3 rounded-2xl font-baloo text-base shadow hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100"
                     >
                       {createLoading ? 'Aanmaken...' : 'School aanmaken'}
                     </button>

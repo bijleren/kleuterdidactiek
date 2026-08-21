@@ -580,7 +580,7 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
           </div>
           <button
             onClick={exportWeekMatrix}
-            className="flex-shrink-0 inline-flex items-center gap-2 bg-gradient-to-r from-deep-purple to-lavender text-white px-4 py-2 rounded-2xl font-baloo text-sm shadow-lg hover:scale-105 transition-transform"
+            className="flex-shrink-0 inline-flex items-center gap-2 bg-deep-purple text-white px-4 py-2 rounded-2xl font-baloo text-sm shadow-lg hover:scale-105 transition-transform"
           >
             <Download className="w-4 h-4" />
             <span className="hidden sm:inline">Exporteer weekmatrix</span>
@@ -902,7 +902,7 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
                           }}
                           className={`flex-1 h-full transition-all hover:opacity-80 cursor-pointer ${
                             hasPractice
-                              ? 'bg-gradient-to-br from-grass-green to-green-400'
+                              ? 'bg-grass-green'
                               : 'bg-gray-200'
                           } ${
                             isCurrentWeek
@@ -1060,14 +1060,14 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
               <div className="flex flex-col sm:flex-row items-stretch gap-2">
                 <button
                   onClick={() => handlePracticeGoal(goal)}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-grass-green to-green-400 text-white rounded-xl font-semibold text-sm hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-md"
+                  className="flex-1 px-4 py-2.5 bg-grass-green text-white rounded-xl font-semibold text-sm hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-md"
                 >
                   <CheckCircle className="w-4 h-4" />
                   <span>Geoefend</span>
                 </button>
                 <button
                   onClick={() => navigate(`/analytics?goal=${goal.code}`)}
-                  className="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-sky-blue to-blue-400 text-white rounded-xl font-semibold text-sm hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-md"
+                  className="flex-1 sm:flex-none px-4 py-2.5 bg-sky-blue text-white rounded-xl font-semibold text-sm hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-md"
                 >
                   <BarChart2 className="w-4 h-4" />
                   <span>Analytics</span>
@@ -1117,7 +1117,7 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
                 </button>
                 <button
                   onClick={submitPractice}
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-grass-green to-green-400 text-white rounded-xl font-semibold hover:scale-105 transition-transform shadow-md"
+                  className="flex-1 px-6 py-3 bg-grass-green text-white rounded-xl font-semibold hover:scale-105 transition-transform shadow-md"
                 >
                   Bevestigen
                 </button>

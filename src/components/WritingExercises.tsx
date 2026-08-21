@@ -288,7 +288,7 @@ export default function WritingExercises({ groupId, schoolId, goalFilter }: Writ
 
               <button
                 onClick={() => handlePracticeClick(exercise)}
-                className="w-full bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-4 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
+                className="w-full bg-sky-blue text-white px-4 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
               >
                 <Check className="w-5 h-5" />
                 Geoefend
@@ -329,7 +329,7 @@ export default function WritingExercises({ groupId, schoolId, goalFilter }: Writ
           {filteredGames.map((game) => (
             <button
               key={game.id}
-              className="bg-gradient-to-br from-cream to-white rounded-3xl p-6 shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-200 border-2 border-sky-blue cursor-pointer text-left"
+              className="bg-cream rounded-3xl p-6 shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-200 border-2 border-sky-blue cursor-pointer text-left"
               onClick={() => handleGameClick(game)}
             >
               <div className="text-6xl mb-4 text-center">{game.emoji}</div>

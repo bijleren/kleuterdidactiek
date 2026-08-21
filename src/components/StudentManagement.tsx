@@ -135,7 +135,7 @@ export default function StudentManagement({ schoolId, onClose }: StudentManageme
             </div>
             <button
               onClick={() => setShowCreateForm(!showCreateForm)}
-              className="bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white px-6 py-3 rounded-full font-baloo flex items-center gap-2 shadow-lg hover:scale-105 transition-transform"
+              className="bg-grass-green text-white px-6 py-3 rounded-full font-baloo flex items-center gap-2 shadow-lg hover:scale-105 transition-transform"
             >
               <Plus className="w-5 h-5" />
               Nieuwe Student
@@ -229,7 +229,7 @@ export default function StudentManagement({ schoolId, onClose }: StudentManageme
                   <button
                     type="submit"
                     disabled={creating}
-                    className="bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white px-6 py-2 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100"
+                    className="bg-grass-green text-white px-6 py-2 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100"
                   >
                     {creating ? 'Aanmaken...' : 'Student Aanmaken'}
                   </button>

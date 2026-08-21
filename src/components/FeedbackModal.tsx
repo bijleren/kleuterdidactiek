@@ -123,7 +123,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
             </p>
             <button
               onClick={handleClose}
-              className="mt-2 bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white px-8 py-3 rounded-full font-baloo shadow-md hover:scale-105 transition-transform"
+              className="mt-2 bg-grass-green text-white px-8 py-3 rounded-full font-baloo shadow-md hover:scale-105 transition-transform"
             >
               Sluiten
             </button>
@@ -215,7 +215,7 @@ export default function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
               <button
                 type="submit"
                 disabled={submitting || !title.trim() || !description.trim()}
-                className="flex-1 bg-gradient-to-r from-deep-purple to-[#9B9EFF] text-white px-4 py-3 rounded-xl font-semibold text-sm shadow-md hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+                className="flex-1 bg-deep-purple text-white px-4 py-3 rounded-xl font-semibold text-sm shadow-md hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
               >
                 {submitting ? (
                   <span>Versturen...</span>

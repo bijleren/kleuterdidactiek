@@ -225,7 +225,7 @@ export default function PhysicalTasks({ groupId, schoolId, goalFilter }: Physica
             onClick={() => setSelectedCategory(category.value)}
             className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
               selectedCategory === category.value
-                ? 'bg-gradient-to-r from-deep-purple to-lavender text-white border-2 border-deep-purple'
+                ? 'bg-deep-purple text-white border-2 border-deep-purple'
                 : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-deep-purple'
             }`}
           >
@@ -292,7 +292,7 @@ export default function PhysicalTasks({ groupId, schoolId, goalFilter }: Physica
 
               <button
                 onClick={() => handleTaskComplete(task)}
-                className="w-full bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white px-4 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
+                className="w-full bg-grass-green text-white px-4 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
               >
                 <Check className="w-5 h-5" />
                 Voltooid

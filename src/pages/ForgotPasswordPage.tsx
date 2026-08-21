@@ -69,7 +69,7 @@ export default function ForgotPasswordPage() {
 
               <Link
                 to="/login"
-                className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white py-4 rounded-xl font-baloo text-xl shadow-lg hover:scale-105 transition-transform duration-200"
+                className="flex items-center justify-center gap-2 w-full bg-sky-blue text-white py-4 rounded-xl font-baloo text-xl shadow-lg hover:scale-105 transition-transform duration-200"
               >
                 <ArrowLeft className="w-5 h-5" />
                 Terug naar inloggen
@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white py-4 rounded-xl font-baloo text-xl shadow-lg hover:scale-105 transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-sky-blue text-white py-4 rounded-xl font-baloo text-xl shadow-lg hover:scale-105 transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Verzenden...' : 'Verstuur reset link'}
                 </button>

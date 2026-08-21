@@ -934,7 +934,7 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
               onClick={() => setTimeFilter('hour')}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                 timeFilter === 'hour'
-                  ? 'bg-gradient-to-r from-coral-pink to-soft-orange text-white'
+                  ? 'bg-coral-pink text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -944,7 +944,7 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
               onClick={() => setTimeFilter('today')}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                 timeFilter === 'today'
-                  ? 'bg-gradient-to-r from-coral-pink to-soft-orange text-white'
+                  ? 'bg-coral-pink text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -954,7 +954,7 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
               onClick={() => setTimeFilter('all')}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
                 timeFilter === 'all'
-                  ? 'bg-gradient-to-r from-coral-pink to-soft-orange text-white'
+                  ? 'bg-coral-pink text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -1070,7 +1070,7 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
                     onClick={() => toggleCategory(category.id)}
                     className={`px-4 py-2 rounded-full text-sm font-semibold transition-all whitespace-nowrap ${
                       isActive
-                        ? 'bg-gradient-to-r from-deep-purple to-lavender text-white border-2 border-deep-purple shadow-md'
+                        ? 'bg-deep-purple text-white border-2 border-deep-purple shadow-md'
                         : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-deep-purple'
                     }`}
                   >
@@ -1720,7 +1720,7 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
 
             <button
               onClick={() => setShowDeleteInstructions(false)}
-              className="w-full bg-gradient-to-r from-deep-purple to-lavender text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-transform"
+              className="w-full bg-deep-purple text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-transform"
             >
               Begrepen, start verwijderen
             </button>

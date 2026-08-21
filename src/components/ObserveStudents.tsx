@@ -340,7 +340,7 @@ export default function ObserveStudents({ groupId }: ObserveStudentsProps) {
                 <button
                   type="submit"
                   disabled={addingStudent || !newFirstName.trim()}
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-blue to-[#B5E9F7] text-white px-4 py-2 rounded-xl font-baloo text-sm shadow hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 bg-sky-blue text-white px-4 py-2 rounded-xl font-baloo text-sm shadow hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {addingStudent ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
                   Toevoegen
@@ -360,7 +360,7 @@ export default function ObserveStudents({ groupId }: ObserveStudentsProps) {
                 href="https://bijleer.school"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-blue to-[#B5E9F7] text-white px-6 py-3 rounded-2xl font-baloo shadow-lg hover:scale-105 transition-transform"
+                className="inline-flex items-center gap-2 bg-sky-blue text-white px-6 py-3 rounded-2xl font-baloo shadow-lg hover:scale-105 transition-transform"
               >
                 <ExternalLink className="w-5 h-5" />
                 Ga naar bijleer.school

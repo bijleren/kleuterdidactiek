@@ -463,7 +463,7 @@ export default function HoekenTemplateBuilder({
           <button
             onClick={handleSave}
             disabled={!name.trim() || selectedItems.length === 0 || saving}
-            className="flex-1 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-sky-blue text-white px-6 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Opslaan...' : editingTemplate ? 'Bijwerken' : 'Opslaan'}
           </button>

@@ -29,26 +29,26 @@ interface GameSession {
 }
 
 const gameTypeColors: Record<string, string> = {
-  colors: 'from-pink-100 to-pink-200 border-pink-400',
-  counting: 'from-blue-100 to-blue-200 border-blue-400',
-  shapes: 'from-green-100 to-green-200 border-green-400',
-  animals: 'from-yellow-100 to-yellow-200 border-yellow-400',
-  body: 'from-purple-100 to-purple-200 border-purple-400',
-  weather: 'from-cyan-100 to-cyan-200 border-cyan-400',
-  position: 'from-orange-100 to-orange-200 border-orange-400',
-  rhyme: 'from-pink-100 to-pink-200 border-pink-400',
-  emotions: 'from-rose-100 to-rose-200 border-rose-400',
-  sorting: 'from-gray-100 to-gray-200 border-gray-400',
-  days: 'from-indigo-100 to-indigo-200 border-indigo-400',
-  letters: 'from-green-100 to-green-200 border-green-400',
-  senses: 'from-purple-100 to-purple-200 border-purple-400',
-  lifecycle: 'from-teal-100 to-teal-200 border-teal-400',
-  patterns: 'from-orange-100 to-orange-200 border-orange-400',
-  seasons: 'from-amber-100 to-amber-200 border-amber-400',
-  geography: 'from-cyan-100 to-cyan-200 border-cyan-400',
-  ranking: 'from-yellow-100 to-yellow-200 border-yellow-400',
-  subitize: 'from-blue-100 to-blue-200 border-blue-400',
-  money: 'from-green-100 to-green-200 border-green-400',
+  colors: 'bg-pink-100 border-pink-400',
+  counting: 'bg-blue-100 border-blue-400',
+  shapes: 'bg-green-100 border-green-400',
+  animals: 'bg-yellow-100 border-yellow-400',
+  body: 'bg-purple-100 border-purple-400',
+  weather: 'bg-cyan-100 border-cyan-400',
+  position: 'bg-orange-100 border-orange-400',
+  rhyme: 'bg-pink-100 border-pink-400',
+  emotions: 'bg-rose-100 border-rose-400',
+  sorting: 'bg-gray-100 border-gray-400',
+  days: 'bg-indigo-100 border-indigo-400',
+  letters: 'bg-green-100 border-green-400',
+  senses: 'bg-purple-100 border-purple-400',
+  lifecycle: 'bg-teal-100 border-teal-400',
+  patterns: 'bg-orange-100 border-orange-400',
+  seasons: 'bg-amber-100 border-amber-400',
+  geography: 'bg-cyan-100 border-cyan-400',
+  ranking: 'bg-yellow-100 border-yellow-400',
+  subitize: 'bg-blue-100 border-blue-400',
+  money: 'bg-green-100 border-green-400',
 };
 
 export default function GamesGrid({ groupId, schoolId, goalFilter }: GamesGridProps) {
@@ -215,13 +215,13 @@ export default function GamesGrid({ groupId, schoolId, goalFilter }: GamesGridPr
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredGames.map((game) => {
           const sessionCount = getSessionCount(game.id);
-          const colorClass = gameTypeColors[game.game_type] || 'from-gray-100 to-gray-200';
+          const colorClass = gameTypeColors[game.game_type] || 'bg-gray-100';
 
           return (
             <div key={game.id} className="flex flex-col gap-2">
             <button
               onClick={() => handleGameClick(game)}
-              className={`bg-gradient-to-br ${colorClass} rounded-3xl p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 border-2 text-left relative group`}
+              className={`${colorClass} rounded-3xl p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-200 border-2 text-left relative group`}
             >
               {sessionCount > 0 && (
                 <div className="absolute top-4 right-4 bg-grass-green text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">

@@ -476,7 +476,7 @@ export default function ActivityAnalytics({ schoolId, initialBoardId }: Activity
           <div className="flex items-end">
             <button
               onClick={exportToExcel}
-              className="w-full bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white px-6 py-2 rounded-xl font-semibold shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
+              className="w-full bg-grass-green text-white px-6 py-2 rounded-xl font-semibold shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
             >
               <FileSpreadsheet className="w-5 h-5" />
               Exporteer Excel
@@ -561,7 +561,7 @@ export default function ActivityAnalytics({ schoolId, initialBoardId }: Activity
 
                   <button
                     onClick={() => setSelectedStudentId(student.student_id)}
-                    className="flex-shrink-0 bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white px-4 py-2 rounded-lg font-semibold hover:scale-105 transition-transform text-sm"
+                    className="flex-shrink-0 bg-sky-blue text-white px-4 py-2 rounded-lg font-semibold hover:scale-105 transition-transform text-sm"
                   >
                     Bekijk details
                   </button>

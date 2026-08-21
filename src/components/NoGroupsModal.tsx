@@ -105,7 +105,7 @@ export default function NoGroupsModal({
             </p>
             <button
               onClick={handleCreateGroup}
-              className="w-full bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white px-6 py-4 rounded-2xl font-baloo text-lg shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
+              className="w-full bg-grass-green text-white px-6 py-4 rounded-2xl font-baloo text-lg shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
             >
               <Plus className="w-5 h-5" />
               Maak Eerste Klas Aan
@@ -123,7 +123,7 @@ export default function NoGroupsModal({
               href="https://bijleer.school"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full bg-gradient-to-r from-deep-purple to-[#9B9EFF] text-white px-6 py-4 rounded-2xl font-baloo text-lg shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
+              className="w-full bg-deep-purple text-white px-6 py-4 rounded-2xl font-baloo text-lg shadow-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
             >
               <ExternalLink className="w-5 h-5" />
               Ga naar bijleer.school

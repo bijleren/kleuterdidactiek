@@ -419,14 +419,14 @@ export default function ClassroomMapView({ schoolId, groupId, groupName, activeB
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="px-3 py-2 rounded-xl bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white text-sm font-semibold hover:scale-105 transition-transform flex items-center gap-1.5 shadow-md disabled:opacity-50"
+            className="px-3 py-2 rounded-xl bg-sky-blue text-white text-sm font-semibold hover:scale-105 transition-transform flex items-center gap-1.5 shadow-md disabled:opacity-50"
           >
             <Upload className="w-4 h-4" />
             {uploading ? 'Uploaden...' : maps.length === 0 ? 'Afbeelding uploaden' : 'Nieuwe kaart'}
           </button>
           <button
             onClick={() => setShowSketchModal(true)}
-            className="px-3 py-2 rounded-xl bg-gradient-to-r from-deep-purple to-[#8B6CE0] text-white text-sm font-semibold hover:scale-105 transition-transform flex items-center gap-1.5 shadow-md"
+            className="px-3 py-2 rounded-xl bg-deep-purple text-white text-sm font-semibold hover:scale-105 transition-transform flex items-center gap-1.5 shadow-md"
           >
             <PenLine className="w-4 h-4" />
             Schets
@@ -481,14 +481,14 @@ export default function ClassroomMapView({ schoolId, groupId, groupName, activeB
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-blue to-[#7EDCD5] text-white font-bold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg disabled:opacity-50"
+              className="px-6 py-3 rounded-xl bg-sky-blue text-white font-bold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg disabled:opacity-50"
             >
               <Upload className="w-5 h-5" />
               {uploading ? 'Uploaden...' : 'Afbeelding uploaden'}
             </button>
             <button
               onClick={() => setShowSketchModal(true)}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-deep-purple to-[#8B6CE0] text-white font-bold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg"
+              className="px-6 py-3 rounded-xl bg-deep-purple text-white font-bold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg"
             >
               <PenLine className="w-5 h-5" />
               Schets tekenen
@@ -765,7 +765,7 @@ function HotspotEditor({ hotspot, activityOptions, activeBoardId, onChange, onSa
       <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100">
         <button
           onClick={() => onSave(hotspot)}
-          className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-deep-purple to-[#8B6CE0] text-white font-semibold text-sm hover:scale-105 transition-transform flex items-center justify-center gap-2"
+          className="flex-1 px-4 py-2.5 rounded-xl bg-deep-purple text-white font-semibold text-sm hover:scale-105 transition-transform flex items-center justify-center gap-2"
         >
           <Check className="w-4 h-4" />
           Opslaan

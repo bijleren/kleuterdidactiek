@@ -189,13 +189,13 @@ export default function PrijsPage() {
               <div className="text-center">
                 <Link
                   to="/contact"
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-blue to-lavender text-white px-8 py-4 rounded-full font-baloo text-lg hover:scale-105 transition-transform shadow-xl"
+                  className="inline-flex items-center gap-2 bg-sky-blue text-white px-8 py-4 rounded-full font-baloo text-lg hover:scale-105 transition-transform shadow-xl"
                 >
                   
                   Neem contact op
                 </Link> <Link
                   to="/register"
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-blue to-lavender text-white px-8 py-4 rounded-full font-baloo text-lg hover:scale-105 transition-transform shadow-xl"
+                  className="inline-flex items-center gap-2 bg-sky-blue text-white px-8 py-4 rounded-full font-baloo text-lg hover:scale-105 transition-transform shadow-xl"
                 >
                  
                  Registreer je

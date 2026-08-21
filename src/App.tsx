@@ -72,7 +72,7 @@ function LaunchSignupWidget() {
             href="https://forms.office.com/e/zviHhhk52T"
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full text-center bg-gradient-to-r from-deep-purple to-[#9B9EFF] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:scale-105 transition-transform shadow-md"
+            className="block w-full text-center bg-deep-purple text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:scale-105 transition-transform shadow-md"
           >
             Ja, schrijf me in
           </a>

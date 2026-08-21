@@ -1407,7 +1407,7 @@ export default function AgendaPage() {
               <button
                 onClick={() => openCreateModal()}
                 type="button"
-                className="px-6 py-3 bg-gradient-to-r from-deep-purple to-lavender text-white rounded-full font-baloo hover:scale-105 transition-transform flex items-center gap-2 shadow-lg"
+                className="px-6 py-3 bg-deep-purple text-white rounded-full font-baloo hover:scale-105 transition-transform flex items-center gap-2 shadow-lg"
               >
                 <Plus className="w-5 h-5" />
                 Nieuwe Les
@@ -1824,7 +1824,7 @@ export default function AgendaPage() {
               </button>
               <button
                 onClick={() => openItemPicker('activity_preset')}
-                className="px-3 py-2 bg-gradient-to-r from-coral-pink to-sky-blue text-white rounded-lg hover:opacity-90 transition-opacity text-sm flex items-center justify-center gap-2"
+                className="px-3 py-2 bg-coral-pink text-white rounded-lg hover:opacity-90 transition-opacity text-sm flex items-center justify-center gap-2"
               >
                 <Grid className="w-4 h-4" />
                 Activiteiten
@@ -2236,7 +2236,7 @@ export default function AgendaPage() {
             <button
               onClick={handleExportRange}
               disabled={exporting || !exportDateFrom || !exportDateTo}
-              className="flex-1 px-4 py-2 bg-gradient-to-r from-deep-purple to-lavender text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 bg-deep-purple text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {exporting ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />

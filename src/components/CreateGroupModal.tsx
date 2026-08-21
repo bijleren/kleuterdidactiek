@@ -262,7 +262,7 @@ export default function CreateGroupModal({
             <button
               type="submit"
               disabled={loading}
-              className="bg-gradient-to-r from-grass-green to-[#B5F0BE] text-white px-8 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 flex items-center gap-2"
+              className="bg-grass-green text-white px-8 py-3 rounded-full font-baloo shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 flex items-center gap-2"
             >
               <Users className="w-5 h-5" />
               {loading ? 'Aanmaken...' : 'Groep Aanmaken'}
