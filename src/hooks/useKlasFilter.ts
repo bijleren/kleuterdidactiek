@@ -3,6 +3,7 @@ import { useSchool } from '../contexts/SchoolContext';
 import {
   heeftKlasFilter,
   omschrijfKlasFilter,
+  OVSG_GROEP_BAND,
   ovsgGroepVoorBand,
   standaardFilter,
   type Leeftijd,
@@ -64,6 +65,8 @@ export function useKlasFilter() {
   const kiesOvsgGroep = useCallback((g: OvsgGroep | 'all') => {
     setToonAlles(false);
     setOvsgGroep(g);
+    // Band mee laten lopen, anders klopt de omschrijving van het filter niet meer.
+    setLeeftijd(g === 'all' ? 'all' : OVSG_GROEP_BAND[g]);
   }, []);
 
   // Terug naar de klasinstelling zodra het vinkje weer uit gaat.

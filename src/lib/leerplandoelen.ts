@@ -385,8 +385,13 @@ export async function loadLeerplandoelen(
       Bij OVSG filteren we op hun eigen leerjaar in plaats van op de gedeelde
       band: dat is fijnmaziger en bij OVSG altijd eenduidig.
     */
-    if (net === 'OVSG' && ovsgGroep !== 'all') {
-      q = q.eq('extra->>leeftijdsgroep', ovsgGroep);
+    /*
+      Bij OVSG is het leerjaar het leeftijdsfilter; de gedeelde band mag er dan
+      niet bovenop komen. Deed hij dat wel, dan bleef bij "Alle leerjaren" de
+      band van de klas hangen en zag je minder dan bij een los leerjaar.
+    */
+    if (net === 'OVSG') {
+      if (ovsgGroep !== 'all') q = q.eq('extra->>leeftijdsgroep', ovsgGroep);
     } else if (leeftijd === '2,5-4') q = q.eq('leeftijd_25_4', true);
     else if (leeftijd === '4-5') q = q.eq('leeftijd_4_5', true);
     else if (leeftijd === '5-6') q = q.eq('leeftijd_5_6', true);

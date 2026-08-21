@@ -164,8 +164,14 @@ export async function loadBewegingen(
     .select('id, net_code, doelnummer, omschrijving, leeftijd_25_4, leeftijd_4_5, leeftijd_5_6, extra')
     .in('id', ids);
   if (net !== 'all') q = q.eq('net_code', net);
-  if (net === 'OVSG' && ovsgGroep !== 'all') q = q.eq('extra->>leeftijdsgroep', ovsgGroep);
-  else if (leeftijd === '2,5-4') q = q.eq('leeftijd_25_4', true);
+  /*
+    Bij OVSG is het leerjaar het leeftijdsfilter; de gedeelde band mag er dan
+    niet bovenop komen. Deed hij dat wel, dan bleef bij "Alle leerjaren" de band
+    van de klas hangen en zag je minder dan bij een los leerjaar.
+  */
+  if (net === 'OVSG') {
+    if (ovsgGroep !== 'all') q = q.eq('extra->>leeftijdsgroep', ovsgGroep);
+  } else if (leeftijd === '2,5-4') q = q.eq('leeftijd_25_4', true);
   else if (leeftijd === '4-5') q = q.eq('leeftijd_4_5', true);
   else if (leeftijd === '5-6') q = q.eq('leeftijd_5_6', true);
 
