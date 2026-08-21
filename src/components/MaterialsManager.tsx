@@ -14,6 +14,7 @@ interface EducationalMaterial {
   isbn: string | null;
   material_type: 'website' | 'book' | 'document' | 'other';
   is_global: boolean;
+  group_id: string | null;
   school_id: string | null;
   created_at: string;
   goal_codes?: string[];
@@ -40,6 +41,17 @@ const materialTypeLabels = {
   other: 'Overig',
 };
 
+/*
+  Drie herkomsten in de bibliotheek:
+  - bijleren : van het platform, voor iedereen
+  - school   : door een collega toegevoegd voor de hele school
+  - klas     : door iemand toegevoegd voor deze klas
+
+  Ordening, geen afscherming: de RLS laat schoolleden alles van hun school
+  lezen. Klasinhoud staat gewoon niet in de lijst van een andere klas.
+*/
+type Bron = 'bijleren' | 'school' | 'klas';
+
 export default function MaterialsManager({ groupId, schoolId: propSchoolId, goalFilter }: MaterialsManagerProps) {
   const [materials, setMaterials] = useState<EducationalMaterial[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +60,9 @@ export default function MaterialsManager({ groupId, schoolId: propSchoolId, goal
   const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState<EducationalMaterial | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [bron, setBron] = useState<Bron | 'alle'>('alle');
+  /* Waar nieuwe inhoud terechtkomt: bij deze klas of bij de hele school. */
+  const [nieuwVoor, setNieuwVoor] = useState<'klas' | 'school'>('klas');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -199,6 +214,7 @@ export default function MaterialsManager({ groupId, schoolId: propSchoolId, goal
           material_type: formData.material_type,
           is_global: false,
           school_id: schoolId,
+          group_id: nieuwVoor === 'klas' ? groupId : null,
           created_by: userData.user.id,
         })
         .select()
@@ -401,6 +417,11 @@ export default function MaterialsManager({ groupId, schoolId: propSchoolId, goal
 
     if (!matchesSearch) return false;
 
+    if (bron !== 'alle') {
+      const herkomst: Bron = material.is_global ? 'bijleren' : material.group_id ? 'klas' : 'school';
+      if (herkomst !== bron) return false;
+    }
+
     if (goalFilter && material.goal_codes) {
       return material.goal_codes.includes(goalFilter);
     }
@@ -440,6 +461,33 @@ export default function MaterialsManager({ groupId, schoolId: propSchoolId, goal
             <Plus className="w-4 h-4" />
             Nieuw materiaal
           </button>
+        </div>
+
+        {/* Herkomst van de inhoud: van Bijleren, van de school of van deze klas. */}
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          {([
+            ['alle', 'Alles'],
+            ['bijleren', 'Van Bijleren'],
+            ['school', 'Van de school'],
+            ['klas', 'Van deze klas'],
+          ] as [Bron | 'alle', string][]).map(([id, label]) => {
+            const aantal = id === 'alle'
+              ? materials.length
+              : materials.filter((x) => (x.is_global ? 'bijleren' : x.group_id ? 'klas' : 'school') === id).length;
+            return (
+              <button
+                key={id}
+                onClick={() => setBron(id)}
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                  bron === id
+                    ? 'bg-deep-purple text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {label} <span className="opacity-70">({aantal})</span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="relative mb-4">
@@ -677,6 +725,34 @@ export default function MaterialsManager({ groupId, schoolId: propSchoolId, goal
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-deep-purple focus:border-transparent resize-none"
               placeholder="Beschrijving van het materiaal"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Zichtbaar voor
+            </label>
+            <div className="flex gap-2">
+              {([
+                ['klas', 'Alleen deze klas'],
+                ['school', 'De hele school'],
+              ] as ['klas' | 'school', string][]).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setNieuwVoor(id)}
+                  className={`flex-1 px-4 py-2 rounded-xl text-sm font-semibold border-2 transition-colors ${
+                    nieuwVoor === id
+                      ? 'bg-deep-purple text-white border-deep-purple'
+                      : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Collega's van andere klassen zien alleen wat voor de hele school staat.
+            </p>
           </div>
 
           <DoelSelector
