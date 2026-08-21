@@ -16,6 +16,7 @@
   net staat er in het scherm naast, zodat je altijd het origineel ziet.
 */
 import { supabase } from './supabase';
+import { compareGoalCodes } from '../utils/goalSort';
 import { NET_CODES, type Leeftijd, type NetCode, type OvsgGroep } from './leerplandoelen';
 
 /*
@@ -196,7 +197,7 @@ export async function loadBewegingen(
       });
     }
     for (const n of NET_CODES) {
-      perNet[n].sort((x, y) => x.doelnummer.localeCompare(y.doelnummer, 'nl', { numeric: true }));
+      perNet[n].sort((x, y) => compareGoalCodes(x.doelnummer, y.doelnummer));
     }
     return { beweging: b, perNet, netten: NET_CODES.filter((n) => perNet[n].length > 0) };
   }).filter((x) => x.netten.length > 0);

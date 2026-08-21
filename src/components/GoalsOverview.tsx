@@ -3,7 +3,6 @@ import { supabase } from '../lib/supabase';
 import { Target, BarChart2, Search, CheckCircle, ArrowRight, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Modal from './Modal';
-import { compareGoalCodes } from '../utils/goalSort';
 import { SCHOOLJAAR_EIND, SCHOOLJAAR_START, getSchoolYearWeeks, getWeekNumber } from '../utils/schooljaar';
 import NetLeeftijdFilter from './NetLeeftijdFilter';
 import { DoelNetBadges } from './NetBadges';

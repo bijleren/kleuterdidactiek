@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { compareGoalCodes } from '../utils/goalSort';
 
 /**
  * Leerplandoelen per onderwijsnet, gekoppeld aan de officiele minimumdoelen.
@@ -443,7 +444,7 @@ export async function loadLeerplandoelen(
     path: (r.path ?? []).filter((p) => p && p.trim() !== ''),
     pathLabels: r.path_labels ?? [],
     leeftijden: leeftijdenVan(r),
-    codes: (codesPerDoel.get(r.id) || []).sort(),
+    codes: (codesPerDoel.get(r.id) || []).sort(compareGoalCodes),
     extra: r.extra ?? {},
   }));
 }

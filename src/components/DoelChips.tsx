@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { compareGoalCodes } from '../utils/goalSort';
 import { loadDoelLabels, type DoelLabel } from '../lib/doelselectie';
 
 interface Props {
@@ -35,7 +36,9 @@ export default function DoelChips({ codes, max, klein = false }: Props) {
 
   if (codes.length === 0) return null;
 
-  const zichtbaar = max ? codes.slice(0, max) : codes;
+  /* Opgeslagen arrays staan in de volgorde waarin iemand ze aanvinkte. */
+  const gesorteerd = [...codes].sort(compareGoalCodes);
+  const zichtbaar = max ? gesorteerd.slice(0, max) : gesorteerd;
   const rest = codes.length - zichtbaar.length;
   const maat = klein ? 'text-xs px-2 py-0.5' : 'text-sm px-3 py-1';
 

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { compareGoalCodes } from '../utils/goalSort';
 import { Search, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useSchool } from '../contexts/SchoolContext';
@@ -132,7 +133,7 @@ export default function LeerdoelActiviteiten() {
     }
     return uit
       .filter((c) => !alleenMeerdere || c.netten > 1)
-      .sort((a, b) => b.netten - a.netten || a.minimumdoel.localeCompare(b.minimumdoel, 'nl', { numeric: true }));
+      .sort((a, b) => b.netten - a.netten || compareGoalCodes(a.minimumdoel, b.minimumdoel));
   }, [rijen, doelen, zoek, leeftijd, alleenMeerdere]);
 
   const totaal = clusters.reduce(

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { compareGoalCodes } from '../utils/goalSort';
 import { X } from 'lucide-react';
 import { useKlasFilter } from '../hooks/useKlasFilter';
 import {
@@ -191,7 +192,11 @@ export default function DoelSelector({ waarde, onChange, label = 'Doelen' }: Pro
         klasOmschrijving={filter.klasOmschrijving}
       />
 
-      {waarde.length > 0 && <div className="flex flex-wrap gap-2">{waarde.map(chip)}</div>}
+      {waarde.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {[...waarde].sort(compareGoalCodes).map(chip)}
+        </div>
+      )}
 
       {/*
         Suggesties op basis van de gekozen minimumdoelen. Boven het zoekveld,

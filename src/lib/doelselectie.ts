@@ -9,6 +9,7 @@
   allebei soorten dragen.
 */
 import { supabase } from './supabase';
+import { compareGoalCodes } from '../utils/goalSort';
 import { relevantieVoorWoord } from './woordmatch';
 import {
   loadLeerplandoelen,
@@ -292,7 +293,7 @@ export async function loadDoelenPerNet(
     });
   }
   for (const net of Object.keys(perNet) as NetCode[]) {
-    perNet[net].sort((a, b) => a.code.localeCompare(b.code, 'nl', { numeric: true }));
+    perNet[net].sort((a, b) => compareGoalCodes(a.code, b.code));
   }
 
   const minimumdoelen = ((minimumData ?? []) as unknown as MinimumdoelRij[])
@@ -301,7 +302,7 @@ export async function loadDoelenPerNet(
       omschrijving: r.description || r.title || r.code,
       soort: 'noemt' as const,
     }))
-    .sort((a, b) => a.code.localeCompare(b.code, 'nl', { numeric: true }));
+    .sort((a, b) => compareGoalCodes(a.code, b.code));
 
   return { minimumdoelen, perNet };
 }
