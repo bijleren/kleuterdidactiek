@@ -159,6 +159,13 @@ function uitCache<T>(sleutel: string): T | null {
     if (!ruw) return null;
     const { tijd, data } = JSON.parse(ruw) as { tijd: number; data: T };
     if (Date.now() - tijd > CACHE_UREN * 3600_000) return null;
+    /*
+      Een lege lijst is nooit een geldig antwoord voor referentiedata, en `[]` is
+      in JavaScript truthy — zonder deze controle glipt een leeg resultaat langs
+      elke `if (!rijen)`-guard heen. Zie naarCache voor hoe zo'n lege lijst
+      erin kon komen.
+    */
+    if (Array.isArray(data) && data.length === 0) return null;
     return data;
   } catch {
     return null; // beschadigde of geblokkeerde opslag: gewoon opnieuw ophalen
@@ -166,6 +173,15 @@ function uitCache<T>(sleutel: string): T | null {
 }
 
 function naarCache(sleutel: string, data: unknown): void {
+  /*
+    Nooit een leeg resultaat bewaren. De views draaien op RLS: zonder sessie
+    geeft PostgREST HTTP 200 met een LEGE lijst, geen fout. Deze laadfunctie
+    start in een useEffect bij het monteren en kan dus vóór het herstellen van
+    de sessie draaien. Werd dat lege antwoord bewaard, dan bleef de woorden- of
+    doelenkoppeling 24 uur leeg en verdween elk woord zodra er op net of
+    leeftijd gefilterd werd — ook na een geslaagde login.
+  */
+  if (Array.isArray(data) && data.length === 0) return;
   try {
     const volle = `kd.cache.${CACHE_VERSIE}.${sleutel}`;
     localStorage.setItem(volle, JSON.stringify({ tijd: Date.now(), data }));
