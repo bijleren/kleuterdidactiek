@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Download, ChevronUp, ChevronDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { compareGoalCodes } from '../utils/goalSort';
+import { useSchooljaar } from '../contexts/SchooljaarContext';
 import CurrentLessonActivityBoard from './CurrentLessonActivityBoard';
 import { toLocalDateString } from '../utils/dateUtils';
 
@@ -36,6 +37,7 @@ type SortField = 'goal_code' | 'goal_title' | 'no_count' | 'almost_count' | 'yes
 type SortDirection = 'asc' | 'desc';
 
 export default function ClassLevelOverview({ groupId }: ClassLevelOverviewProps) {
+  const schooljaar = useSchooljaar();
   const [progress, setProgress] = useState<GoalProgress[]>([]);
   const [filteredProgress, setFilteredProgress] = useState<GoalProgress[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,7 +51,7 @@ export default function ClassLevelOverview({ groupId }: ClassLevelOverviewProps)
 
   useEffect(() => {
     loadProgress();
-  }, [groupId]);
+  }, [groupId, schooljaar.start, schooljaar.eind]);
 
   useEffect(() => {
     applyFiltersAndSort();
@@ -79,7 +81,10 @@ export default function ClassLevelOverview({ groupId }: ClassLevelOverviewProps)
       const { data: evaluationsData } = await supabase
         .from('student_goal_evaluations')
         .select('student_id, goal_code, result')
-        .in('student_id', studentIds);
+        .in('student_id', studentIds)
+        // Evaluaties van vorig schooljaar horen niet in het beeld van dit jaar.
+        .gte('evaluated_at', schooljaar.start)
+        .lte('evaluated_at', `${schooljaar.eind}T23:59:59`);
 
       const { data: goalsData } = await supabase
         .from('educational_goals')

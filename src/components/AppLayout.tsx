@@ -1,4 +1,5 @@
 import { ReactNode, useState } from 'react';
+import { useSchooljaar } from '../contexts/SchooljaarContext';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, ChevronDown, BarChart3, Target, Compass, Calendar, UserCheck, Rocket, HelpCircle, School, MessageSquarePlus, X, Copy, Check, Plus, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -13,6 +14,7 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   const { user, signOut } = useAuth();
+  const schooljaar = useSchooljaar();
   const { schools, selectedSchool, setSelectedSchool, groups, selectedGroup, setSelectedGroup, feedbackOpen, openFeedback, closeFeedback } = useSchool();
   const navigate = useNavigate();
   const location = useLocation();
@@ -302,6 +304,26 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </header>
 
       {/* Main content */}
+      {/*
+        Wie een ouder schooljaar bekijkt, moet dat blijven zien: anders lijkt een
+        leeg overzicht een fout in plaats van een andere periode.
+      */}
+      {!schooljaar.isHuidig && (
+        <div className="relative z-10 mx-4 sm:mx-6 mt-4">
+          <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-amber-900">
+              Je bekijkt de cijfers van schooljaar <strong>{schooljaar.label}</strong>.
+            </p>
+            <button
+              onClick={() => schooljaar.kies(schooljaar.keuzes[0])}
+              className="text-sm font-semibold text-amber-900 underline underline-offset-2 hover:text-amber-700 transition-colors"
+            >
+              Terug naar dit schooljaar
+            </button>
+          </div>
+        </div>
+      )}
+
       <main className="relative z-5 max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
         {children}
       </main>

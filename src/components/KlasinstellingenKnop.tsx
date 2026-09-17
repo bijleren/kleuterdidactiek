@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase';
 import { useSchool } from '../contexts/SchoolContext';
 import Modal from './Modal';
 import { LEEFTIJDEN, NET_CODES, NET_LABELS, type Leeftijd, type NetCode } from '../lib/leerplandoelen';
+import { useSchooljaar } from '../contexts/SchooljaarContext';
+import { schooljaarLabel } from '../utils/schooljaar';
 
 const LEEFTIJD_LABELS: Record<Leeftijd, string> = {
   '2,5-4': 'Instap en 1ste kleuterklas (2,5-4 jaar)',
@@ -22,6 +24,7 @@ const LEEFTIJD_LABELS: Record<Leeftijd, string> = {
  */
 export default function KlasinstellingenKnop() {
   const { selectedSchool, setSelectedSchool, selectedGroup, setSelectedGroup } = useSchool();
+  const schooljaar = useSchooljaar();
   const [open, setOpen] = useState(false);
   const [bezig, setBezig] = useState(false);
   const [fout, setFout] = useState('');
@@ -90,7 +93,13 @@ export default function KlasinstellingenKnop() {
     <>
       <button
         onClick={() => setOpen(true)}
-        title={allesOk ? 'Instellingen — alles ingevuld' : 'Instellingen — er ontbreekt nog iets'}
+        title={
+          !schooljaar.isHuidig
+            ? `Instellingen — je bekijkt schooljaar ${schooljaar.label}`
+            : allesOk
+            ? 'Instellingen — alles ingevuld'
+            : 'Instellingen — er ontbreekt nog iets'
+        }
         aria-label="Instellingen voor net en leeftijdsgroep"
         className="relative bg-white/20 hover:bg-white/30 text-white p-1.5 sm:p-2 rounded-full border-2 border-white/30 transition-colors"
       >
@@ -127,6 +136,25 @@ export default function KlasinstellingenKnop() {
             <p className="text-xs text-gray-500">
               Geldt voor <span className="font-semibold">{selectedSchool.name}</span> en dus voor al je
               collega's. Bepaalt welke leerdoelen iedereen standaard te zien krijgt.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700">Schooljaar</label>
+            <select
+              value={schooljaar.startjaar}
+              onChange={(e) => schooljaar.kies(Number(e.target.value))}
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-deep-purple focus:outline-none"
+            >
+              {schooljaar.keuzes.map((jaar, i) => (
+                <option key={jaar} value={jaar}>
+                  {schooljaarLabel(jaar)}{i === 0 ? ' (dit schooljaar)' : ''}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500">
+              Bepaalt welke cijfers je ziet in de doelenoverzichten, de analyses en de rapporten.
+              Alleen voor jou, en standaard het lopende schooljaar.
             </p>
           </div>
 

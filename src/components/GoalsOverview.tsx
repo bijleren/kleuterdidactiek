@@ -3,7 +3,8 @@ import { supabase } from '../lib/supabase';
 import { Target, BarChart2, Search, CheckCircle, ArrowRight, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Modal from './Modal';
-import { SCHOOLJAAR_EIND, SCHOOLJAAR_START, getSchoolYearWeeks, getWeekNumber } from '../utils/schooljaar';
+import { getWeekNumber } from '../utils/schooljaar';
+import { useSchooljaar } from '../contexts/SchooljaarContext';
 import NetLeeftijdFilter from './NetLeeftijdFilter';
 import { DoelNetBadges } from './NetBadges';
 import {
@@ -92,6 +93,7 @@ const getProgressCategory = (sessions: number): 'not_started' | 'beginner' | 'in
 };
 
 export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
+  const schooljaar = useSchooljaar();
   const navigate = useNavigate();
   const [goals, setGoals] = useState<GoalWithProgress[]>([]);
   const [loading, setLoading] = useState(true);
@@ -125,7 +127,8 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
 
   useEffect(() => {
     loadGoals();
-  }, [groupId]);
+    // Ook opnieuw laden bij een ander schooljaar: de cijfers horen bij dat jaar.
+  }, [groupId, schooljaar.start, schooljaar.eind]);
 
   useEffect(() => {
     if (!loading && goals.length > 0) {
@@ -141,39 +144,47 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
       // typeinferentie van de andere resultaten.
       loadDoelNetInfo().then(setDoelNetInfo);
 
-      const [goalsResult, progressResult, sessionsResult] = await Promise.all([
+      const [goalsResult, sessionsResult] = await Promise.all([
         supabase.from('educational_goals').select('*').order('sort_order'),
-        supabase.from('group_goal_progress').select('*').eq('group_id', groupId),
-        // Weken server-side samengevat per code: het aantal sessies groeit
-        // onbeperkt, het aantal codes niet.
-        supabase.rpc('doel_weken', {
+        /*
+          Alleen het lopende schooljaar, server-side samengevat per code:
+          group_goal_progress telt op sinds het begin, waardoor een doel in
+          september nog het cijfer van vorig jaar toonde. Het aantal sessies
+          groeit bovendien onbeperkt, het aantal codes niet.
+        */
+        supabase.rpc('doel_voortgang', {
           p_group_id: groupId,
-          p_van: SCHOOLJAAR_START,
-          p_tot: SCHOOLJAAR_EIND,
+          p_van: schooljaar.start,
+          p_tot: schooljaar.eind,
         } as never),
       ]);
 
       if (goalsResult.error) throw goalsResult.error;
-      if (progressResult.error) throw progressResult.error;
       if (sessionsResult.error) throw sessionsResult.error;
 
+      const voortgangRijen = (sessionsResult.data ?? []) as unknown as {
+        code: string;
+        sessies: number;
+        herhalingen: number;
+        eerst: string | null;
+        laatst: string | null;
+        weken: number[] | null;
+      }[];
+
       const progressMap = new Map(
-        progressResult.data?.map((p) => [
-          p.goal_code,
+        voortgangRijen.map((p) => [
+          p.code,
           {
-            total_sessions: p.total_sessions,
-            total_repetitions: p.total_repetitions,
-            last_practiced_at: p.last_practiced_at,
-            first_practiced_at: p.first_practiced_at,
+            total_sessions: p.sessies,
+            total_repetitions: p.herhalingen,
+            last_practiced_at: p.laatst,
+            first_practiced_at: p.eerst,
           },
-        ]) || []
+        ])
       );
 
       const weeklyMap = new Map<string, Set<number>>();
-      for (const r of (sessionsResult.data ?? []) as unknown as {
-        code: string;
-        weken: number[];
-      }[]) {
+      for (const r of voortgangRijen) {
         weeklyMap.set(r.code, new Set(r.weken ?? []));
       }
 
@@ -331,7 +342,7 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
 
       if (lessonGoalsError) throw lessonGoalsError;
 
-      const { start: schoolYearStart } = getSchoolYearWeeks();
+      const schoolYearStart = schooljaar.startDatum;
       const weeklyMap = new Map(weeklyData);
       const goalLessonsMap = new Map<string, LessonInfo[]>();
       const futureLessonsCountMap = new Map<string, number>();
@@ -506,10 +517,10 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
     const timelineContainer = timelineRefs.current.get(goalCode);
     if (!timelineContainer) return;
 
-    const { start: schoolYearStart } = getSchoolYearWeeks();
+    const schoolYearStart = schooljaar.startDatum;
     const currentWeekNum = getWeekNumber(new Date(), schoolYearStart);
 
-    const weekWidth = timelineContainer.scrollWidth / getSchoolYearWeeks().weeks.length;
+    const weekWidth = timelineContainer.scrollWidth / schooljaar.weken.length;
     const scrollPosition = (currentWeekNum * weekWidth) - (timelineContainer.clientWidth / 2) + (weekWidth / 2);
 
     timelineContainer.scrollTo({
@@ -530,7 +541,7 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
     // xlsx is ~284 kB: pas laden wanneer iemand echt exporteert,
     // niet bij het opstarten van de app.
     const XLSX = await import('xlsx');
-    const { weeks } = getSchoolYearWeeks();
+    const weeks = schooljaar.weken;
     const sortedGoals = [...goals].sort((a, b) => a.sort_order - b.sort_order);
 
     const weekHeaders = weeks.map((w, i) => {
@@ -786,7 +797,7 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
       <div className="space-y-3">
         {filteredGoals.map((goal) => {
           const lastPracticed = formatDate(goal.last_practiced_at);
-          const { weeks } = getSchoolYearWeeks();
+          const weeks = schooljaar.weken;
           const goalWeeks = weeklyData.get(goal.code) || new Set();
 
           return (
@@ -886,7 +897,7 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
                         month: 'short'
                       });
 
-                      const { start: schoolYearStart } = getSchoolYearWeeks();
+                      const schoolYearStart = schooljaar.startDatum;
                       const currentWeekNum = getWeekNumber(new Date(), schoolYearStart);
                       const isCurrentWeek = weekIndex === currentWeekNum;
 

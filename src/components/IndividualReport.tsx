@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Download, ChevronDown, ChevronRight, ExternalLink, Users } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { compareGoalCodes } from '../utils/goalSort';
+import { useSchooljaar } from '../contexts/SchooljaarContext';
 import { toLocalDateString } from '../utils/dateUtils';
 
 interface Student {
@@ -45,6 +46,7 @@ interface IndividualReportProps {
 }
 
 export default function IndividualReport({ groupId }: IndividualReportProps) {
+  const schooljaar = useSchooljaar();
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState<string>('');
   const [goalSummaries, setGoalSummaries] = useState<GoalSummary[]>([]);
@@ -62,7 +64,7 @@ export default function IndividualReport({ groupId }: IndividualReportProps) {
     } else {
       setGoalSummaries([]);
     }
-  }, [selectedStudentId]);
+  }, [selectedStudentId, schooljaar.start, schooljaar.eind]);
 
   const loadStudents = async () => {
     setLoading(true);
@@ -119,6 +121,9 @@ export default function IndividualReport({ groupId }: IndividualReportProps) {
           )
         `)
         .eq('student_id', selectedStudentId)
+        // Alleen dit schooljaar: een rapport gaat over het lopende jaar.
+        .gte('evaluated_at', schooljaar.start)
+        .lte('evaluated_at', `${schooljaar.eind}T23:59:59`)
         .order('evaluated_at', { ascending: false });
 
       const { data: goalsData } = await supabase

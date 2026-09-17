@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SchoolProvider } from './contexts/SchoolContext';
+import { SchooljaarProvider } from './contexts/SchooljaarContext';
 import LandingPage from './pages/LandingPage';
 import { lazy, Suspense } from 'react';
 
@@ -257,7 +258,9 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <SchoolProvider>
+          <SchooljaarProvider>
           <AppRoutes />
+          </SchooljaarProvider>
         </SchoolProvider>
       </AuthProvider>
     </BrowserRouter>

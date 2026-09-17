@@ -4,6 +4,7 @@ import { useSchool } from '../contexts/SchoolContext';
 import AppLayout from '../components/AppLayout';
 import { BarChart3, TrendingUp, Filter, Download, School, Calendar, Copy, Check } from 'lucide-react';
 import { compareGoalCodes } from '../utils/goalSort';
+import { useSchooljaar } from '../contexts/SchooljaarContext';
 import { toLocalDateString } from '../utils/dateUtils';
 
 interface GroupGoalStat {
@@ -37,6 +38,7 @@ interface WeekData {
 }
 
 export default function SchoolAnalyticsPage() {
+  const schooljaar = useSchooljaar();
   const { selectedSchool, groups } = useSchool();
   const [loading, setLoading] = useState(true);
   const [goalOverviews, setGoalOverviews] = useState<GoalOverview[]>([]);
@@ -58,7 +60,7 @@ export default function SchoolAnalyticsPage() {
     if (selectedSchool) {
       loadSchoolAnalytics();
     }
-  }, [selectedSchool]);
+  }, [selectedSchool, schooljaar.start, schooljaar.eind]);
 
   useEffect(() => {
     if (selectedGoal && selectedSchool) {
@@ -67,13 +69,13 @@ export default function SchoolAnalyticsPage() {
         loadYearlyGridData();
       }
     }
-  }, [selectedGoal, selectedSchool]);
+  }, [selectedGoal, selectedSchool, schooljaar.start, schooljaar.eind]);
 
   useEffect(() => {
     if (view === 'yearly-grid' && selectedGoal && selectedSchool) {
       loadYearlyGridData();
     }
-  }, [view, selectedGoal, selectedSchool]);
+  }, [view, selectedGoal, selectedSchool, schooljaar.start, schooljaar.eind]);
 
   const loadSchoolAnalytics = async () => {
     if (!selectedSchool) return;
@@ -92,7 +94,10 @@ export default function SchoolAnalyticsPage() {
       const { data: sessions, error } = await supabase
         .from('goal_tracking_sessions')
         .select('group_id, goal_codes')
-        .in('group_id', groupIds);
+        .in('group_id', groupIds)
+        // Alleen het lopende schooljaar; anders blijft vorig jaar meetellen.
+        .gte('practiced_at', schooljaar.start)
+        .lte('practiced_at', `${schooljaar.eind}T23:59:59`);
 
       if (error) throw error;
 
@@ -150,6 +155,8 @@ export default function SchoolAnalyticsPage() {
         .select('group_id, goal_codes, created_at')
         .in('group_id', groupIds)
         .contains('goal_codes', [selectedGoal])
+        .gte('practiced_at', schooljaar.start)
+        .lte('practiced_at', `${schooljaar.eind}T23:59:59`)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -204,7 +211,9 @@ export default function SchoolAnalyticsPage() {
         .from('goal_tracking_sessions')
         .select('group_id, goal_codes, created_at')
         .in('group_id', groupIds)
-        .contains('goal_codes', [selectedGoal]);
+        .contains('goal_codes', [selectedGoal])
+        .gte('practiced_at', schooljaar.start)
+        .lte('practiced_at', `${schooljaar.eind}T23:59:59`);
 
       if (error) throw error;
 

@@ -1,8 +1,5 @@
-import {
-  SCHOOLJAAR_LABEL,
-  getSchoolYearWeeks,
-  getWeekNumber,
-} from '../utils/schooljaar';
+import { getWeekNumber } from '../utils/schooljaar';
+import { useSchooljaar } from '../contexts/SchooljaarContext';
 import { toLocalDateString } from '../utils/dateUtils';
 
 interface WeekBalkProps {
@@ -19,14 +16,15 @@ interface WeekBalkProps {
  * grijs waar niet, met de huidige week omrand.
  */
 export default function WeekBalk({ weken, onWeekClick, toonKop = true }: WeekBalkProps) {
-  const { start, weeks } = getSchoolYearWeeks();
-  const huidigeWeek = getWeekNumber(new Date(), start);
+  const { label, weken: weeks, startDatum, isHuidig } = useSchooljaar();
+  // Buiten het lopende jaar is er geen huidige week om te omranden.
+  const huidigeWeek = isHuidig ? getWeekNumber(new Date(), startDatum) : -1;
 
   return (
     <div>
       {toonKop && (
         <div className="flex items-center gap-2 mb-1.5">
-          <span className="text-xs text-gray-600 font-semibold">Schooljaar {SCHOOLJAAR_LABEL}</span>
+          <span className="text-xs text-gray-600 font-semibold">Schooljaar {label}</span>
           <span className="text-xs text-gray-500">({weeks.length} weken)</span>
         </div>
       )}

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import NetLeeftijdFilter from './NetLeeftijdFilter';
 import WeekBalk from './WeekBalk';
-import { SCHOOLJAAR_EIND, SCHOOLJAAR_START } from '../utils/schooljaar';
+import { useSchooljaar } from '../contexts/SchooljaarContext';
 import {
   NET_CODES,
   NET_LABELS,
@@ -36,6 +36,7 @@ type Weergave = 'alle' | 'gewerkt' | 'niet' | 'geenoefenvorm';
  */
 export default function LeerplandoelenOverzicht({ groupId }: Props) {
   const navigate = useNavigate();
+  const { start: schooljaarStart, eind: schooljaarEind } = useSchooljaar();
   const {
     net: netFilter,
     leeftijd: leeftijdFilter,
@@ -83,42 +84,36 @@ export default function LeerplandoelenOverzicht({ groupId }: Props) {
   }, [netFilter, leeftijdFilter, ovsgGroep]);
 
   const laadVoortgang = useCallback(async () => {
-    const [{ data: prog, error: pErr }, { data: sess, error: sErr }] = await Promise.all([
-      supabase
-        .from('group_goal_progress')
-        .select('goal_code, total_sessions, last_practiced_at')
-        .eq('group_id', groupId),
-      // Weken server-side samengevat per code: het aantal sessies groeit
-      // onbeperkt, het aantal codes niet.
-      supabase.rpc('doel_weken', {
-        p_group_id: groupId,
-        p_van: SCHOOLJAAR_START,
-        p_tot: SCHOOLJAAR_EIND,
-      } as never),
-    ]);
+    // Alleen het lopende schooljaar: group_goal_progress telt op sinds het
+    // begin, waardoor een doel in september "1x geoefend" bleef staan van
+    // vorig jaar.
+    const { data: sess, error: sErr } = await supabase.rpc('doel_voortgang', {
+      p_group_id: groupId,
+      p_van: schooljaarStart,
+      p_tot: schooljaarEind,
+    } as never);
 
-    if (pErr) console.error('Voortgang laden mislukt:', pErr);
-    else {
-      const m = new Map<string, Voortgang>();
-      for (const r of (prog ?? []) as unknown as {
-        goal_code: string;
-        total_sessions: number;
-        last_practiced_at: string | null;
-      }[]) {
-        m.set(r.goal_code, { sessies: r.total_sessions, laatst: r.last_practiced_at });
-      }
-      setVoortgang(m);
+    if (sErr) {
+      console.error('Voortgang laden mislukt:', sErr);
+      return;
     }
 
-    if (sErr) console.error('Weekgegevens laden mislukt:', sErr);
-    else {
-      const m = new Map<string, Set<number>>();
-      for (const r of (sess ?? []) as unknown as { code: string; weken: number[] }[]) {
-        m.set(r.code, new Set(r.weken ?? []));
-      }
-      setWekenPerCode(m);
+    const rijen = (sess ?? []) as unknown as {
+      code: string;
+      sessies: number;
+      laatst: string | null;
+      weken: number[] | null;
+    }[];
+
+    const voortgangMap = new Map<string, Voortgang>();
+    const m = new Map<string, Set<number>>();
+    for (const r of rijen) {
+      voortgangMap.set(r.code, { sessies: r.sessies, laatst: r.laatst });
+      m.set(r.code, new Set(r.weken ?? []));
     }
-  }, [groupId]);
+    setVoortgang(voortgangMap);
+    setWekenPerCode(m);
+  }, [groupId, schooljaarStart, schooljaarEind]);
 
   useEffect(() => {
     laadVoortgang();
