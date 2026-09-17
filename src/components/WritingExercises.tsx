@@ -6,6 +6,8 @@ import { PenTool, Check, Gamepad2 } from 'lucide-react';
 import { PromptModal, AlertModal } from './Modal';
 import GamePlayer from './GamePlayer';
 import { logActivityToCalendar } from '../utils/calendarLogger';
+import { useSchool } from '../contexts/SchoolContext';
+import { LEEFTIJDEN, type Leeftijd } from '../lib/leerplandoelen';
 
 interface WritingExercisesProps {
   groupId: string;
@@ -22,6 +24,10 @@ interface Exercise {
   instructions: string;
   tips: string[];
   exercise_type: string;
+  /* Overgenomen uit de leerplandoelen bij het doel van de oefening. */
+  leeftijd_25_4: boolean;
+  leeftijd_4_5: boolean;
+  leeftijd_5_6: boolean;
 }
 
 interface PracticeLog {
@@ -49,6 +55,17 @@ export default function WritingExercises({ groupId, schoolId, goalFilter }: Writ
   const [showPrompt, setShowPrompt] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [showAlert, setShowAlert] = useState(false);
+  /*
+    De band van de klas zelf, niet die uit useKlasFilter: die laat de leeftijd
+    pas gelden zodra de school een net invulde, en de meeste scholen doen dat
+    niet. De leeftijd van een oefening komt uit alle netten samen, dus een net
+    is hier niet nodig.
+  */
+  const { selectedGroup } = useSchool();
+  const leeftijd = (LEEFTIJDEN as readonly string[]).includes(selectedGroup?.leeftijdsgroep ?? '')
+    ? (selectedGroup!.leeftijdsgroep as Leeftijd)
+    : 'all';
+  const [toonAlleLeeftijden, setToonAlleLeeftijden] = useState(false);
 
   useEffect(() => {
     loadExercises();
@@ -209,9 +226,23 @@ export default function WritingExercises({ groupId, schoolId, goalFilter }: Writ
     return practiceLogs.find((log) => log.exercise_id === exerciseId)?.count || 0;
   };
 
+  /*
+    De leeftijdsband komt van de klas. Staat er geen band op de klas, dan
+    valt er niets te filteren en zie je alles.
+  */
+  const pastBijLeeftijd = (ex: Exercise) => {
+    if (toonAlleLeeftijden || leeftijd === 'all') return true;
+    if (leeftijd === '2,5-4') return ex.leeftijd_25_4;
+    if (leeftijd === '4-5') return ex.leeftijd_4_5;
+    return ex.leeftijd_5_6;
+  };
+
+  const exercisesVoorKlas = exercises.filter(pastBijLeeftijd);
+  const verborgenDoorLeeftijd = exercises.length - exercisesVoorKlas.length;
+
   const filteredExercises = goalFilter
-    ? exercises.filter(ex => ex.goal_codes.includes(goalFilter))
-    : exercises;
+    ? exercisesVoorKlas.filter(ex => ex.goal_codes.includes(goalFilter))
+    : exercisesVoorKlas;
 
   const filteredGames = goalFilter
     ? games.filter(g => g.goal_codes.includes(goalFilter))
@@ -233,11 +264,32 @@ export default function WritingExercises({ groupId, schoolId, goalFilter }: Writ
           Voorbereidende Schrijfvaardigheden
         </h3>
         <p className="text-gray-600 mb-2">
-          Oefen voorbereidende schrijfvaardigheden voor kleuters (Doelen 1.2.1 - 1.2.7)
+          Oefen schrijfvaardigheden voor kleuters (Doelen 1.2.1 - 1.2.10)
         </p>
         <p className="text-sm text-gray-500">
           Klik op een oefening om te registreren dat de groep deze heeft geoefend.
         </p>
+
+        {leeftijd !== 'all' && (
+          <label className="mt-3 flex items-start gap-2 text-sm text-gray-600 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={toonAlleLeeftijden}
+              onChange={(e) => setToonAlleLeeftijden(e.target.checked)}
+              className="mt-1 w-4 h-4 accent-deep-purple"
+            />
+            <span>
+              Toon alle oefeningen
+              <span className="block text-xs text-gray-500">
+                {toonAlleLeeftijden
+                  ? `Je ziet nu ook oefeningen die de leerplannen pas later plaatsen dan ${leeftijd} jaar.`
+                  : verborgenDoorLeeftijd > 0
+                  ? `${verborgenDoorLeeftijd} ${verborgenDoorLeeftijd === 1 ? 'oefening hoort' : 'oefeningen horen'} volgens de leerplannen nog niet bij ${leeftijd} jaar.`
+                  : `Alle oefeningen horen bij ${leeftijd} jaar.`}
+              </span>
+            </span>
+          </label>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
