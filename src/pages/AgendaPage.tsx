@@ -4,11 +4,19 @@ import { useSchool } from '../contexts/SchoolContext';
 import { useAuth } from '../contexts/AuthContext';
 import AppLayout from '../components/AppLayout';
 import { trackFeatureUsage } from '../utils/onboardingTracker';
-import { Calendar, Plus, CreditCard as Edit, Copy, Trash2, Clock, ChevronLeft, ChevronRight, BookOpen, Gamepad2, PenTool, Activity, Video, FileText, Target, Search, X, ExternalLink, ChevronDown, ChevronUp, Check, Grid2x2 as Grid, Clipboard, Download } from 'lucide-react';
+import { Calendar, CalendarPlus, Plus, Pencil as Edit, Trash2, Clock, ChevronLeft, ChevronRight, BookOpen, Gamepad2, PenTool, Activity, Video, FileText, Target, Search, X, ExternalLink, ChevronDown, ChevronUp, Check, Grid2x2 as Grid, Clipboard, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
 import WeekCalendarView from '../components/WeekCalendarView';
 import { extractGoalCodesFromLessonItems } from '../utils/lessonGoalExtractor';
+import {
+  loadLeerplandoelenVoorCodes,
+  NET_LABELS,
+  omschrijfKlasFilter,
+  standaardFilter,
+  type LeerplandoelVoorExport,
+} from '../lib/leerplandoelen';
+import { localDateTimeInputToISO, toLocalDateString, toLocalDateTimeInput, toLocalTimeString } from '../utils/dateUtils';
 
 interface Lesson {
   id: string;
@@ -119,7 +127,7 @@ const itemTypeLabels = {
 const STANDAARD_LESDUUR_MINUTEN = 50;
 
 export default function AgendaPage() {
-  const { selectedGroupId, selectedSchool } = useSchool();
+  const { selectedGroupId, selectedGroup, selectedSchool } = useSchool();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -138,6 +146,8 @@ export default function AgendaPage() {
   const [selectedLessonGoals, setSelectedLessonGoals] = useState<GoalInfo[]>([]);
   const [loadingGoals, setLoadingGoals] = useState(false);
   const [loadingSelectedLessonGoals, setLoadingSelectedLessonGoals] = useState(false);
+  const [selectedLessonLeerplandoelen, setSelectedLessonLeerplandoelen] = useState<LeerplandoelVoorExport[]>([]);
+  const [loadingLeerplandoelen, setLoadingLeerplandoelen] = useState(false);
   const [showGoalPicker, setShowGoalPicker] = useState(false);
   const [allGoals, setAllGoals] = useState<GoalInfo[]>([]);
   const [goalSearchQuery, setGoalSearchQuery] = useState('');
@@ -152,18 +162,30 @@ export default function AgendaPage() {
     items: [],
   });
   const [showCopiedNotification, setShowCopiedNotification] = useState(false);
+  const [copiedMessage, setCopiedMessage] = useState('Gekopieerd naar klembord!');
+
+  /* Eén melding voor alle kopieeracties, zodat een klik nooit stil blijft. */
+  const meldKopie = (bericht: string) => {
+    setCopiedMessage(bericht);
+    setShowCopiedNotification(true);
+    setTimeout(() => setShowCopiedNotification(false), 3000);
+  };
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [lessonToDelete, setLessonToDelete] = useState<string | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [lessonToDuplicate, setLessonToDuplicate] = useState<Lesson | null>(null);
+  const [duplicateDate, setDuplicateDate] = useState('');
+  const [duplicateTime, setDuplicateTime] = useState('');
+  const [duplicating, setDuplicating] = useState(false);
   const [exportDateFrom, setExportDateFrom] = useState(() => {
     const s = getStartOfWeek(new Date());
-    return s.toISOString().split('T')[0];
+    return toLocalDateString(s);
   });
   const [exportDateTo, setExportDateTo] = useState(() => {
     const s = getStartOfWeek(new Date());
     const e = new Date(s);
     e.setDate(e.getDate() + 6);
-    return e.toISOString().split('T')[0];
+    return toLocalDateString(e);
   });
   const [exporting, setExporting] = useState(false);
 
@@ -242,7 +264,7 @@ export default function AgendaPage() {
     if (!selectedGroupId || !selectedSchoolId) return;
 
     try {
-      const dateStr = new Date().toISOString().split('T')[0];
+      const dateStr = toLocalDateString(new Date());
 
       const { data: groupTemplate } = await supabase
         .from('group_day_templates')
@@ -485,6 +507,7 @@ export default function AgendaPage() {
   const loadSelectedLessonGoals = async (lesson: Lesson) => {
     if (!lesson.items || lesson.items.length === 0) {
       setSelectedLessonGoals([]);
+      setSelectedLessonLeerplandoelen([]);
       return;
     }
 
@@ -492,11 +515,31 @@ export default function AgendaPage() {
     try {
       const goals = await loadGoalsForItems(lesson.items);
       setSelectedLessonGoals(goals);
+      loadSelectedLessonLeerplandoelen(goals.map(g => g.code));
     } catch (error) {
       console.error('Error loading selected lesson goals:', error);
       setSelectedLessonGoals([]);
+      setSelectedLessonLeerplandoelen([]);
     } finally {
       setLoadingSelectedLessonGoals(false);
+    }
+  };
+
+  /* De leerplandoelen bij die minimumdoelen, volgens het net van de school en de leeftijd van de klas. */
+  const loadSelectedLessonLeerplandoelen = async (codes: string[]) => {
+    if (codes.length === 0) {
+      setSelectedLessonLeerplandoelen([]);
+      return;
+    }
+
+    setLoadingLeerplandoelen(true);
+    try {
+      setSelectedLessonLeerplandoelen(await loadLeerplandoelenVoorCodes(codes, klasFilter));
+    } catch (error) {
+      console.error('Error loading leerplandoelen:', error);
+      setSelectedLessonLeerplandoelen([]);
+    } finally {
+      setLoadingLeerplandoelen(false);
     }
   };
 
@@ -793,8 +836,8 @@ export default function AgendaPage() {
       setFormData({
         title: templateBlock.subject?.title || templateBlock.title,
         description: '',
-        start_time: startTime.toISOString().slice(0, 16),
-        end_time: endTime.toISOString().slice(0, 16),
+        start_time: toLocalDateTimeInput(startTime),
+        end_time: toLocalDateTimeInput(endTime),
         items: [],
       });
     } else if (hour !== undefined) {
@@ -804,8 +847,8 @@ export default function AgendaPage() {
       setFormData({
         title: '',
         description: '',
-        start_time: startTime.toISOString().slice(0, 16),
-        end_time: endTime.toISOString().slice(0, 16),
+        start_time: toLocalDateTimeInput(startTime),
+        end_time: toLocalDateTimeInput(endTime),
         items: [],
       });
     } else {
@@ -815,8 +858,8 @@ export default function AgendaPage() {
       setFormData({
         title: '',
         description: '',
-        start_time: startTime.toISOString().slice(0, 16),
-        end_time: endTime.toISOString().slice(0, 16),
+        start_time: toLocalDateTimeInput(startTime),
+        end_time: toLocalDateTimeInput(endTime),
         items: [],
       });
     }
@@ -838,8 +881,8 @@ export default function AgendaPage() {
     setFormData({
       title: lesson.title,
       description: lesson.description || '',
-      start_time: new Date(lesson.start_time).toISOString().slice(0, 16),
-      end_time: new Date(lesson.end_time).toISOString().slice(0, 16),
+      start_time: toLocalDateTimeInput(new Date(lesson.start_time)),
+      end_time: toLocalDateTimeInput(new Date(lesson.end_time)),
       items,
     });
 
@@ -876,73 +919,104 @@ export default function AgendaPage() {
     setSelectedItemType(null);
   };
 
-  const handleCopyLesson = async (lesson: Lesson) => {
+  /* Maakt een kopie van een les (met onderdelen en doelen) op het opgegeven moment. */
+  const copyLessonTo = async (lesson: Lesson, startTime: Date, endTime: Date, title: string) => {
     if (!selectedGroupId || !selectedSchoolId) return;
 
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return;
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
 
-      const startTime = new Date(lesson.start_time);
-      startTime.setDate(startTime.getDate() + 7);
-      const endTime = new Date(lesson.end_time);
-      endTime.setDate(endTime.getDate() + 7);
+    const { data: newLesson, error: lessonError } = await supabase
+      .from('lessons')
+      .insert({
+        group_id: selectedGroupId,
+        school_id: selectedSchoolId,
+        title,
+        description: lesson.description,
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
+        created_by: userData.user.id,
+      })
+      .select()
+      .single();
 
-      const { data: newLesson, error: lessonError } = await supabase
-        .from('lessons')
-        .insert({
-          group_id: selectedGroupId,
-          school_id: selectedSchoolId,
-          title: `${lesson.title} (kopie)`,
-          description: lesson.description,
-          start_time: startTime.toISOString(),
-          end_time: endTime.toISOString(),
-          created_by: userData.user.id,
-        })
-        .select()
-        .single();
+    if (lessonError) throw lessonError;
 
-      if (lessonError) throw lessonError;
+    if (lesson.items && lesson.items.length > 0) {
+      const itemsToInsert = lesson.items.map((item, index) => ({
+        lesson_id: newLesson.id,
+        item_type: item.item_type,
+        item_id: item.item_id,
+        item_name: item.item_name,
+        sort_order: index,
+        notes: item.notes,
+        duration_minutes: item.duration_minutes,
+      }));
 
-      if (lesson.items && lesson.items.length > 0) {
-        const itemsToInsert = lesson.items.map((item, index) => ({
+      const { error: itemsError } = await supabase
+        .from('lesson_items')
+        .insert(itemsToInsert);
+
+      if (itemsError) throw itemsError;
+
+      const goalCodes = await extractGoalCodesFromLessonItems(lesson.items);
+
+      if (goalCodes.length > 0) {
+        const lessonGoalsToInsert = goalCodes.map(goalCode => ({
           lesson_id: newLesson.id,
-          item_type: item.item_type,
-          item_id: item.item_id,
-          item_name: item.item_name,
-          sort_order: index,
-          notes: item.notes,
-          duration_minutes: item.duration_minutes,
+          goal_code: goalCode,
+          lesson_start_time: startTime.toISOString(),
+          group_id: selectedGroupId,
         }));
 
-        const { error: itemsError } = await supabase
-          .from('lesson_items')
-          .insert(itemsToInsert);
+        const { error: insertGoalsError } = await supabase
+          .from('lesson_goals')
+          .insert(lessonGoalsToInsert);
 
-        if (itemsError) throw itemsError;
-
-        const goalCodes = await extractGoalCodesFromLessonItems(lesson.items);
-
-        if (goalCodes.length > 0) {
-          const lessonGoalsToInsert = goalCodes.map(goalCode => ({
-            lesson_id: newLesson.id,
-            goal_code: goalCode,
-            lesson_start_time: startTime.toISOString(),
-            group_id: selectedGroupId,
-          }));
-
-          const { error: insertGoalsError } = await supabase
-            .from('lesson_goals')
-            .insert(lessonGoalsToInsert);
-
-          if (insertGoalsError) throw insertGoalsError;
-        }
+        if (insertGoalsError) throw insertGoalsError;
       }
+    }
 
-      await loadLessons();
+    await loadLessons();
+  };
+
+  const openDuplicateModal = (lesson: Lesson) => {
+    const start = new Date(lesson.start_time);
+    setLessonToDuplicate(lesson);
+    setDuplicateDate(toLocalDateString(start));
+    setDuplicateTime(toLocalTimeString(start));
+  };
+
+  const setDuplicateToNow = () => {
+    const now = new Date();
+    setDuplicateDate(toLocalDateString(now));
+    setDuplicateTime(toLocalTimeString(now));
+  };
+
+  const getDuplicateTimes = () => {
+    if (!lessonToDuplicate || !duplicateDate || !duplicateTime) return null;
+    const startTime = new Date(`${duplicateDate}T${duplicateTime}`);
+    if (isNaN(startTime.getTime())) return null;
+    const duration = new Date(lessonToDuplicate.end_time).getTime() - new Date(lessonToDuplicate.start_time).getTime();
+    return { startTime, endTime: new Date(startTime.getTime() + duration) };
+  };
+
+  const confirmDuplicateLesson = async () => {
+    const times = getDuplicateTimes();
+    if (!lessonToDuplicate || !times) return;
+
+    setDuplicating(true);
+    try {
+      await copyLessonTo(lessonToDuplicate, times.startTime, times.endTime, lessonToDuplicate.title);
+      setLessonToDuplicate(null);
+      meldKopie(
+        `Kopie gezet op ${times.startTime.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' })} om ${toLocalTimeString(times.startTime)}`
+      );
     } catch (error) {
-      console.error('Error copying lesson:', error);
-      alert('Er is een fout opgetreden bij het kopiëren van de les');
+      console.error('Error duplicating lesson:', error);
+      alert('Er is een fout opgetreden bij het dupliceren van de les');
+    } finally {
+      setDuplicating(false);
     }
   };
 
@@ -969,6 +1043,18 @@ export default function AgendaPage() {
       alert('Er is een fout opgetreden bij het verwijderen van de les');
     }
   };
+
+  // De leerplandoelen in een export volgen het net van de school en de leeftijd van de klas.
+  const klasFilter = standaardFilter(selectedSchool?.net_code, selectedGroup?.leeftijdsgroep);
+
+  const leerplandoelenTitel = () =>
+    klasFilter.net === 'all'
+      ? 'LEERPLANDOELEN'
+      : `LEERPLANDOELEN (${omschrijfKlasFilter(klasFilter)})`;
+
+  // Zonder net op de school komen alle netten mee; dan moet het net bij elk doel staan.
+  const leerplandoelLabel = (doel: LeerplandoelVoorExport) =>
+    klasFilter.net === 'all' ? `${NET_LABELS[doel.netCode]} ${doel.doelnummer}` : doel.doelnummer;
 
   const handleExportLesson = async (lesson: Lesson) => {
     if (!lesson.items || lesson.items.length === 0) {
@@ -1022,19 +1108,51 @@ export default function AgendaPage() {
       });
     });
 
-    if (selectedLessonGoals.length > 0) {
-      exportText += '\nDOELEN\n';
-      exportText += '======\n\n';
-      selectedLessonGoals.forEach((goal, index) => {
-        exportText += `${index + 1}. ${goal.code}\n`;
-        exportText += `   ${goal.description}\n\n`;
-      });
-    }
+    const buildText = async () => {
+      let text = exportText;
+      const goals = selectedLessonGoals.length > 0
+        ? selectedLessonGoals
+        : await loadGoalsForItems(lesson.items!);
+
+      if (goals.length > 0) {
+        text += '\nMINIMUMDOELEN\n';
+        text += '=============\n\n';
+        goals.forEach((goal, index) => {
+          text += `${index + 1}. ${goal.code}\n`;
+          text += `   ${goal.description}\n\n`;
+        });
+
+        const leerplandoelen = await loadLeerplandoelenVoorCodes(goals.map(g => g.code), klasFilter);
+        if (leerplandoelen.length > 0) {
+          const titel = `${leerplandoelenTitel()}`;
+          text += `\n${titel}\n`;
+          text += '='.repeat(titel.length) + '\n\n';
+          leerplandoelen.forEach((doel, index) => {
+            text += `${index + 1}. ${leerplandoelLabel(doel)}\n`;
+            text += `   ${doel.omschrijving}\n`;
+            text += `   Bij minimumdoel ${doel.codes.join(', ')}\n\n`;
+          });
+        }
+      }
+      return text;
+    };
 
     try {
-      await navigator.clipboard.writeText(exportText);
-      setShowCopiedNotification(true);
-      setTimeout(() => setShowCopiedNotification(false), 3000);
+      /*
+        Safari laat alleen naar het klembord schrijven in de klik zelf, niet na
+        een await. Met een ClipboardItem dat een promise krijgt, blijft de klik
+        geldig terwijl de doelen nog laden.
+      */
+      if (typeof ClipboardItem !== 'undefined' && navigator.clipboard.write) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/plain': buildText().then(text => new Blob([text], { type: 'text/plain' })),
+          }),
+        ]);
+      } else {
+        await navigator.clipboard.writeText(await buildText());
+      }
+      meldKopie('Gekopieerd naar klembord!');
     } catch (error) {
       console.error('Error copying to clipboard:', error);
       alert('Er is een fout opgetreden bij het kopiëren naar klembord');
@@ -1065,6 +1183,8 @@ export default function AgendaPage() {
       const lessonIds = lessonsData?.map(l => l.id) || [];
       let itemsMap = new Map<string, LessonItem[]>();
       let goalsMap = new Map<string, string[]>();
+      const goalCodesMap = new Map<string, string[]>();
+      let leerplandoelen: LeerplandoelVoorExport[] = [];
 
       if (lessonIds.length > 0) {
         const { data: itemsData } = await supabase
@@ -1089,7 +1209,13 @@ export default function AgendaPage() {
             ? `${lg.educational_goals.code} - ${lg.educational_goals.description}`
             : lg.goal_code;
           goalsMap.get(lg.lesson_id)!.push(label);
+          if (!goalCodesMap.has(lg.lesson_id)) goalCodesMap.set(lg.lesson_id, []);
+          goalCodesMap.get(lg.lesson_id)!.push(lg.goal_code);
         });
+
+        // In één keer voor alle lessen, daarna per les de doelen die bij haar minimumdoelen horen.
+        const alleCodes = [...new Set(lessonGoalsData?.map((lg: any) => lg.goal_code as string) || [])];
+        leerplandoelen = await loadLeerplandoelenVoorCodes(alleCodes, klasFilter);
       }
 
       const rows: Record<string, string>[] = [];
@@ -1097,6 +1223,10 @@ export default function AgendaPage() {
       for (const lesson of lessonsData || []) {
         const items = itemsMap.get(lesson.id) || [];
         const goals = goalsMap.get(lesson.id) || [];
+        const lessonCodes = new Set(goalCodesMap.get(lesson.id) || []);
+        const lessonLeerplandoelen = leerplandoelen
+          .filter(doel => doel.codes.some(code => lessonCodes.has(code)))
+          .map(doel => `${leerplandoelLabel(doel)} - ${doel.omschrijving}`);
         const startDt = new Date(lesson.start_time);
         const endDt = new Date(lesson.end_time);
 
@@ -1127,7 +1257,8 @@ export default function AgendaPage() {
           Eindtijd: endDt.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }),
           Titel: lesson.title,
           Inhoud: contentLines.join('\n').trim(),
-          Doelen: goals.join('\n'),
+          Minimumdoelen: goals.join('\n'),
+          Leerplandoelen: lessonLeerplandoelen.join('\n'),
         });
       }
 
@@ -1137,15 +1268,15 @@ export default function AgendaPage() {
       }
 
       const ws = XLSX.utils.json_to_sheet(rows);
-      // Enable text wrapping for Inhoud (col E) and Doelen (col F)
+      // Enable text wrapping for Inhoud (col E), Minimumdoelen (col F) and Leerplandoelen (col G)
       const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
       for (let r = 1; r <= range.e.r; r++) {
-        ['E', 'F'].forEach(col => {
+        ['E', 'F', 'G'].forEach(col => {
           const cell = ws[`${col}${r + 1}`];
           if (cell) cell.s = { alignment: { wrapText: true, vertical: 'top' } };
         });
       }
-      ws['!cols'] = [{ wch: 28 }, { wch: 10 }, { wch: 10 }, { wch: 30 }, { wch: 50 }, { wch: 40 }];
+      ws['!cols'] = [{ wch: 28 }, { wch: 10 }, { wch: 10 }, { wch: 30 }, { wch: 50 }, { wch: 40 }, { wch: 60 }];
 
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Lessen');
@@ -1178,8 +1309,8 @@ export default function AgendaPage() {
           .update({
             title: formData.title,
             description: formData.description || null,
-            start_time: formData.start_time,
-            end_time: formData.end_time,
+            start_time: localDateTimeInputToISO(formData.start_time),
+            end_time: localDateTimeInputToISO(formData.end_time),
             updated_at: new Date().toISOString(),
           })
           .eq('id', editingLesson.id);
@@ -1207,7 +1338,7 @@ export default function AgendaPage() {
         }
 
         lessonId = editingLesson.id;
-        lessonStartTime = formData.start_time;
+        lessonStartTime = localDateTimeInputToISO(formData.start_time);
       } else {
         const { data: newLesson, error: lessonError } = await supabase
           .from('lessons')
@@ -1216,8 +1347,8 @@ export default function AgendaPage() {
             school_id: selectedSchoolId,
             title: formData.title,
             description: formData.description || null,
-            start_time: formData.start_time,
-            end_time: formData.end_time,
+            start_time: localDateTimeInputToISO(formData.start_time),
+            end_time: localDateTimeInputToISO(formData.end_time),
             created_by: userData.user.id,
           })
           .select()
@@ -1239,7 +1370,7 @@ export default function AgendaPage() {
         }
 
         lessonId = newLesson.id;
-        lessonStartTime = formData.start_time;
+        lessonStartTime = localDateTimeInputToISO(formData.start_time);
       }
 
       const goalCodes = await extractGoalCodesFromLessonItems(formData.items);
@@ -1320,10 +1451,10 @@ export default function AgendaPage() {
       const [endHour, endMin] = block.end_time.split(':').map(Number);
 
       date.setHours(startHour, startMin, 0, 0);
-      const startTimeStr = date.toISOString().slice(0, 16);
+      const startTimeStr = toLocalDateTimeInput(date);
 
       date.setHours(endHour, endMin, 0, 0);
-      const endTimeStr = date.toISOString().slice(0, 16);
+      const endTimeStr = toLocalDateTimeInput(date);
 
       setFormData({
         ...formData,
@@ -1352,10 +1483,10 @@ export default function AgendaPage() {
   const getLessonsForDay = (dayOffset: number) => {
     const date = new Date(currentWeekStart);
     date.setDate(date.getDate() + dayOffset);
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = toLocalDateString(date);
 
     return lessons.filter(lesson => {
-      const lessonDate = new Date(lesson.start_time).toISOString().split('T')[0];
+      const lessonDate = toLocalDateString(new Date(lesson.start_time));
       return lessonDate === dateStr;
     }).sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
   };
@@ -1543,14 +1674,14 @@ export default function AgendaPage() {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleCopyLesson(selectedLesson);
+                    openDuplicateModal(selectedLesson);
                     setShowDetailModal(false);
                     setSelectedLessonGoals([]);
                   }}
                   className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                  title="Kopiëren"
+                  title="Dupliceren naar ander moment"
                 >
-                  <Copy className="w-5 h-5 text-sky-blue" />
+                  <CalendarPlus className="w-5 h-5 text-grass-green" />
                 </button>
                 <button
                   onClick={(e) => {
@@ -1650,6 +1781,55 @@ export default function AgendaPage() {
                     </div>
                   )}
                 </div>
+
+                {selectedLessonGoals.length > 0 && (
+                  <div className="border-t pt-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Leerplandoelen</h4>
+                        <p className="text-xs text-gray-500">{omschrijfKlasFilter(klasFilter)}</p>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {selectedLessonLeerplandoelen.length}{' '}
+                        {selectedLessonLeerplandoelen.length === 1 ? 'doel' : 'doelen'}
+                      </div>
+                    </div>
+
+                    {loadingLeerplandoelen ? (
+                      <div className="flex justify-center py-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-grass-green"></div>
+                      </div>
+                    ) : selectedLessonLeerplandoelen.length > 0 ? (
+                      <div className="max-h-64 overflow-y-auto space-y-2 bg-gradient-to-br from-green-50 to-teal-50 rounded-xl p-3">
+                        {selectedLessonLeerplandoelen.map((doel, index) => (
+                          <div
+                            key={`${doel.netCode}-${doel.doelnummer}-${index}`}
+                            className="flex items-start gap-3 p-3 bg-white rounded-lg shadow-sm"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-grass-green flex items-center justify-center flex-shrink-0">
+                              <BookOpen className="w-4 h-4 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-sm text-green-900">
+                                {leerplandoelLabel(doel)}
+                              </div>
+                              <div className="text-xs text-gray-600">{doel.omschrijving}</div>
+                              <div className="text-xs text-gray-400 mt-1">
+                                Bij minimumdoel {doel.codes.join(', ')}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-4 text-sm text-gray-500 bg-gray-50 rounded-lg">
+                        {klasFilter.net === 'all'
+                          ? 'Geen leerplandoelen gevonden bij deze doelen'
+                          : `Geen leerplandoelen van ${NET_LABELS[klasFilter.net]} bij deze doelen`}
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             ) : (
               <div className="text-center py-8 text-gray-500">
@@ -2222,8 +2402,8 @@ export default function AgendaPage() {
 
           <div className="bg-cream rounded-xl p-4 text-sm text-gray-700 space-y-1">
             <p className="font-semibold text-gray-800 mb-2">Kolommen in het exportbestand:</p>
-            <p>Datum &bull; Starttijd &bull; Eindtijd &bull; Titel &bull; Inhoud &bull; Doelen</p>
-            <p className="text-xs text-gray-500 mt-1">Eén rij per les. Inhoud bevat alle lesonderdelen gegroepeerd per type. Doelen staan elk op een aparte regel.</p>
+            <p>Datum &bull; Starttijd &bull; Eindtijd &bull; Titel &bull; Inhoud &bull; Minimumdoelen &bull; Leerplandoelen</p>
+            <p className="text-xs text-gray-500 mt-1">Eén rij per les. Inhoud bevat alle lesonderdelen gegroepeerd per type. Minimumdoelen en leerplandoelen staan elk op een aparte regel. De leerplandoelen volgen het net van je school en de leeftijd van je klas.</p>
           </div>
 
           <div className="flex gap-3 pt-2 border-t">
@@ -2249,10 +2429,81 @@ export default function AgendaPage() {
         </div>
       </Modal>
 
+      <Modal
+        isOpen={!!lessonToDuplicate}
+        onClose={() => setLessonToDuplicate(null)}
+        title="Dupliceren naar ander moment"
+      >
+        {lessonToDuplicate && (() => {
+          const times = getDuplicateTimes();
+          return (
+            <div className="space-y-5">
+              <p className="text-sm text-gray-600">
+                Kies wanneer de kopie van <strong>{lessonToDuplicate.title}</strong> moet plaatsvinden.
+                Alle lesonderdelen en doelen worden mee gekopieerd.
+              </p>
+
+              <button
+                type="button"
+                onClick={setDuplicateToNow}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg border-2 border-grass-green text-grass-green font-semibold hover:bg-grass-green/10 transition-colors"
+              >
+                <Clock className="w-4 h-4" />
+                Nu
+              </button>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Datum</label>
+                  <input
+                    type="date"
+                    value={duplicateDate}
+                    onChange={(e) => setDuplicateDate(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-deep-purple focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Starttijd</label>
+                  <input
+                    type="time"
+                    value={duplicateTime}
+                    onChange={(e) => setDuplicateTime(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-deep-purple focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              {times && (
+                <p className="text-sm text-gray-600">
+                  Eindtijd: <strong>{toLocalTimeString(times.endTime)}</strong> (zelfde duur als de originele les)
+                </p>
+              )}
+
+              <div className="flex gap-3 pt-2 border-t">
+                <button
+                  onClick={() => setLessonToDuplicate(null)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Annuleren
+                </button>
+                <button
+                  onClick={confirmDuplicateLesson}
+                  disabled={duplicating || !times}
+                  className="flex-1 px-4 py-2 bg-deep-purple text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  <CalendarPlus className="w-4 h-4" />
+                  {duplicating ? 'Dupliceren...' : 'Dupliceren'}
+                </button>
+              </div>
+            </div>
+          );
+        })()}
+      </Modal>
+
       {showCopiedNotification && (
         <div className="fixed bottom-8 right-8 bg-green-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 animate-fade-in z-50">
           <Check className="w-5 h-5" />
-          <span className="font-semibold">Gekopieerd naar klembord!</span>
+          <span className="font-semibold">{copiedMessage}</span>
         </div>
       )}
     </AppLayout>

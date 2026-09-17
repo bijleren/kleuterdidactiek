@@ -528,3 +528,94 @@ export function omschrijfKlasFilter(f: KlasFilter): string {
   const leeftijd = f.leeftijd === 'all' ? 'alle leeftijden' : `${f.leeftijd} jaar`;
   return `${NET_LABELS[f.net]} · ${leeftijd}`;
 }
+
+/** Een leerplandoel zoals het in een export van de planner komt. */
+export interface LeerplandoelVoorExport {
+  netCode: NetCode;
+  doelnummer: string;
+  omschrijving: string;
+  /** De minimumdoelen van de les waaraan dit leerplandoel gekoppeld is. */
+  codes: string[];
+}
+
+/**
+ * Leerplandoelen bij een reeks minimumdoelcodes, voor de export van de planner.
+ *
+ * Volgt de klasinstelling: met een net op de school alleen dat net, met een
+ * leeftijdsband op de klas alleen die leeftijd. Zonder net komen alle netten
+ * mee, want dan weten we niet welk leerplan de school volgt.
+ */
+export async function loadLeerplandoelenVoorCodes(
+  codes: string[],
+  filter: KlasFilter
+): Promise<LeerplandoelVoorExport[]> {
+  if (codes.length === 0) return [];
+
+  const { rijen: koppelingen, error: kErr } = await haalAlles<{
+    leerplandoel_id: string;
+    code: string;
+  }>(() =>
+    supabase
+      .from('leerplandoel_minimumdoelen')
+      .select('leerplandoel_id, code')
+      .in('code', codes)
+      .order('leerplandoel_id') as never
+  );
+  if (kErr) {
+    console.error('Koppelingen laden mislukt:', kErr);
+    return [];
+  }
+
+  const codesPerDoel = new Map<string, string[]>();
+  for (const k of koppelingen) {
+    const lijst = codesPerDoel.get(k.leerplandoel_id) || [];
+    if (!lijst.includes(k.code)) lijst.push(k.code);
+    codesPerDoel.set(k.leerplandoel_id, lijst);
+  }
+
+  const ids = [...codesPerDoel.keys()];
+  const netten: NetCode[] = filter.net === 'all' ? NET_CODES : [filter.net];
+  const resultaat: (LeerplandoelVoorExport & { volgorde: number })[] = [];
+
+  for (let i = 0; i < ids.length; i += 500) {
+    const groep = ids.slice(i, i + 500);
+    const { rijen, error } = await haalAlles<LeerplandoelRow & { net_code: string }>(() => {
+      let q = supabase
+        .from('leerplandoelen')
+        .select('id, net_code, doelnummer, omschrijving, bron_volgorde, extra, leeftijd_25_4, leeftijd_4_5, leeftijd_5_6')
+        .in('id', groep)
+        .in('net_code', netten);
+      // Zelfde leeftijdslogica als loadLeerplandoelen; OVSG filtert op zijn eigen leerjaar.
+      if (filter.net === 'OVSG') {
+        const ovsgGroep = ovsgGroepVoorBand(filter.leeftijd);
+        if (ovsgGroep !== 'all') q = q.eq('extra->>leeftijdsgroep', ovsgGroep);
+      } else if (filter.net !== 'all') {
+        if (filter.leeftijd === '2,5-4') q = q.eq('leeftijd_25_4', true);
+        else if (filter.leeftijd === '4-5') q = q.eq('leeftijd_4_5', true);
+        else if (filter.leeftijd === '5-6') q = q.eq('leeftijd_5_6', true);
+      }
+      return q.order('id') as never;
+    });
+    if (error) {
+      console.error('Leerplandoelen laden mislukt:', error);
+      return [];
+    }
+    for (const r of rijen) {
+      if (!isNet(r.net_code)) continue;
+      resultaat.push({
+        netCode: r.net_code,
+        doelnummer: r.doelnummer,
+        omschrijving: r.omschrijving,
+        codes: (codesPerDoel.get(r.id) || []).sort(compareGoalCodes),
+        volgorde: r.bron_volgorde ?? Number.MAX_SAFE_INTEGER,
+      });
+    }
+  }
+
+  return resultaat
+    .sort(
+      (a, b) =>
+        NET_CODES.indexOf(a.netCode) - NET_CODES.indexOf(b.netCode) || a.volgorde - b.volgorde
+    )
+    .map(({ volgorde: _volgorde, ...doel }) => doel);
+}
