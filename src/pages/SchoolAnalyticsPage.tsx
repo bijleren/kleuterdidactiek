@@ -4,6 +4,12 @@ import { useSchool } from '../contexts/SchoolContext';
 import AppLayout from '../components/AppLayout';
 import { BarChart3, TrendingUp, Filter, Download, School, Calendar, Copy, Check } from 'lucide-react';
 import { compareGoalCodes } from '../utils/goalSort';
+import {
+  loadLeerplandoelen,
+  NET_LABELS,
+  type Leerplandoel,
+  type NetCode,
+} from '../lib/leerplandoelen';
 import { useSchooljaar } from '../contexts/SchooljaarContext';
 import { toLocalDateString } from '../utils/dateUtils';
 
@@ -15,8 +21,16 @@ interface GroupGoalStat {
   weeks_practiced: number[];
 }
 
+/* Een minimumdoel heet 1.2.3; een leerplandoel heet NL.284 of 1.3.GK3.12. */
+const IS_MINIMUMDOEL = /^\d+\.\d+\.\d+$/;
+
+type Niveau = 'minimumdoelen' | 'leerplandoelen';
+
 interface GoalOverview {
   goal_code: string;
+  /** Alleen bij een leerplandoel: de tekst en de minimumdoelen erachter. */
+  omschrijving?: string;
+  minimumdoelen?: string[];
   total_sessions: number;
   groups_practicing: number;
   groups: {
@@ -48,6 +62,35 @@ export default function SchoolAnalyticsPage() {
   const [sortBy, setSortBy] = useState<'sessions' | 'groups'>('sessions');
   const [yearlyGridData, setYearlyGridData] = useState<Map<string, Set<number>>>(new Map());
   const [codeCopied, setCodeCopied] = useState(false);
+  const [niveau, setNiveau] = useState<Niveau>('minimumdoelen');
+  const [leerplandoelen, setLeerplandoelen] = useState<Leerplandoel[]>([]);
+  const net = (selectedSchool?.net_code as NetCode | null | undefined) ?? null;
+
+  /*
+    De sessies bevatten allebei de niveaus door elkaar: bij een leerplandoel
+    registreren we het doelnummer van het net én de minimumdoelen erachter.
+    Zonder onderscheid stond 'GEZ moc 4.1' tussen '1.2.3' in dezelfde lijst.
+  */
+  useEffect(() => {
+    if (!net) {
+      setLeerplandoelen([]);
+      return;
+    }
+    let afgebroken = false;
+    loadLeerplandoelen(net, 'all').then((d) => {
+      if (!afgebroken) setLeerplandoelen(d);
+    });
+    return () => {
+      afgebroken = true;
+    };
+  }, [net]);
+
+  /** De codes waarmee een doel in de sessies kan staan. */
+  const codesVan = (doel: string): string[] => {
+    if (niveau === 'minimumdoelen') return [doel];
+    const lp = leerplandoelen.find((l) => l.doelnummer === doel);
+    return lp ? [lp.doelnummer, ...lp.codes] : [doel];
+  };
 
   const handleCopyCode = () => {
     if (!selectedSchool?.school_code) return;
@@ -60,7 +103,7 @@ export default function SchoolAnalyticsPage() {
     if (selectedSchool) {
       loadSchoolAnalytics();
     }
-  }, [selectedSchool, schooljaar.start, schooljaar.eind]);
+  }, [selectedSchool, schooljaar.start, schooljaar.eind, niveau, leerplandoelen]);
 
   useEffect(() => {
     if (selectedGoal && selectedSchool) {
@@ -134,8 +177,43 @@ export default function SchoolAnalyticsPage() {
         });
       });
 
-      const overviews = Array.from(goalMap.values());
-      setGoalOverviews(overviews);
+      if (niveau === 'minimumdoelen') {
+        // Alleen echte minimumdoelcodes; doelnummers van een net horen hier niet.
+        setGoalOverviews(
+          Array.from(goalMap.values()).filter((g) => IS_MINIMUMDOEL.test(g.goal_code))
+        );
+      } else {
+        /*
+          Per leerplandoel het hoogste aantal over het doelnummer zelf en zijn
+          minimumdoelen — dezelfde telling als in het leerdoelenoverzicht, zodat
+          werken aan het minimumdoel ook hier meetelt en niets dubbel telt.
+        */
+        const rijen: GoalOverview[] = [];
+        for (const lp of leerplandoelen) {
+          const kandidaten = [lp.doelnummer, ...lp.codes]
+            .map((c) => goalMap.get(c))
+            .filter((g): g is GoalOverview => !!g);
+          if (kandidaten.length === 0) continue;
+
+          const perGroep = new Map<string, { id: string; name: string; sessions: number }>();
+          for (const k of kandidaten) {
+            for (const groep of k.groups) {
+              const huidige = perGroep.get(groep.id);
+              if (!huidige || groep.sessions > huidige.sessions) perGroep.set(groep.id, { ...groep });
+            }
+          }
+          const groepen = [...perGroep.values()];
+          rijen.push({
+            goal_code: lp.doelnummer,
+            omschrijving: lp.omschrijving,
+            minimumdoelen: lp.codes,
+            total_sessions: groepen.reduce((t, g) => t + g.sessions, 0),
+            groups_practicing: groepen.length,
+            groups: groepen,
+          });
+        }
+        setGoalOverviews(rijen);
+      }
     } catch (error) {
       console.error('Error loading school analytics:', error);
     } finally {
@@ -154,7 +232,7 @@ export default function SchoolAnalyticsPage() {
         .from('goal_tracking_sessions')
         .select('group_id, goal_codes, created_at')
         .in('group_id', groupIds)
-        .contains('goal_codes', [selectedGoal])
+        .overlaps('goal_codes', codesVan(selectedGoal))
         .gte('practiced_at', schooljaar.start)
         .lte('practiced_at', `${schooljaar.eind}T23:59:59`)
         .order('created_at', { ascending: true });
@@ -211,7 +289,7 @@ export default function SchoolAnalyticsPage() {
         .from('goal_tracking_sessions')
         .select('group_id, goal_codes, created_at')
         .in('group_id', groupIds)
-        .contains('goal_codes', [selectedGoal])
+        .overlaps('goal_codes', codesVan(selectedGoal))
         .gte('practiced_at', schooljaar.start)
         .lte('practiced_at', `${schooljaar.eind}T23:59:59`);
 
@@ -277,6 +355,11 @@ export default function SchoolAnalyticsPage() {
   };
 
   const getGoalDomain = (goalCode: string): string => {
+    if (!IS_MINIMUMDOEL.test(goalCode)) {
+      // Bij een leerplandoel komt het vak uit het pad van het net zelf.
+      const lp = leerplandoelen.find((l) => l.doelnummer === goalCode);
+      if (lp) return lp.pathLabels[0] || lp.path[0] || (net ? NET_LABELS[net] : 'Leerplandoel');
+    }
     const firstDigit = goalCode.split('.')[0];
     const domains: Record<string, string> = {
       '1': 'Nederlands',
@@ -566,11 +649,46 @@ export default function SchoolAnalyticsPage() {
 
         {view === 'overview' && (
           <div className="space-y-6">
+            <div className="bg-white rounded-3xl p-4 shadow-xl flex flex-wrap items-center gap-3">
+              <span className="text-sm font-semibold text-gray-700">Niveau</span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setNiveau('minimumdoelen')}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                    niveau === 'minimumdoelen'
+                      ? 'bg-deep-purple text-white'
+                      : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-deep-purple'
+                  }`}
+                >
+                  Minimumdoelen
+                </button>
+                <button
+                  onClick={() => net && setNiveau('leerplandoelen')}
+                  disabled={!net}
+                  title={net ? undefined : 'Vul eerst het onderwijsnet van de school in'}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                    niveau === 'leerplandoelen'
+                      ? 'bg-deep-purple text-white'
+                      : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-deep-purple'
+                  }`}
+                >
+                  Leerplandoelen{net ? ` · ${NET_LABELS[net]}` : ''}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 flex-1 min-w-[16rem]">
+                {!net
+                  ? 'Vul het onderwijsnet in bij de instellingen om de leerplandoelen van je net te zien.'
+                  : niveau === 'leerplandoelen'
+                  ? 'Een leerplandoel telt mee zodra er aan het doel zelf of aan het minimumdoel erachter gewerkt is.'
+                  : 'De officiële minimumdoelen, over alle netten heen.'}
+              </p>
+            </div>
+
             <div className="bg-white rounded-3xl p-6 shadow-xl">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-baloo text-deep-purple flex items-center gap-2">
                   <BarChart3 className="w-6 h-6" />
-                  Alle Doelen ({goalOverviews.length})
+                  {niveau === 'leerplandoelen' ? 'Leerplandoelen' : 'Minimumdoelen'} ({goalOverviews.length})
                 </h2>
                 <div className="flex items-center gap-2">
                   <Filter className="w-5 h-5 text-gray-600" />
@@ -611,7 +729,15 @@ export default function SchoolAnalyticsPage() {
                             <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
                               {getGoalDomain(goal.goal_code)}
                             </span>
+                            {goal.minimumdoelen && goal.minimumdoelen.length > 0 && (
+                              <span className="text-xs text-gray-500">
+                                bij minimumdoel {goal.minimumdoelen.join(', ')}
+                              </span>
+                            )}
                           </div>
+                          {goal.omschrijving && (
+                            <p className="text-sm text-gray-700 mb-1">{goal.omschrijving}</p>
+                          )}
                           <div className="flex items-center gap-6 text-sm text-gray-600">
                             <span className="flex items-center gap-1">
                               <TrendingUp className="w-4 h-4 text-sky-blue" />
