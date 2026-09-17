@@ -2,8 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SchoolProvider } from './contexts/SchoolContext';
 import LandingPage from './pages/LandingPage';
-import { lazy, Suspense, useState } from 'react';
-import { X, Mail } from 'lucide-react';
+import { lazy, Suspense } from 'react';
 
 /*
   Alleen de landingspagina laadt mee in de eerste bundel; die is voor de meeste
@@ -38,46 +37,6 @@ function PaginaLaadt() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FFF8E7] via-[#FFF5E6] to-[#E8F6F3]">
       <div className="text-2xl font-baloo text-[#5D5FEF]">Laden...</div>
-    </div>
-  );
-}
-
-function LaunchSignupWidget() {
-  const { user, loading } = useAuth();
-  const [dismissed, setDismissed] = useState(false);
-
-  if (loading || user || dismissed) return null;
-
-  return (
-    <div className="fixed bottom-5 right-5 z-50 max-w-xs w-full animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
-        <div className="bg-gradient-to-r from-deep-purple to-[#9B9EFF] px-4 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Mail className="w-4 h-4 text-white flex-shrink-0" />
-            <span className="text-white font-semibold text-sm">Op de hoogte blijven?</span>
-          </div>
-          <button
-            onClick={() => setDismissed(true)}
-            className="text-white/70 hover:text-white transition-colors flex-shrink-0"
-            aria-label="Sluiten"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="px-4 py-3 space-y-3">
-          <p className="text-sm text-gray-700 leading-relaxed">
-            Mogen we je één keer mailen bij de lancering? Deel hier je mailadres.
-          </p>
-          <a
-            href="https://forms.office.com/e/zviHhhk52T"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block w-full text-center bg-deep-purple text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:scale-105 transition-transform shadow-md"
-          >
-            Ja, schrijf me in
-          </a>
-        </div>
-      </div>
     </div>
   );
 }
@@ -289,7 +248,6 @@ function AppRoutes() {
       />
     </Routes>
       </Suspense>
-      <LaunchSignupWidget />
     </>
   );
 }

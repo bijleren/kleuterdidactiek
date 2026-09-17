@@ -1,18 +1,10 @@
-import { X, MessageSquare, Rocket, Clock } from 'lucide-react';
+import { X, MessageSquare, Rocket } from 'lucide-react';
 
 interface NonPremiumWelcomeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenFeedback: () => void;
 }
-
-const COMING_SOON = [
-  'Duidelijke handleiding, help en ondersteuning',
-  'Videocatalogus met Bijleren-video\'s',
-  'Versie 2.0 van Doe-opdrachten',
-  'Versie 2.0 van Speel',
-  'Versie 2.0 van Woordenschat met alle afbeeldingen en audio, en aanpassingen per onderwijsnet (GO!, Katholiek, OVSG, ...)',
-];
 
 export default function NonPremiumWelcomeModal({ isOpen, onClose, onOpenFeedback }: NonPremiumWelcomeModalProps) {
   if (!isOpen) return null;
@@ -58,34 +50,9 @@ export default function NonPremiumWelcomeModal({ isOpen, onClose, onOpenFeedback
           </div>
 
           {/* Welcome message */}
-          <div className="space-y-3">
-            <p className="text-gray-800 text-base leading-relaxed">
-              Fijn dat je er bent! Het is nog vroeg voor nieuwe scholen, maar je bent van harte welkom om alvast
-              rond te kijken. We staan nog voor de officiële lancering, dus sommige dingen zijn nog niet helemaal
-              op punt — dat is normaal en hoort erbij.
-            </p>
-            <p className="text-gray-700 text-base leading-relaxed">
-              We zijn hard bezig om alles klaar te maken voor scholen die zich in{' '}
-              <strong className="text-deep-purple">augustus</strong> inschrijven. Je krijgt van ons een update
-              zodra alles klaarstaat.
-            </p>
-          </div>
-
-          {/* Coming soon list */}
-          <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Clock className="w-4 h-4 text-amber-600 flex-shrink-0" />
-              <p className="text-sm font-semibold text-amber-800">Dit staat nog op de planning voor de zomervakantie:</p>
-            </div>
-            <ul className="space-y-2">
-              {COMING_SOON.map((item) => (
-                <li key={item} className="flex items-start gap-2.5 text-sm text-amber-900">
-                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <p className="text-gray-800 text-base leading-relaxed">
+            Fijn dat je er bent! Je bent van harte welkom om rond te kijken en alles uit te proberen.
+          </p>
 
           {/* Feedback nudge */}
           <p className="text-gray-700 text-base leading-relaxed">

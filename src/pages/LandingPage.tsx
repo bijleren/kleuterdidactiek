@@ -423,9 +423,9 @@ export default function LandingPage() {
               <div className="inline-flex items-center gap-2 bg-sunny-yellow/30 text-deep-purple px-3 py-1 rounded-full text-xs font-semibold mb-3 border border-sunny-yellow/50">
                 ✨ Schooljaar 2026–2027
               </div>
-              <h2 className="text-2xl font-baloo text-deep-purple mb-2">Nieuwe school volgend jaar?</h2>
+              <h2 className="text-2xl font-baloo text-deep-purple mb-2">Nieuwe school?</h2>
               <p className="text-gray-600 text-sm leading-relaxed max-w-md">
-                Verken alvast de omgeving. Het volledige aanbod en alle inhoud zijn beschikbaar einde augustus 2026 — klaar voor een vliegende start.
+                Verken de omgeving en ontdek wat Kleuterdidactiek voor jouw school kan betekenen.
               </p>
             </div>
             <Link

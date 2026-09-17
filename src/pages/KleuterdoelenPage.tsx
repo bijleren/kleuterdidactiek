@@ -181,7 +181,7 @@ export default function KleuterdoelenPage() {
     videos: 'Hier komen alle bijleervideo\'s op basis van de minimumdoelen, maar je kan ook samen met het team jullie favoriete video\'s verzamelen.',
     materials: 'Hier krijg je een overzicht van alle bijleermaterialen die er voorhanden zijn om aan de minimumdoelen te werken, maar ook jij kan samen met het team jullie materialen databank bij elkaar brengen.',
     activities: 'Bepaal de verschillende activiteiten die er in jullie klassen kunnen zijn, maak de activiteiten aan en voeg ze samen tot een hoekenwerk. Hier kunnen leerlingen aanduiden welke activiteit ze willen doen. Ze kunnen hier ook hun webwijzer voor gebruiken.',
-    routines: 'Maak één keer tijd voor je routines goed in kaart te brengen en pluk de vruchten en kijk aan welke doelen er gewerkt is. Gebruik onze routines als inspiratie of maak er nieuwe aan. Ook dit was een eerste versie van onze routines, we verwerken de feedback en komen met een versie 2 in augustus.',
+    routines: 'Maak één keer tijd voor je routines goed in kaart te brengen en pluk de vruchten en kijk aan welke doelen er gewerkt is. Gebruik onze routines als inspiratie of maak er nieuwe aan.',
   };
 
   const isGoalsOnlyMode = activeTab === 'goals';
@@ -298,17 +298,15 @@ export default function KleuterdoelenPage() {
           <div className="bg-gradient-to-r from-sky-blue/10 to-coral-pink/10 rounded-2xl p-8 shadow-lg border-2 border-sky-blue/20 space-y-6">
             <h2 className="text-2xl font-baloo text-deep-purple">Welkom bij Aan de Slag!</h2>
 
-            {/* Non-premium: early-access block + video side by side */}
+            {/* Non-premium: welcome block + video side by side */}
             {(selectedSchool?.premium_school ?? 1) === 0 && (
               <div className="flex flex-col lg:flex-row gap-6">
-                {/* Left: early-access info */}
+                {/* Left: welcome info */}
                 <div className="flex-1 space-y-4">
                   <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-5 space-y-3">
-                    <p className="text-base font-semibold text-amber-800">Je bent er vroeg bij!</p>
+                    <p className="text-base font-semibold text-amber-800">Fijn dat je er bent!</p>
                     <p className="text-base text-amber-900 leading-relaxed">
-                      We hebben dit schooljaar al met scholen samengewerkt om het platform te gebruiken en te testen.
-                      Tijdens de zomervakantie verwerken we hun feedback en bouwen we verder — zodat alles klaarstaat
-                      voor de officiële lancering in <strong>augustus</strong>. Je krijgt van ons een update zodra alles klaarstaat.
+                      Kijk gerust rond en probeer alles uit. Heb je vragen of ideeën? Laat het ons weten via de feedbackknop.
                     </p>
                     <p className="text-base text-amber-900 leading-relaxed">
                       <strong>Tip:</strong>{' '}
@@ -321,23 +319,6 @@ export default function KleuterdoelenPage() {
                         Download hier de productcatalogus van Bijleren
                       </a>
                     </p>
-                  </div>
-                  <div>
-                    <p className="text-base font-semibold text-gray-700 mb-2">Wat staat er nog op de planning voor de zomervakantie:</p>
-                    <ul className="space-y-1.5">
-                      {[
-                        'Duidelijke handleiding, help en ondersteuning',
-                        "Videocatalogus met Bijleren-video's",
-                        'Versie 2.0 van Doe-opdrachten',
-                        'Versie 2.0 van Speel',
-                        'Versie 2.0 van Woordenschat met alle afbeeldingen en audio, en aanpassingen per onderwijsnet (GO!, Katholiek, OVSG, ...)',
-                      ].map((item) => (
-                        <li key={item} className="flex items-start gap-2 text-base text-gray-700">
-                          <span className="mt-2 w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
                   </div>
                 </div>
 

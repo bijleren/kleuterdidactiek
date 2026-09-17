@@ -40,9 +40,8 @@ export default function NieuweScholenPage() {
             <span className="text-sky-blue">voor 2026–2027</span>
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Interesse om met Kleuterdidactiek te starten volgend schooljaar? Je bent van harte welkom
-            om alvast rond te kijken. De volledige inhoud en het definitieve aanbod zijn beschikbaar
-            <strong> eind augustus 2026</strong>.
+            Interesse om met Kleuterdidactiek te starten? Je bent van harte welkom
+            om rond te kijken en alles uit te proberen.
           </p>
         </section>
 
@@ -71,7 +70,7 @@ export default function NieuweScholenPage() {
           </div>
         </section>
 
-        {/* ── COME BACK END OF AUGUST ── */}
+        {/* ── VIDEOS + EXPLORE ── */}
         <section className="mb-16">
           {/* Two videos side by side */}
           <div className="grid md:grid-cols-2 gap-6 mb-8">
@@ -113,10 +112,9 @@ export default function NieuweScholenPage() {
 
           <div className="bg-gradient-to-br from-sunny-yellow/20 to-coral-pink/10 rounded-3xl p-8 border-2 border-sunny-yellow/30 text-center">
             <div className="text-4xl mb-4">📅</div>
-            <h2 className="text-2xl font-baloo text-deep-purple mb-3">Kijk gerust alvast rond</h2>
+            <h2 className="text-2xl font-baloo text-deep-purple mb-3">Kijk gerust rond</h2>
             <p className="text-gray-600 leading-relaxed max-w-xl mx-auto">
-              Verken en probeer uit, wil je echt het volledige aanbod zien? Kom dan terug <strong>eind augustus 2026</strong>.
-              Tegen dan is alles klaar voor een vliegende start van het nieuwe schooljaar.
+              Verken de omgeving en probeer alles uit. Zo zie je meteen wat Kleuterdidactiek voor jouw school kan betekenen.
             </p>
           </div>
         </section>
@@ -281,7 +279,7 @@ export default function NieuweScholenPage() {
               Klaar om te starten?
             </h2>
             <p className="text-white/90 text-base mb-4 max-w-xl mx-auto">
-              Maak een gratis account aan en verken de omgeving. Het definitieve aanbod is beschikbaar eind augustus 2026.
+              Maak een gratis account aan en verken de omgeving.
             </p>
             <p className="text-white/80 text-sm mb-6 max-w-xl mx-auto">
               Geef jezelf de keuze om tot 1 oktober tot een beslissing te komen. Wil je vooraf al echt meer informatie, laat het weten via{' '}
