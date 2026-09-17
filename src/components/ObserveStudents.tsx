@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Check, HelpCircle, Save, Download, ExternalLink, Users, Camera, Image, Loader2, UserPlus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { toLocalDateString } from '../utils/dateUtils';
 
 interface Goal {
   code: string;
@@ -107,6 +108,20 @@ export default function ObserveStudents({ groupId }: ObserveStudentsProps) {
         result: prev[studentId]?.result === result ? null : result,
       },
     }));
+  };
+
+  const handleSetAll = (result: 'no' | 'almost' | 'yes') => {
+    setEvaluations(prev => {
+      const next = { ...prev };
+      students.forEach(student => {
+        next[student.id] = {
+          ...prev[student.id],
+          student_id: student.id,
+          result,
+        };
+      });
+      return next;
+    });
   };
 
   const handleCommentChange = (studentId: string, comment: string) => {
@@ -269,7 +284,7 @@ export default function ObserveStudents({ groupId }: ObserveStudentsProps) {
     const metaSheet = XLSX.utils.aoa_to_sheet(metaData);
     XLSX.utils.book_append_sheet(workbook, metaSheet, 'Info');
 
-    const fileName = `evaluatie_${selectedGoal}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const fileName = `evaluatie_${selectedGoal}_${toLocalDateString(new Date())}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
@@ -495,6 +510,36 @@ export default function ObserveStudents({ groupId }: ObserveStudentsProps) {
         <>
           <div className="space-y-4">
             <h3 className="text-xl font-baloo text-deep-purple">Evalueer leerlingen</h3>
+
+            {students.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 bg-white rounded-xl shadow-md p-3">
+                <span className="text-sm font-semibold text-gray-700 mr-1">Zet iedereen op:</span>
+                <button
+                  type="button"
+                  onClick={() => handleSetAll('no')}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold bg-red-100 text-red-700 hover:bg-red-200 transition-all"
+                >
+                  <X className="w-4 h-4" />
+                  Niet behaald
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSetAll('almost')}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-all"
+                >
+                  <HelpCircle className="w-4 h-4" />
+                  Bijna behaald
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSetAll('yes')}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold bg-green-100 text-green-700 hover:bg-green-200 transition-all"
+                >
+                  <Check className="w-4 h-4" />
+                  Behaald
+                </button>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {students.map((student) => (
