@@ -3,6 +3,7 @@ import { Download, ChevronUp, ChevronDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { compareGoalCodes } from '../utils/goalSort';
 import CurrentLessonActivityBoard from './CurrentLessonActivityBoard';
+import { toLocalDateString } from '../utils/dateUtils';
 
 interface Goal {
   code: string;
@@ -227,7 +228,7 @@ export default function ClassLevelOverview({ groupId }: ClassLevelOverviewProps)
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Klasoverzicht');
 
-    const fileName = `klasoverzicht_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const fileName = `klasoverzicht_${toLocalDateString(new Date())}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 

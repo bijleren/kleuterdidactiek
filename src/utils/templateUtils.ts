@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { toLocalDateString } from './dateUtils';
 
 interface TemplateBlock {
   id: string;
@@ -29,7 +30,7 @@ export async function findApplicableTemplate(
   schoolId: string,
   timestamp: Date
 ): Promise<string | null> {
-  const dateStr = timestamp.toISOString().split('T')[0];
+  const dateStr = toLocalDateString(timestamp);
 
   const { data: groupTemplate } = await supabase
     .from('group_day_templates')

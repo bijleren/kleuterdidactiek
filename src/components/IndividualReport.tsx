@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Download, ChevronDown, ChevronRight, ExternalLink, Users } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { compareGoalCodes } from '../utils/goalSort';
+import { toLocalDateString } from '../utils/dateUtils';
 
 interface Student {
   id: string;
@@ -247,7 +248,7 @@ export default function IndividualReport({ groupId }: IndividualReportProps) {
     XLSX.utils.book_append_sheet(wb, ws1, 'Overzicht');
     XLSX.utils.book_append_sheet(wb, ws2, 'Details');
 
-    const fileName = `rapport_${selectedStudent.first_name}_${selectedStudent.last_name}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const fileName = `rapport_${selectedStudent.first_name}_${selectedStudent.last_name}_${toLocalDateString(new Date())}.xlsx`;
     XLSX.writeFile(wb, fileName);
   };
 

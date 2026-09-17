@@ -4,6 +4,7 @@ import { useSchool } from '../contexts/SchoolContext';
 import AppLayout from '../components/AppLayout';
 import { BarChart3, TrendingUp, Filter, Download, School, Calendar, Copy, Check } from 'lucide-react';
 import { compareGoalCodes } from '../utils/goalSort';
+import { toLocalDateString } from '../utils/dateUtils';
 
 interface GroupGoalStat {
   group_id: string;
@@ -370,7 +371,7 @@ export default function SchoolAnalyticsPage() {
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Jaaroverzicht');
 
-      XLSX.writeFile(wb, `jaaroverzicht_${selectedGoal}_${selectedSchool?.name || 'school'}_${new Date().toISOString().split('T')[0]}.xlsx`);
+      XLSX.writeFile(wb, `jaaroverzicht_${selectedGoal}_${selectedSchool?.name || 'school'}_${toLocalDateString(new Date())}.xlsx`);
     }
   };
 
@@ -389,7 +390,7 @@ export default function SchoolAnalyticsPage() {
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
-      link.setAttribute('download', `school_analytics_${selectedSchool?.name || 'school'}_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute('download', `school_analytics_${selectedSchool?.name || 'school'}_${toLocalDateString(new Date())}.csv`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -417,7 +418,7 @@ export default function SchoolAnalyticsPage() {
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
-      link.setAttribute('download', `goal_${selectedGoal}_weekly_${selectedSchool?.name || 'school'}_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute('download', `goal_${selectedGoal}_weekly_${selectedSchool?.name || 'school'}_${toLocalDateString(new Date())}.csv`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();

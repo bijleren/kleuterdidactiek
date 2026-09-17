@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BarChart3, Download, Users, Clock, TrendingUp, FileSpreadsheet } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { toLocalDateString } from '../utils/dateUtils';
 
 interface ActivityAnalyticsProps {
   schoolId: string;
@@ -366,7 +367,7 @@ export default function ActivityAnalytics({ schoolId, initialBoardId }: Activity
     const boardName = selectedBoardId === 'all' ? 'Alle borden' : boards.find((b) => b.id === selectedBoardId)?.name || 'board';
     const studentName = selectedStudentId === 'all' ? 'alle_leerlingen' : studentStats.find((s) => s.student_id === selectedStudentId)?.first_name || 'student';
     const dateRangeText = { today: 'vandaag', week: 'afgelopen_week', month: 'afgelopen_maand', all: 'alle_tijd' }[dateRange];
-    const filename = `activitijd_analyses_${boardName}_${studentName}_${dateRangeText}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const filename = `activitijd_analyses_${boardName}_${studentName}_${dateRangeText}_${toLocalDateString(new Date())}.xlsx`;
 
     XLSX.writeFile(wb, filename);
   };

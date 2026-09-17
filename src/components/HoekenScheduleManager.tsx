@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import Modal from './Modal';
 import { getActivityIcon } from '../lib/activityIcons';
+import { toLocalDateString } from '../utils/dateUtils';
 
 interface HoekenTemplate {
   id: string;
@@ -71,7 +72,7 @@ export default function HoekenScheduleManager({
     day_of_week: [1, 2, 3, 4, 5] as number[],
     start_time: '09:00',
     duration_minutes: 45,
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: toLocalDateString(new Date()),
     end_date: '',
   });
 
@@ -143,7 +144,7 @@ export default function HoekenScheduleManager({
       day_of_week: [1, 2, 3, 4, 5],
       start_time: '09:00',
       duration_minutes: 45,
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: toLocalDateString(new Date()),
       end_date: '',
     });
   };

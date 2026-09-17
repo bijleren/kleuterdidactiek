@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import AppLayout from '../components/AppLayout';
 import { trackFeatureUsage } from '../utils/onboardingTracker';
 import { BarChart3, Calendar, TrendingUp, Filter, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { parseLocalDate, toLocalDateString } from '../utils/dateUtils';
 
 interface GoalSession {
   id: string;
@@ -68,12 +69,15 @@ export default function AnalyticsPage() {
     const d = new Date(date);
     const day = d.getDay();
     const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    return new Date(d.setDate(diff));
+    d.setDate(diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
   }
 
   function getEndOfWeek(startDate: Date): Date {
     const end = new Date(startDate);
     end.setDate(end.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
     return end;
   }
 
@@ -124,9 +128,9 @@ export default function AnalyticsPage() {
         monthAgo.setMonth(monthAgo.getMonth() - 1);
         query = query.gte('created_at', monthAgo.toISOString());
       } else if (dateRange === 'custom' && customStartDate && customEndDate) {
-        const startDateTime = new Date(customStartDate);
+        const startDateTime = parseLocalDate(customStartDate);
         startDateTime.setHours(0, 0, 0, 0);
-        const endDateTime = new Date(customEndDate);
+        const endDateTime = parseLocalDate(customEndDate);
         endDateTime.setHours(23, 59, 59, 999);
         query = query
           .gte('created_at', startDateTime.toISOString())
@@ -152,7 +156,7 @@ export default function AnalyticsPage() {
     const daysMap: Record<string, Set<string>> = {};
 
     data.forEach((session) => {
-      const day = session.created_at.slice(0, 10);
+      const day = toLocalDateString(new Date(session.created_at));
       session.goal_codes.forEach((code) => {
         if (!summaryMap[code]) {
           summaryMap[code] = {
@@ -187,7 +191,7 @@ export default function AnalyticsPage() {
     const activities: DayActivity[] = data.map((session) => {
       const date = new Date(session.created_at);
       return {
-        date: date.toISOString().split('T')[0],
+        date: toLocalDateString(date),
         hour: date.getHours(),
         goal_codes: session.goal_codes,
         activity_name: session.activity_name,
@@ -462,7 +466,7 @@ export default function AnalyticsPage() {
       csv += `${escapeCSV(summary.goal_code)},${summary.total_sessions},${escapeCSV(new Date(summary.last_practiced).toLocaleDateString('nl-NL'))}\n`;
     });
 
-    const filename = `analytics-overzicht-${selectedGroup?.name || 'groep'}-${new Date().toISOString().split('T')[0]}.csv`;
+    const filename = `analytics-overzicht-${selectedGroup?.name || 'groep'}-${toLocalDateString(new Date())}.csv`;
     exportToExcel(filename, csv);
   };
 
@@ -489,7 +493,7 @@ export default function AnalyticsPage() {
       csv += `${datumStr},${tijdStr},${activiteitStr},${typeStr},${doelenStr},${duurStr},${herhalingenStr}\n`;
     });
 
-    const filename = `analytics-doelen-${selectedGroup?.name || 'groep'}-${new Date().toISOString().split('T')[0]}.csv`;
+    const filename = `analytics-doelen-${selectedGroup?.name || 'groep'}-${toLocalDateString(new Date())}.csv`;
     exportToExcel(filename, csv);
   };
 
@@ -511,7 +515,7 @@ export default function AnalyticsPage() {
       csv += `${datumStr},${tijdStr},${activiteitStr},${typeStr},${doelenStr}\n`;
     });
 
-    const filename = `analytics-kalender-${selectedGroup?.name || 'groep'}-${new Date().toISOString().split('T')[0]}.csv`;
+    const filename = `analytics-kalender-${selectedGroup?.name || 'groep'}-${toLocalDateString(new Date())}.csv`;
     exportToExcel(filename, csv);
   };
 
@@ -881,7 +885,7 @@ export default function AnalyticsPage() {
                     {Array.from({ length: 7 }, (_, dayOffset) => {
                       const date = new Date(currentWeekStart);
                       date.setDate(date.getDate() + dayOffset);
-                      const dateStr = date.toISOString().split('T')[0];
+                      const dateStr = toLocalDateString(date);
 
                       const activitiesAtHour = dayActivities.filter(
                         (a) => a.date === dateStr && a.hour === hour

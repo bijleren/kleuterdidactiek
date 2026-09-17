@@ -13,6 +13,7 @@ import {
   type DoelNetInfo,
 } from '../lib/leerplandoelen';
 import { useKlasFilter } from '../hooks/useKlasFilter';
+import { toLocalDateString } from '../utils/dateUtils';
 
 interface GoalsOverviewProps {
   groupId: string;
@@ -548,7 +549,7 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
     const ws = XLSX.utils.aoa_to_sheet(wsData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Doelen per week');
-    XLSX.writeFile(wb, `doelen-weekoverzicht-${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.writeFile(wb, `doelen-weekoverzicht-${toLocalDateString(new Date())}.xlsx`);
   };
 
   if (loading) {
@@ -895,8 +896,8 @@ export default function GoalsOverview({ groupId }: GoalsOverviewProps) {
                           onClick={() => {
                             const actualWeekEnd = new Date(weekStart);
                             actualWeekEnd.setDate(actualWeekEnd.getDate() + 6);
-                            const startStr = weekStart.toISOString().split('T')[0];
-                            const endStr = actualWeekEnd.toISOString().split('T')[0];
+                            const startStr = toLocalDateString(weekStart);
+                            const endStr = toLocalDateString(actualWeekEnd);
                             navigate(`/analytics?goal=${goal.code}&startDate=${startStr}&endDate=${endStr}`);
                           }}
                           className={`flex-1 h-full transition-all hover:opacity-80 cursor-pointer ${

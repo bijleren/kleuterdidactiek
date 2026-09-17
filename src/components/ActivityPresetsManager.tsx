@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import DoelChips from './DoelChips';
 import { supabase } from '../lib/supabase';
 import DoelSelector from './DoelSelector';
-import { Search, Plus, CreditCard as Edit, Trash2, X, Clock, Calendar, Check, Copy, Palette, BookOpen, Blocks, Hammer, Scissors, Home, Wrench, Building2, Puzzle, Drama, Rainbow, Music, Paintbrush, LayoutGrid as Layout, Users, Upload } from 'lucide-react';
+import { Search, Plus, Pencil as Edit, Trash2, X, Clock, Calendar, Check, Copy, Palette, BookOpen, Blocks, Hammer, Scissors, Home, Wrench, Building2, Puzzle, Drama, Rainbow, Music, Paintbrush, LayoutGrid as Layout, Users, Upload } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSchool } from '../contexts/SchoolContext';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ import Modal from './Modal';
 import { getActivityIcon } from '../lib/activityIcons';
 import { logActivityToCalendar } from '../utils/calendarLogger';
 import { uploadHoekenIcon } from '../utils/iconUpload';
+import { toLocalDateString, toLocalTimeString } from '../utils/dateUtils';
 
 interface ActivityPresetsManagerProps {
   groupId: string;
@@ -67,12 +68,12 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
   const iconFileInputRef = useRef<HTMLInputElement>(null);
 
   const [markDoneData, setMarkDoneData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    time: new Date().toTimeString().slice(0, 5),
+    date: toLocalDateString(new Date()),
+    time: toLocalTimeString(new Date()),
   });
 
   const [agendaData, setAgendaData] = useState({
-    date: new Date().toISOString().split('T')[0],
+    date: toLocalDateString(new Date()),
     start_time: '09:00',
     end_time: '10:00',
     title: '',
@@ -582,8 +583,8 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
       setNotification({ message: 'Hoekenwerk geregistreerd als gedaan!', type: 'success' });
       setShowMarkDoneModal(null);
       setMarkDoneData({
-        date: new Date().toISOString().split('T')[0],
-        time: new Date().toTimeString().slice(0, 5),
+        date: toLocalDateString(new Date()),
+        time: toLocalTimeString(new Date()),
       });
       loadActivePresets();
     } catch (error) {
@@ -658,7 +659,7 @@ export default function ActivityPresetsManager({ groupId, schoolId, goalFilter }
       setNotification({ message: 'Hoekenwerk toegevoegd aan agenda!', type: 'success' });
       setShowAddToAgendaModal(null);
       setAgendaData({
-        date: new Date().toISOString().split('T')[0],
+        date: toLocalDateString(new Date()),
         start_time: '09:00',
         end_time: '10:00',
         title: '',

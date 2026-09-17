@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { toLocalDateString } from './dateUtils';
 
 interface GroupRoutine {
   id: string;
@@ -47,7 +48,7 @@ export function shouldRoutineOccur(
   routine: GroupRoutine,
   date: Date
 ): boolean {
-  const dateStr = date.toISOString().split('T')[0];
+  const dateStr = toLocalDateString(date);
 
   if (dateStr < routine.start_date) {
     return false;
@@ -99,7 +100,7 @@ export function generateRoutineInstances(
           routine_color: routine.routine.color,
           routine_category: routine.routine.category,
           goal_codes: routine.routine.goal_codes,
-          date: currentDate.toISOString().split('T')[0],
+          date: toLocalDateString(currentDate),
           day_of_week: currentDate.getDay(),
           template_block_ids: routine.template_block_ids,
           group_routine_id: routine.id,

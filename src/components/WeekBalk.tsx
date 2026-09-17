@@ -3,6 +3,7 @@ import {
   getSchoolYearWeeks,
   getWeekNumber,
 } from '../utils/schooljaar';
+import { toLocalDateString } from '../utils/dateUtils';
 
 interface WeekBalkProps {
   /** Weeknummers (0-based vanaf 1 september) waarin geoefend is. */
@@ -59,8 +60,8 @@ export default function WeekBalk({ weken, onWeekClick, toonKop = true }: WeekBal
                 const echtEind = new Date(weekStart);
                 echtEind.setDate(echtEind.getDate() + 6);
                 onWeekClick(
-                  weekStart.toISOString().split('T')[0],
-                  echtEind.toISOString().split('T')[0],
+                  toLocalDateString(weekStart),
+                  toLocalDateString(echtEind),
                   weekIndex
                 );
               }}

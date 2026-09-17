@@ -42,10 +42,10 @@ export async function findExistingLesson(
   timestamp: Date
 ): Promise<Lesson | null> {
   const startOfDay = new Date(timestamp);
-  startOfDay.setUTCHours(0, 0, 0, 0);
+  startOfDay.setHours(0, 0, 0, 0);
 
   const endOfDay = new Date(timestamp);
-  endOfDay.setUTCHours(23, 59, 59, 999);
+  endOfDay.setHours(23, 59, 59, 999);
 
   const startOfDayStr = startOfDay.toISOString();
   const endOfDayStr = endOfDay.toISOString();

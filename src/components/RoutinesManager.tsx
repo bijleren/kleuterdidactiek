@@ -6,6 +6,7 @@ import { RefreshCw, Plus, Pencil, Trash2, Search, Clock, Settings } from 'lucide
 import { Circle } from 'lucide-react';
 import { getActivityIcon } from '../lib/activityIcons';
 import Modal from './Modal';
+import { toLocalDateString } from '../utils/dateUtils';
 
 type RoutineCategory = 'start_week' | 'start_day' | 'start_lesson' | 'lesson' | 'end_lesson' | 'end_day' | 'end_week';
 type RoutineFrequency = 'weekly' | 'bi_weekly';
@@ -98,7 +99,7 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
     week_alternation: 0,
     day_of_week: [1, 2, 3, 4, 5],
     template_block_ids: [] as string[],
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: toLocalDateString(new Date()),
     end_date: '',
     start_time: '',
     end_time: '',
@@ -292,7 +293,7 @@ export default function RoutinesManager({ schoolId, groupId, goalFilter }: Routi
         week_alternation: 0,
         day_of_week: [1, 2, 3, 4, 5],
         template_block_ids: [],
-        start_date: new Date().toISOString().split('T')[0],
+        start_date: toLocalDateString(new Date()),
         end_date: '',
         start_time: '',
         end_time: '',
