@@ -37,6 +37,10 @@ interface Word {
 
 interface VocabularyCategory {
   id: string;
+  /** Eigen categorie van de school, aangemaakt door een leerkracht. */
+  isCustom?: boolean;
+  /** Alleen gevuld bij een eigen categorie die tot één klas beperkt is. */
+  groupId?: string | null;
   title: string;
   icon: string;
   categoryType: string;
@@ -92,6 +96,13 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryEmoji, setNewCategoryEmoji] = useState('📚');
+  const [newCategoryGoals, setNewCategoryGoals] = useState<string[]>([]);
+  const [newCategoryOnlyGroup, setNewCategoryOnlyGroup] = useState(false);
+  const [savingCategory, setSavingCategory] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<VocabularyCategory | null>(null);
   const [newWord, setNewWord] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
@@ -273,6 +284,7 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
       setSystemWords(systemWordsList);
 
       let customWordsData = [];
+      let customCategoriesData: any[] = [];
       if (selectedSchool?.id) {
         const { data, error: customWordsError } = await supabase
           .from('custom_vocabulary')
@@ -282,6 +294,28 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
 
         if (customWordsError) throw customWordsError;
         customWordsData = data || [];
+
+        /*
+          Eigen categorieën van de school: die van de hele school plus die van
+          deze klas. Categorieën van een andere klas blijven buiten beeld.
+        */
+        const { data: eigenCategorieen, error: eigenError } = await supabase
+          .from('custom_vocabulary_categories')
+          .select('*')
+          .eq('school_id', selectedSchool.id)
+          .eq('is_deleted', false)
+          .or(`group_id.is.null,group_id.eq.${groupId}`)
+          .order('created_at');
+
+        /*
+          Eigen categorieën zijn een aanvulling: gaat dit mis, dan blijft de
+          woordenlijst zelf gewoon staan. Zonder deze afhandeling verdween bij
+          een fout de hele lijst en las de leerkracht "geen woorden gevonden".
+        */
+        if (eigenError) {
+          console.error('Eigen categorieën laden mislukt:', eigenError);
+        }
+        customCategoriesData = eigenCategorieen || [];
       }
 
       const formattedCategories: VocabularyCategory[] = categoriesData?.map((cat) => ({
@@ -311,7 +345,27 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
         ],
       })) || [];
 
-      setCategories(formattedCategories);
+      const eigenCategorieen: VocabularyCategory[] = customCategoriesData.map((cat: any) => ({
+        id: cat.id,
+        isCustom: true,
+        groupId: cat.group_id,
+        title: cat.name,
+        icon: cat.emoji,
+        categoryType: 'custom',
+        goalCodes: (cat.goal_codes || []).join(', '),
+        description: cat.group_id ? 'Eigen categorie van deze klas' : 'Eigen categorie van de school',
+        colorCode: cat.color_code || '#9CA3AF',
+        words: customWordsData
+          .filter((w: any) => w.custom_category_id === cat.id)
+          .map((w: any) => ({
+            word: w.word,
+            goals: w.goal_codes,
+            isCustom: true,
+            customId: w.id,
+          })),
+      }));
+
+      setCategories([...formattedCategories, ...eigenCategorieen]);
     } catch (error) {
       console.error('Error loading vocabulary data:', error);
     } finally {
@@ -685,10 +739,14 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
     }
 
     try {
+      const gekozenCategorie = categories.find((c) => c.id === selectedCategoryId);
+
       const { error } = await supabase.from('custom_vocabulary').insert({
         school_id: selectedSchool.id,
         word: trimmedWord,
-        category_id: selectedCategoryId,
+        // Een woord hangt aan een systeemcategorie óf aan een eigen categorie.
+        category_id: gekozenCategorie?.isCustom ? null : selectedCategoryId,
+        custom_category_id: gekozenCategorie?.isCustom ? selectedCategoryId : null,
         goal_codes: selectedGoals,
         created_by: user.id,
       });
@@ -711,6 +769,80 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
     } catch (error) {
       console.error('Error adding custom word:', error);
       setNotification({ message: 'Er is een fout opgetreden bij het toevoegen van het woord.', type: 'error' });
+    }
+  };
+
+  const handleAddCategory = async () => {
+    if (!user || !selectedSchool || !newCategoryName.trim()) {
+      setNotification({ message: 'Geef de categorie een naam.', type: 'error' });
+      return;
+    }
+
+    setSavingCategory(true);
+    try {
+      const { error } = await supabase.from('custom_vocabulary_categories').insert({
+        school_id: selectedSchool.id,
+        group_id: newCategoryOnlyGroup ? groupId : null,
+        name: newCategoryName.trim(),
+        emoji: newCategoryEmoji.trim() || '📚',
+        goal_codes: newCategoryGoals,
+        created_by: user.id,
+      });
+
+      if (error) {
+        if (error.code === '23505') {
+          setNotification({ message: 'Er bestaat al een categorie met deze naam.', type: 'error' });
+          return;
+        }
+        throw error;
+      }
+
+      setNewCategoryName('');
+      setNewCategoryEmoji('📚');
+      setNewCategoryGoals([]);
+      setNewCategoryOnlyGroup(false);
+      setShowCategoryModal(false);
+      setNotification({ message: 'Categorie toegevoegd!', type: 'success' });
+      loadVocabularyData();
+    } catch (error) {
+      console.error('Error adding category:', error);
+      setNotification({ message: 'Er is een fout opgetreden bij het toevoegen van de categorie.', type: 'error' });
+    } finally {
+      setSavingCategory(false);
+    }
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (!user || !categoryToDelete) return;
+
+    // Een categorie met woorden verwijderen zou die woorden meenemen; eerst leegmaken.
+    if (categoryToDelete.words.length > 0) {
+      setNotification({
+        message: 'Verwijder eerst de woorden in deze categorie.',
+        type: 'error',
+      });
+      setCategoryToDelete(null);
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('custom_vocabulary_categories')
+        .update({
+          is_deleted: true,
+          deleted_at: new Date().toISOString(),
+          deleted_by: user.id,
+        })
+        .eq('id', categoryToDelete.id);
+
+      if (error) throw error;
+
+      setCategoryToDelete(null);
+      setNotification({ message: 'Categorie verwijderd.', type: 'success' });
+      loadVocabularyData();
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      setNotification({ message: 'Er is een fout opgetreden bij het verwijderen van de categorie.', type: 'error' });
     }
   };
 
@@ -1013,6 +1145,13 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
                 Aangepast woord toevoegen
               </button>
               <button
+                onClick={() => setShowCategoryModal(true)}
+                className="px-4 py-2 rounded-full text-sm font-semibold transition-all bg-lavender text-white hover:scale-105 shadow-md flex items-center gap-2 whitespace-nowrap"
+              >
+                <Plus className="w-4 h-4" />
+                Eigen categorie
+              </button>
+              <button
                 onClick={toggleDeleteMode}
                 className={`px-4 py-2 rounded-full text-sm font-semibold transition-all hover:scale-105 shadow-md flex items-center gap-2 whitespace-nowrap ${
                   deleteMode
@@ -1208,8 +1347,8 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
 
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl">
-            <div className="flex justify-between items-center mb-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center mb-4 flex-shrink-0">
               <h3 className="text-2xl font-baloo text-deep-purple">Aangepast woord toevoegen</h3>
               <button
                 onClick={() => {
@@ -1224,7 +1363,7 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 overflow-y-auto min-h-0 flex-1 -mx-1 px-1">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Woord
@@ -1257,11 +1396,22 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
                   className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-deep-purple focus:outline-none"
                 >
                   <option value="">Selecteer een categorie...</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.icon} {cat.title}
-                    </option>
-                  ))}
+                  <optgroup label="Standaardcategorieën">
+                    {categories.filter((cat) => !cat.isCustom).map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.icon} {cat.title}
+                      </option>
+                    ))}
+                  </optgroup>
+                  {categories.some((cat) => cat.isCustom) && (
+                    <optgroup label="Eigen categorieën">
+                      {categories.filter((cat) => cat.isCustom).map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.icon} {cat.title}{cat.groupId ? ' (deze klas)' : ''}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
                 </select>
               </div>
 
@@ -1272,32 +1422,187 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
                   label="Doelen"
                 />
               )}
+            </div>
 
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleAddCustomWord();
-                  }}
-                  className="flex-1 bg-grass-green text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-transform"
-                >
-                  Toevoegen
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setShowAddModal(false);
-                    setNewWord('');
-                    setSelectedCategoryId('');
-                    setSelectedGoals([]);
-                  }}
-                  className="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-transform"
-                >
-                  Annuleren
-                </button>
+            <div className="flex gap-3 pt-4 flex-shrink-0">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleAddCustomWord();
+                }}
+                className="flex-1 bg-grass-green text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-transform"
+              >
+                Toevoegen
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowAddModal(false);
+                  setNewWord('');
+                  setSelectedCategoryId('');
+                  setSelectedGoals([]);
+                }}
+                className="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-transform"
+              >
+                Annuleren
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCategoryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center mb-4 flex-shrink-0">
+              <h3 className="text-2xl font-baloo text-deep-purple">Eigen categorie</h3>
+              <button
+                onClick={() => setShowCategoryModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4 overflow-y-auto min-h-0 flex-1 -mx-1 px-1">
+              <p className="text-sm text-gray-600">
+                Maak een categorie voor een eigen thema. Daarna kan je er woorden aan toevoegen
+                via <strong>Aangepast woord toevoegen</strong>.
+              </p>
+
+              <div className="flex gap-3">
+                <div className="w-20">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Icoon</label>
+                  <input
+                    type="text"
+                    value={newCategoryEmoji}
+                    onChange={(e) => setNewCategoryEmoji(e.target.value)}
+                    maxLength={4}
+                    className="w-full px-3 py-2 text-center text-xl rounded-xl border-2 border-gray-200 focus:border-deep-purple focus:outline-none"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Naam</label>
+                  <input
+                    type="text"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    placeholder="Bijvoorbeeld: Carnaval"
+                    className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-deep-purple focus:outline-none"
+                  />
+                </div>
               </div>
+
+              <label className="flex items-start gap-3 p-3 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-deep-purple/40 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={newCategoryOnlyGroup}
+                  onChange={(e) => setNewCategoryOnlyGroup(e.target.checked)}
+                  className="mt-1 w-4 h-4 accent-deep-purple"
+                />
+                <span className="text-sm text-gray-700">
+                  Alleen voor {groupName || 'deze klas'}
+                  <span className="block text-xs text-gray-500">
+                    Laat dit uit als de hele school deze categorie mag gebruiken.
+                  </span>
+                </span>
+              </label>
+
+              <div>
+                <p className="text-sm text-gray-600 mb-2">
+                  De doelen liggen bij de woorden zelf. Kies je hier toch doelen, dan staan die
+                  alvast aangevinkt zodra je een woord aan deze categorie toevoegt — handig bij een
+                  thema waar telkens dezelfde doelen terugkomen.
+                </p>
+                <DoelSelector
+                  waarde={newCategoryGoals}
+                  onChange={setNewCategoryGoals}
+                  label="Doelen die je standaard voorstelt (optioneel)"
+                />
+              </div>
+
+              {categories.some((cat) => cat.isCustom) && (
+                <div>
+                  <p className="text-sm font-semibold text-gray-700 mb-2">Eigen categorieën</p>
+                  <ul className="space-y-2">
+                    {categories.filter((cat) => cat.isCustom).map((cat) => (
+                      <li
+                        key={cat.id}
+                        className="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200"
+                      >
+                        <span className="text-lg">{cat.icon}</span>
+                        <span className="flex-1 text-sm text-gray-700">
+                          {cat.title}
+                          <span className="block text-xs text-gray-500">
+                            {cat.groupId ? 'alleen deze klas' : 'hele school'} · {cat.words.length}{' '}
+                            {cat.words.length === 1 ? 'woord' : 'woorden'}
+                          </span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setCategoryToDelete(cat)}
+                          title="Categorie verwijderen"
+                          className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 pt-4 flex-shrink-0">
+              <button
+                type="button"
+                onClick={handleAddCategory}
+                disabled={savingCategory}
+                className="flex-1 bg-grass-green text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-transform disabled:opacity-50"
+              >
+                {savingCategory ? 'Toevoegen...' : 'Toevoegen'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowCategoryModal(false)}
+                className="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:scale-105 transition-transform"
+              >
+                Sluiten
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {categoryToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4">
+            <h3 className="text-xl font-baloo text-deep-purple">Categorie verwijderen</h3>
+            <p className="text-gray-700">
+              Weet je zeker dat je <strong>{categoryToDelete.title}</strong> wilt verwijderen?
+            </p>
+            {categoryToDelete.words.length > 0 && (
+              <p className="text-sm text-red-600">
+                Deze categorie bevat nog {categoryToDelete.words.length}{' '}
+                {categoryToDelete.words.length === 1 ? 'woord' : 'woorden'}. Verwijder die eerst.
+              </p>
+            )}
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setCategoryToDelete(null)}
+                className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-semibold"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={confirmDeleteCategory}
+                disabled={categoryToDelete.words.length > 0}
+                className="flex-1 bg-red-500 text-white px-4 py-2 rounded-xl font-semibold disabled:opacity-50"
+              >
+                Verwijderen
+              </button>
             </div>
           </div>
         </div>
