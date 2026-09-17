@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Users, Clock, Pause, X, Plus, CreditCard as Edit, Trash2, Save, Maximize, AlertCircle, Timer, Square, Hand, Upload, Shield, MapPin, List } from 'lucide-react';
+import { ArrowLeft, Users, Clock, Pause, X, Plus, Pencil as Edit, Trash2, Save, Maximize, AlertCircle, Timer, Square, Hand, Upload, Shield, MapPin, List } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import Modal from './Modal';

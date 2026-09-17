@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, ReactNode } from 'react';
-import { MapPin, Plus, Trash2, Upload, CreditCard as Edit2, Check, X, Image as ImageIcon, Move, Users, ChevronDown, Settings, PenLine } from 'lucide-react';
+import { MapPin, Plus, Trash2, Upload, Pencil as Edit2, Check, X, Image as ImageIcon, Move, Users, ChevronDown, Settings, PenLine } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import ClassroomSketchModal from './ClassroomSketchModal';

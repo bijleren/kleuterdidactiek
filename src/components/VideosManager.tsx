@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import DoelChips from './DoelChips';
 import { supabase } from '../lib/supabase';
 import DoelSelector from './DoelSelector';
-import { Video, Plus, Play, CheckCircle, Trash2, X, Search, CreditCard as Edit } from 'lucide-react';
+import { Video, Plus, Play, CheckCircle, Trash2, X, Search, Pencil as Edit } from 'lucide-react';
 import Modal from './Modal';
 import { logActivityToCalendar } from '../utils/calendarLogger';
 import { getVideoEmbed } from '../utils/videoEmbed';

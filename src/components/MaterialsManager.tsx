@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import DoelChips from './DoelChips';
 import { supabase } from '../lib/supabase';
 import DoelSelector from './DoelSelector';
-import { BookOpen, Plus, CheckCircle, Trash2, Search, CreditCard as Edit, ExternalLink, FileText, Globe, Book, Upload } from 'lucide-react';
+import { BookOpen, Plus, CheckCircle, Trash2, Search, Pencil as Edit, ExternalLink, FileText, Globe, Book, Upload } from 'lucide-react';
 import Modal from './Modal';
 import { logActivityToCalendar } from '../utils/calendarLogger';
 
