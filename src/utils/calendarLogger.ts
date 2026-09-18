@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { findOrCreateLesson } from './lessonUtils';
+import { extractGoalCodesFromLessonItems } from './lessonGoalExtractor';
 
 interface LogActivityParams {
   itemType: 'vocabulary' | 'vocabulary_word' | 'quiz' | 'writing' | 'physical_task' | 'video' | 'material' | 'activity_preset';
@@ -54,6 +55,40 @@ export async function logActivityToCalendar({
       });
 
     if (itemError) throw itemError;
+
+    /*
+      Ook de doelen van dit onderdeel bij de les bewaren. Zonder dit bleef
+      lesson_goals leeg bij elke les die door een klik ontstaat, en ontbrak
+      die les in de lessen per doel. Een fout hier mag het loggen niet
+      tegenhouden: het onderdeel staat al in de planner.
+    */
+    try {
+      const codes = await extractGoalCodesFromLessonItems([
+        { item_type: itemType, item_id: itemId, item_name: itemName },
+      ]);
+      if (codes.length > 0) {
+        const { data: bestaand } = await supabase
+          .from('lesson_goals')
+          .select('goal_code')
+          .eq('lesson_id', lesson.id);
+        const alBewaard = new Set(
+          ((bestaand ?? []) as unknown as { goal_code: string }[]).map((g) => g.goal_code)
+        );
+        const nieuw = codes.filter((c) => !alBewaard.has(c));
+        if (nieuw.length > 0) {
+          await supabase.from('lesson_goals').insert(
+            nieuw.map((goal_code) => ({
+              lesson_id: lesson.id,
+              goal_code,
+              lesson_start_time: lesson.start_time,
+              group_id: groupId,
+            })) as never
+          );
+        }
+      }
+    } catch (doelFout) {
+      console.error('Lesdoelen bewaren mislukt:', doelFout);
+    }
 
     return { success: true };
   } catch (error) {
