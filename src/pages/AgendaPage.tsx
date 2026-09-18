@@ -4,16 +4,19 @@ import { useSchool } from '../contexts/SchoolContext';
 import { useAuth } from '../contexts/AuthContext';
 import AppLayout from '../components/AppLayout';
 import { trackFeatureUsage } from '../utils/onboardingTracker';
-import { Calendar, CalendarPlus, Plus, Pencil as Edit, Trash2, Clock, ChevronLeft, ChevronRight, BookOpen, Gamepad2, PenTool, Activity, Video, FileText, Target, Search, X, ExternalLink, ChevronDown, ChevronUp, Check, Grid2x2 as Grid, Clipboard, Download, Palette } from 'lucide-react';
+import { Calendar, CalendarPlus, Plus, Pencil as Edit, Trash2, Clock, ChevronLeft, ChevronRight, BookOpen, Gamepad2, PenTool, Activity, Video, FileText, Target, Search, X, ExternalLink, ChevronDown, ChevronUp, Check, Grid2x2 as Grid, Clipboard, Download, Palette, GraduationCap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
 import WeekCalendarView from '../components/WeekCalendarView';
 import { doelcodesPerLes, extractGoalCodesFromLessonItems } from '../utils/lessonGoalExtractor';
 import {
+  loadLeerplandoelen,
   loadLeerplandoelenVoorCodes,
   NET_LABELS,
   omschrijfKlasFilter,
+  ovsgGroepVoorBand,
   standaardFilter,
+  type Leerplandoel,
   type LeerplandoelVoorExport,
 } from '../lib/leerplandoelen';
 import { localDateTimeInputToISO, toLocalDateString, toLocalDateTimeInput, toLocalTimeString } from '../utils/dateUtils';
@@ -35,7 +38,7 @@ interface Lesson {
 interface LessonItem {
   id: string;
   lesson_id: string;
-  item_type: 'vocabulary' | 'vocabulary_word' | 'quiz' | 'writing' | 'physical_task' | 'video' | 'material' | 'activity_preset' | 'goal' | 'thema';
+  item_type: 'vocabulary' | 'vocabulary_word' | 'quiz' | 'writing' | 'physical_task' | 'video' | 'material' | 'activity_preset' | 'goal' | 'thema' | 'leerplandoel';
   item_id: string;
   item_name: string;
   sort_order: number;
@@ -94,6 +97,7 @@ const itemTypeIcons = {
   activity_preset: Grid,
   goal: Target,
   thema: Palette,
+  leerplandoel: GraduationCap,
 };
 
 const itemTypeColors = {
@@ -107,6 +111,7 @@ const itemTypeColors = {
   activity_preset: 'bg-lavender',
   goal: 'bg-blue-600',
   thema: 'bg-teal-500',
+  leerplandoel: 'bg-emerald-600',
 };
 
 const itemTypeLabels = {
@@ -120,6 +125,7 @@ const itemTypeLabels = {
   activity_preset: 'Activiteiten',
   goal: 'Doel',
   thema: 'Thema',
+  leerplandoel: 'Leerdoel',
 };
 
 /*
@@ -154,6 +160,11 @@ export default function AgendaPage() {
   const [showGoalPicker, setShowGoalPicker] = useState(false);
   const [allGoals, setAllGoals] = useState<GoalInfo[]>([]);
   const [goalSearchQuery, setGoalSearchQuery] = useState('');
+  const [showLeerdoelPicker, setShowLeerdoelPicker] = useState(false);
+  const [leerdoelZoek, setLeerdoelZoek] = useState('');
+  const [leerdoelenVoorKlas, setLeerdoelenVoorKlas] = useState<Leerplandoel[]>([]);
+  const [leerdoelenLaden, setLeerdoelenLaden] = useState(false);
+  const [alleLeeftijdenLeerdoel, setAlleLeeftijdenLeerdoel] = useState(false);
   const [showVocabPicker, setShowVocabPicker] = useState(false);
   const [vocabCategories, setVocabCategories] = useState<any[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
@@ -218,6 +229,8 @@ export default function AgendaPage() {
         return '/kleuterdoelen';
       case 'thema':
         return '/aan-de-slag?tab=thema';
+      case 'leerplandoel':
+        return '/leerdoelen';
       default:
         return '/';
     }
@@ -474,6 +487,44 @@ export default function AgendaPage() {
       isFromActivity: activityGoalCodes.has(goal.code) && !manualGoalCodes.has(goal.code),
       isManuallyAdded: manualGoalCodes.has(goal.code),
     }));
+  };
+
+  /*
+    Leerplandoelen van het net van de school, standaard beperkt tot de
+    leeftijdsgroep van de klas — dezelfde klasinstelling als de rest van de app.
+  */
+  const openLeerdoelPicker = async (alleLeeftijden = alleLeeftijdenLeerdoel) => {
+    if (klasFilter.net === 'all') return;
+    setShowLeerdoelPicker(true);
+    setLeerdoelenLaden(true);
+    try {
+      const leeftijd = alleLeeftijden ? 'all' : klasFilter.leeftijd;
+      const doelen = await loadLeerplandoelen(klasFilter.net, leeftijd, ovsgGroepVoorBand(leeftijd));
+      setLeerdoelenVoorKlas(doelen);
+    } catch (error) {
+      console.error('Leerdoelen laden mislukt:', error);
+      setLeerdoelenVoorKlas([]);
+    } finally {
+      setLeerdoelenLaden(false);
+    }
+  };
+
+  const addLeerdoelToLesson = (doel: Leerplandoel) => {
+    if (formData.items.some((i) => i.item_type === 'leerplandoel' && i.item_id === doel.id)) return;
+    setFormData({
+      ...formData,
+      items: [
+        ...formData.items,
+        {
+          item_type: 'leerplandoel',
+          item_id: doel.id,
+          item_name: `${doel.doelnummer} - ${doel.omschrijving}`,
+          sort_order: formData.items.length,
+          notes: null,
+          duration_minutes: null,
+        },
+      ],
+    });
   };
 
   const addGoalToLesson = (goal: GoalInfo) => {
@@ -1958,8 +2009,8 @@ export default function AgendaPage() {
             </div>
           </div>
 
-          {formData.items.length > 0 && (
-            <div className="border-t pt-6">
+          {/* Altijd zichtbaar: een les kan ook starten vanuit een doel, zonder onderdelen. */}
+          <div className="border-t pt-6">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="font-semibold text-gray-900">Doelen</h4>
                 <div className="text-sm text-gray-600">
@@ -1997,15 +2048,30 @@ export default function AgendaPage() {
                 </div>
               )}
 
-              <button
-                onClick={() => setShowGoalPicker(true)}
-                className="w-full mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Extra doel toevoegen
-              </button>
-            </div>
-          )}
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button
+                  onClick={() => setShowGoalPicker(true)}
+                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Extra doel toevoegen
+                </button>
+                <button
+                  onClick={() => openLeerdoelPicker()}
+                  disabled={klasFilter.net === 'all'}
+                  title={klasFilter.net === 'all' ? 'Vul eerst het onderwijsnet van de school in bij de instellingen' : undefined}
+                  className="w-full px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <GraduationCap className="w-4 h-4" />
+                  Leerdoel toevoegen
+                </button>
+              </div>
+              {klasFilter.net === 'all' && (
+                <p className="text-xs text-gray-500 mt-2">
+                  Vul het onderwijsnet van de school in bij de instellingen om leerdoelen uit je leerplan toe te voegen.
+                </p>
+              )}
+          </div>
 
           <div className="flex gap-3 pt-4 border-t">
             <button
@@ -2063,6 +2129,103 @@ export default function AgendaPage() {
           {filteredAvailableItems.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               Geen items gevonden
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showLeerdoelPicker}
+        onClose={() => {
+          setShowLeerdoelPicker(false);
+          setLeerdoelZoek('');
+        }}
+        title={klasFilter.net !== 'all' ? `Leerdoel toevoegen · ${NET_LABELS[klasFilter.net]}` : 'Leerdoel toevoegen'}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            {alleLeeftijdenLeerdoel || klasFilter.leeftijd === 'all'
+              ? 'Alle leerdoelen van je net.'
+              : `De leerdoelen van je net voor ${klasFilter.leeftijd} jaar, de leeftijdsgroep van deze klas.`}
+          </p>
+
+          {klasFilter.leeftijd !== 'all' && (
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={alleLeeftijdenLeerdoel}
+                onChange={(e) => {
+                  setAlleLeeftijdenLeerdoel(e.target.checked);
+                  openLeerdoelPicker(e.target.checked);
+                }}
+                className="w-4 h-4 accent-deep-purple"
+              />
+              Ook leerdoelen van andere leeftijden tonen
+            </label>
+          )}
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Zoek op nummer, tekst of minimumdoel..."
+              value={leerdoelZoek}
+              onChange={(e) => setLeerdoelZoek(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-deep-purple focus:border-transparent"
+            />
+          </div>
+
+          {leerdoelenLaden ? (
+            <div className="flex justify-center py-6">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-600"></div>
+            </div>
+          ) : (
+            <div className="max-h-96 overflow-y-auto space-y-2">
+              {leerdoelenVoorKlas
+                .filter((d) => {
+                  const q = leerdoelZoek.trim().toLowerCase();
+                  if (!q) return true;
+                  return (
+                    d.doelnummer.toLowerCase().includes(q) ||
+                    d.omschrijving.toLowerCase().includes(q) ||
+                    d.codes.some((c) => c.includes(q))
+                  );
+                })
+                .slice(0, 200)
+                .map((d) => {
+                  const toegevoegd = formData.items.some(
+                    (i) => i.item_type === 'leerplandoel' && i.item_id === d.id
+                  );
+                  return (
+                    <div
+                      key={d.id}
+                      onClick={() => !toegevoegd && addLeerdoelToLesson(d)}
+                      className={`flex items-start gap-3 p-3 rounded-xl transition-all ${
+                        toegevoegd
+                          ? 'bg-green-100 border-2 border-green-500'
+                          : 'bg-cream hover:bg-gray-100 cursor-pointer'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${toegevoegd ? 'bg-green-600' : 'bg-emerald-600'}`}>
+                        <GraduationCap className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm text-emerald-900">{d.doelnummer}</div>
+                        <div className="text-xs text-gray-700">{d.omschrijving}</div>
+                        {d.pathLabels.length > 0 && (
+                          <div className="text-xs text-gray-400 mt-0.5">{d.pathLabels.join(' › ')}</div>
+                        )}
+                        {d.codes.length > 0 && (
+                          <div className="text-xs text-gray-500 mt-0.5">Bij minimumdoel {d.codes.join(', ')}</div>
+                        )}
+                        {toegevoegd && <div className="text-xs text-green-600 mt-1">Toegevoegd</div>}
+                      </div>
+                    </div>
+                  );
+                })}
+              {leerdoelenVoorKlas.length === 0 && (
+                <div className="text-center py-6 text-sm text-gray-500">Geen leerdoelen gevonden.</div>
+              )}
             </div>
           )}
         </div>

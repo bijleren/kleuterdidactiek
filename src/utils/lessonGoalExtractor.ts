@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 
 interface LessonItem {
-  item_type: 'vocabulary' | 'vocabulary_word' | 'quiz' | 'writing' | 'physical_task' | 'video' | 'material' | 'activity_preset' | 'goal' | 'thema';
+  item_type: 'vocabulary' | 'vocabulary_word' | 'quiz' | 'writing' | 'physical_task' | 'video' | 'material' | 'activity_preset' | 'goal' | 'thema' | 'leerplandoel';
   item_id: string;
   item_name?: string;
 }
@@ -128,6 +128,22 @@ export async function doelcodesPerLes(onderdelen: LesOnderdeel[]): Promise<Map<s
     van alle woorden van een thema, en ze allemaal toekennen zou de
     doelenoverzichten opblazen.
   */
+
+  /*
+    Een leerplandoel telt voor de minimumdoelen waaraan het gekoppeld is. Het
+    doelnummer van het net zelf komt hier niet bij: de lijsten met doelen zijn
+    minimumdoelen, en de leerplandoelen worden daar telkens uit afgeleid.
+  */
+  const leerplandoelIds = idsVan('leerplandoel').filter((id) => IS_UUID.test(id));
+  if (leerplandoelIds.length) {
+    const { data } = await supabase
+      .from('leerplandoel_minimumdoelen')
+      .select('leerplandoel_id, code')
+      .in('leerplandoel_id', leerplandoelIds);
+    for (const k of (data ?? []) as unknown as { leerplandoel_id: string; code: string }[]) {
+      zet('leerplandoel', k.leerplandoel_id, [k.code]);
+    }
+  }
 
   const resultaat = new Map<string, string[]>();
   for (const o of onderdelen) {
