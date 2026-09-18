@@ -3,7 +3,7 @@ import { findOrCreateLesson } from './lessonUtils';
 import { extractGoalCodesFromLessonItems } from './lessonGoalExtractor';
 
 interface LogActivityParams {
-  itemType: 'vocabulary' | 'vocabulary_word' | 'quiz' | 'writing' | 'physical_task' | 'video' | 'material' | 'activity_preset';
+  itemType: 'vocabulary' | 'vocabulary_word' | 'quiz' | 'writing' | 'physical_task' | 'video' | 'material' | 'activity_preset' | 'thema';
   itemId: string;
   itemName: string;
   groupId: string;

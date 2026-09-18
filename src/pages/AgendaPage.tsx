@@ -4,7 +4,7 @@ import { useSchool } from '../contexts/SchoolContext';
 import { useAuth } from '../contexts/AuthContext';
 import AppLayout from '../components/AppLayout';
 import { trackFeatureUsage } from '../utils/onboardingTracker';
-import { Calendar, CalendarPlus, Plus, Pencil as Edit, Trash2, Clock, ChevronLeft, ChevronRight, BookOpen, Gamepad2, PenTool, Activity, Video, FileText, Target, Search, X, ExternalLink, ChevronDown, ChevronUp, Check, Grid2x2 as Grid, Clipboard, Download } from 'lucide-react';
+import { Calendar, CalendarPlus, Plus, Pencil as Edit, Trash2, Clock, ChevronLeft, ChevronRight, BookOpen, Gamepad2, PenTool, Activity, Video, FileText, Target, Search, X, ExternalLink, ChevronDown, ChevronUp, Check, Grid2x2 as Grid, Clipboard, Download, Palette } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
 import WeekCalendarView from '../components/WeekCalendarView';
@@ -35,7 +35,7 @@ interface Lesson {
 interface LessonItem {
   id: string;
   lesson_id: string;
-  item_type: 'vocabulary' | 'vocabulary_word' | 'quiz' | 'writing' | 'physical_task' | 'video' | 'material' | 'activity_preset' | 'goal';
+  item_type: 'vocabulary' | 'vocabulary_word' | 'quiz' | 'writing' | 'physical_task' | 'video' | 'material' | 'activity_preset' | 'goal' | 'thema';
   item_id: string;
   item_name: string;
   sort_order: number;
@@ -93,6 +93,7 @@ const itemTypeIcons = {
   material: FileText,
   activity_preset: Grid,
   goal: Target,
+  thema: Palette,
 };
 
 const itemTypeColors = {
@@ -105,6 +106,7 @@ const itemTypeColors = {
   material: 'bg-yellow-500',
   activity_preset: 'bg-lavender',
   goal: 'bg-blue-600',
+  thema: 'bg-teal-500',
 };
 
 const itemTypeLabels = {
@@ -117,6 +119,7 @@ const itemTypeLabels = {
   material: 'Materiaal',
   activity_preset: 'Activiteiten',
   goal: 'Doel',
+  thema: 'Thema',
 };
 
 /*
@@ -213,6 +216,8 @@ export default function AgendaPage() {
         return '/kleuterdoelen';
       case 'goal':
         return '/kleuterdoelen';
+      case 'thema':
+        return '/aan-de-slag?tab=thema';
       default:
         return '/';
     }
@@ -710,6 +715,22 @@ export default function AgendaPage() {
             type: 'activity_preset'
           })) || [];
           break;
+
+        case 'thema': {
+          // Platformthema's en die van de eigen school, zoals het Thema-tabblad.
+          const { data: themaData } = await supabase
+            .from('themas')
+            .select('id, naam, emoji')
+            .eq('is_actief', true)
+            .or(`school_id.is.null,school_id.eq.${selectedSchoolId}`)
+            .order('naam');
+          items = ((themaData ?? []) as unknown as { id: string; naam: string; emoji: string }[]).map((t) => ({
+            id: t.id,
+            name: `${t.emoji} ${t.naam}`,
+            type: 'thema',
+          }));
+          break;
+        }
       }
 
       setAvailableItems(items);
@@ -1926,6 +1947,13 @@ export default function AgendaPage() {
               >
                 <Grid className="w-4 h-4" />
                 Activiteiten
+              </button>
+              <button
+                onClick={() => openItemPicker('thema')}
+                className="px-3 py-2 bg-teal-500 text-white rounded-lg hover:opacity-90 transition-opacity text-sm flex items-center justify-center gap-2"
+              >
+                <Palette className="w-4 h-4" />
+                Thema
               </button>
             </div>
           </div>

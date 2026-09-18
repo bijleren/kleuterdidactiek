@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 
 interface LessonItem {
-  item_type: 'vocabulary' | 'vocabulary_word' | 'quiz' | 'writing' | 'physical_task' | 'video' | 'material' | 'activity_preset' | 'goal';
+  item_type: 'vocabulary' | 'vocabulary_word' | 'quiz' | 'writing' | 'physical_task' | 'video' | 'material' | 'activity_preset' | 'goal' | 'thema';
   item_id: string;
   item_name?: string;
 }
@@ -119,6 +119,66 @@ export async function doelcodesPerLes(onderdelen: LesOnderdeel[]): Promise<Map<s
     );
     for (const [itemId, categorieId] of categorieVanWoord) {
       zet('vocabulary_word', itemId, doelenVanCategorie.get(categorieId));
+    }
+  }
+
+  /*
+    Een thema: de doelen van zijn woorden, materialen en video's. Woorden staan
+    in een thema als tekst; ze krijgen de doelen van het woord zelf, zoals het
+    themaoverzicht ze toont. Een woord dat alleen in het thema bestaat, heeft
+    geen doelen en telt dus niet mee.
+  */
+  const themaIds = idsVan('thema').filter((id) => IS_UUID.test(id));
+  if (themaIds.length) {
+    const { data: themaRijen } = await supabase
+      .from('thema_items')
+      .select('thema_id, item_type, item_id, item_name')
+      .in('thema_id', themaIds);
+    const rijen = (themaRijen ?? []) as unknown as {
+      thema_id: string;
+      item_type: 'woord' | 'materiaal' | 'video';
+      item_id: string;
+      item_name: string;
+    }[];
+
+    const teksten = [...new Set(rijen.filter((r) => r.item_type === 'woord').map((r) => r.item_name))];
+    const zoekteksten = [...new Set([...teksten, ...teksten.map((t) => t.toLowerCase())])];
+    const materiaalIds = rijen.filter((r) => r.item_type === 'materiaal').map((r) => r.item_id);
+    const videoIds = rijen.filter((r) => r.item_type === 'video').map((r) => r.item_id);
+
+    const [woordDoelen, materiaalDoelen, videoDoelen] = await Promise.all([
+      zoekteksten.length
+        ? supabase.from('vocabulary_words').select('word, goal_codes').in('word', zoekteksten)
+        : Promise.resolve({ data: [] }),
+      materiaalIds.length
+        ? supabase.from('educational_material_goals').select('material_id, goal_code').in('material_id', materiaalIds)
+        : Promise.resolve({ data: [] }),
+      videoIds.length
+        ? supabase.from('educational_video_goals').select('video_id, goal_code').in('video_id', videoIds)
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    const perWoord = new Map<string, string[]>();
+    for (const w of (woordDoelen.data ?? []) as unknown as { word: string; goal_codes: string[] }[]) {
+      perWoord.set(w.word.toLowerCase(), [...(perWoord.get(w.word.toLowerCase()) ?? []), ...(w.goal_codes ?? [])]);
+    }
+    const perMateriaal = new Map<string, string[]>();
+    for (const m of (materiaalDoelen.data ?? []) as unknown as { material_id: string; goal_code: string }[]) {
+      perMateriaal.set(m.material_id, [...(perMateriaal.get(m.material_id) ?? []), m.goal_code]);
+    }
+    const perVideo = new Map<string, string[]>();
+    for (const v of (videoDoelen.data ?? []) as unknown as { video_id: string; goal_code: string }[]) {
+      perVideo.set(v.video_id, [...(perVideo.get(v.video_id) ?? []), v.goal_code]);
+    }
+
+    for (const r of rijen) {
+      const codes =
+        r.item_type === 'woord'
+          ? perWoord.get(r.item_name.toLowerCase())
+          : r.item_type === 'materiaal'
+          ? perMateriaal.get(r.item_id)
+          : perVideo.get(r.item_id);
+      zet('thema', r.thema_id, codes);
     }
   }
 
