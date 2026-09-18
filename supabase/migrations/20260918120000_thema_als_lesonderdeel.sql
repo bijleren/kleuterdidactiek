@@ -5,9 +5,9 @@
   hangen, maar geen thema. Wie een week rond "Herfst" werkt, moest de woorden
   van dat thema één voor één toevoegen.
 
-  lesson_items.item_type krijgt de waarde 'thema', met het id uit themas. De
-  doelen van zo'n onderdeel volgen uit de woorden, materialen en video's van
-  het thema; zie doelcodesPerLes in src/utils/lessonGoalExtractor.ts.
+  lesson_items.item_type krijgt de waarde 'thema', met het id uit themas. Een
+  thema is een label: het telt niet mee voor de doelen van de les, omdat je in
+  één les niet aan alle doelen van een heel thema werkt.
 */
 DO $$
 DECLARE
