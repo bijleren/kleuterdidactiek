@@ -3,133 +3,136 @@ import { supabase } from '../lib/supabase';
 interface LessonItem {
   item_type: 'vocabulary' | 'vocabulary_word' | 'quiz' | 'writing' | 'physical_task' | 'video' | 'material' | 'activity_preset' | 'goal';
   item_id: string;
+  item_name?: string;
 }
 
-export async function extractGoalCodesFromLessonItems(lessonItems: LessonItem[]): Promise<string[]> {
-  const goalCodes = new Set<string>();
+interface LesOnderdeel extends LessonItem {
+  lesson_id: string;
+}
 
-  for (const item of lessonItems) {
-    if (item.item_type === 'goal') {
-      goalCodes.add(item.item_id);
-      continue;
-    }
+const IS_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-    if (item.item_type === 'vocabulary') {
-      const { data } = await supabase
-        .from('vocabulary_categories')
-        .select('goal_codes')
-        .eq('id', item.item_id)
-        .maybeSingle();
+const woordVan = (item: LessonItem) =>
+  (item.item_name ?? item.item_id).replace(/^Woordenschat:\s*/i, '').trim();
 
-      if (data?.goal_codes) {
-        const codes = Array.isArray(data.goal_codes) ? data.goal_codes : [data.goal_codes];
-        codes.forEach(code => goalCodes.add(code));
-      }
-      continue;
-    }
+/*
+  De doelen van een les volgen uit haar onderdelen. Dit is de enige plek die
+  dat uitrekent: het lesvenster, de kopieerknop en de Excel-export lazen elk
+  op hun eigen manier, en liepen daardoor uiteen. De export las lesson_goals,
+  dat bij automatisch aangemaakte lessen (een klik op een woord) nooit gevuld
+  wordt, en bleef bij de meeste lessen leeg.
 
-    if (item.item_type === 'vocabulary_word') {
-      const { data: wordData } = await supabase
-        .from('vocabulary_words')
-        .select('category_id')
-        .eq('id', item.item_id)
-        .maybeSingle();
+  Per type één query voor alle onderdelen samen, zodat een export over een
+  week niet honderden losse aanvragen doet.
+*/
+export async function doelcodesPerLes(onderdelen: LesOnderdeel[]): Promise<Map<string, string[]>> {
+  const perType = new Map<string, LesOnderdeel[]>();
+  for (const o of onderdelen) {
+    const lijst = perType.get(o.item_type) ?? [];
+    lijst.push(o);
+    perType.set(o.item_type, lijst);
+  }
+  const idsVan = (type: string) => [...new Set((perType.get(type) ?? []).map((o) => o.item_id))];
 
-      if (wordData?.category_id) {
-        const { data: catData } = await supabase
-          .from('vocabulary_categories')
-          .select('goal_codes')
-          .eq('id', wordData.category_id)
-          .maybeSingle();
+  /** Per onderdeel-sleutel (type:id) de doelcodes. */
+  const codesPerOnderdeel = new Map<string, string[]>();
+  const zet = (type: string, id: string, codes: string[] | null | undefined) => {
+    if (!codes || codes.length === 0) return;
+    const sleutel = `${type}:${id}`;
+    codesPerOnderdeel.set(sleutel, [...(codesPerOnderdeel.get(sleutel) ?? []), ...codes]);
+  };
 
-        if (catData?.goal_codes) {
-          const codes = Array.isArray(catData.goal_codes) ? catData.goal_codes : [catData.goal_codes];
-          codes.forEach(code => goalCodes.add(code));
-        }
-      }
-      continue;
-    }
+  // Tabellen met goal_codes op de rij zelf.
+  const directeTabellen: [string, string][] = [
+    ['quiz', 'learning_games'],
+    ['writing', 'writing_exercises'],
+    ['physical_task', 'physical_tasks'],
+    ['activity_preset', 'activity_presets'],
+  ];
 
-    if (item.item_type === 'quiz') {
-      const { data } = await supabase
-        .from('learning_games')
-        .select('goal_codes')
-        .eq('id', item.item_id)
-        .maybeSingle();
+  // Woorden: een id van vocabulary_words, of bij oudere en eigen woorden de tekst.
+  const woorden = perType.get('vocabulary_word') ?? [];
+  const woordIds = [...new Set(woorden.filter((w) => IS_UUID.test(w.item_id)).map((w) => w.item_id))];
+  const woordTeksten = [...new Set(woorden.map(woordVan))];
 
-      if (data?.goal_codes) {
-        const codes = Array.isArray(data.goal_codes) ? data.goal_codes : [];
-        codes.forEach(code => goalCodes.add(code));
-      }
-      continue;
-    }
+  const [
+    direct,
+    categorieen,
+    woordenOpId,
+    woordenOpTekst,
+    video,
+    materiaal,
+  ] = await Promise.all([
+    Promise.all(
+      directeTabellen.map(async ([type, tabel]) => {
+        const ids = idsVan(type).filter((id) => IS_UUID.test(id));
+        if (ids.length === 0) return { type, rijen: [] as { id: string; goal_codes: string[] }[] };
+        const { data } = await supabase.from(tabel).select('id, goal_codes').in('id', ids);
+        return { type, rijen: (data ?? []) as unknown as { id: string; goal_codes: string[] }[] };
+      })
+    ),
+    idsVan('vocabulary').length
+      ? supabase.from('vocabulary_categories').select('id, goal_codes').in('id', idsVan('vocabulary'))
+      : Promise.resolve({ data: [] }),
+    woordIds.length
+      ? supabase.from('vocabulary_words').select('id, word, category_id').in('id', woordIds)
+      : Promise.resolve({ data: [] }),
+    woordTeksten.length
+      ? supabase.from('vocabulary_words').select('id, word, category_id').in('word', woordTeksten)
+      : Promise.resolve({ data: [] }),
+    idsVan('video').length
+      ? supabase.from('educational_video_goals').select('video_id, goal_code').in('video_id', idsVan('video'))
+      : Promise.resolve({ data: [] }),
+    idsVan('material').length
+      ? supabase.from('educational_material_goals').select('material_id, goal_code').in('material_id', idsVan('material'))
+      : Promise.resolve({ data: [] }),
+  ]);
 
-    if (item.item_type === 'writing') {
-      const { data } = await supabase
-        .from('writing_exercises')
-        .select('goal_codes')
-        .eq('id', item.item_id)
-        .maybeSingle();
+  for (const { type, rijen } of direct) for (const r of rijen) zet(type, r.id, r.goal_codes);
+  for (const r of (categorieen.data ?? []) as unknown as { id: string; goal_codes: string[] }[]) {
+    zet('vocabulary', r.id, r.goal_codes);
+  }
+  for (const r of (video.data ?? []) as unknown as { video_id: string; goal_code: string }[]) {
+    zet('video', r.video_id, [r.goal_code]);
+  }
+  for (const r of (materiaal.data ?? []) as unknown as { material_id: string; goal_code: string }[]) {
+    zet('material', r.material_id, [r.goal_code]);
+  }
 
-      if (data?.goal_codes) {
-        const codes = Array.isArray(data.goal_codes) ? data.goal_codes : [];
-        codes.forEach(code => goalCodes.add(code));
-      }
-      continue;
-    }
-
-    if (item.item_type === 'physical_task') {
-      const { data } = await supabase
-        .from('physical_tasks')
-        .select('goal_codes')
-        .eq('id', item.item_id)
-        .maybeSingle();
-
-      if (data?.goal_codes) {
-        const codes = Array.isArray(data.goal_codes) ? data.goal_codes : [];
-        codes.forEach(code => goalCodes.add(code));
-      }
-      continue;
-    }
-
-    if (item.item_type === 'video') {
-      const { data } = await supabase
-        .from('educational_video_goals')
-        .select('goal_code')
-        .eq('video_id', item.item_id);
-
-      if (data) {
-        data.forEach(row => goalCodes.add(row.goal_code));
-      }
-      continue;
-    }
-
-    if (item.item_type === 'material') {
-      const { data } = await supabase
-        .from('educational_material_goals')
-        .select('goal_code')
-        .eq('material_id', item.item_id);
-
-      if (data) {
-        data.forEach(row => goalCodes.add(row.goal_code));
-      }
-      continue;
-    }
-
-    if (item.item_type === 'activity_preset') {
-      const { data } = await supabase
-        .from('activity_presets')
-        .select('goal_codes')
-        .eq('id', item.item_id)
-        .maybeSingle();
-
-      if (data?.goal_codes) {
-        const codes = Array.isArray(data.goal_codes) ? data.goal_codes : [];
-        codes.forEach(code => goalCodes.add(code));
-      }
-      continue;
+  // Woorden krijgen de doelen van hun categorie, zoals in het lesvenster.
+  type Woordrij = { id: string; word: string; category_id: string };
+  const opId = new Map(((woordenOpId.data ?? []) as unknown as Woordrij[]).map((w) => [w.id, w]));
+  const opTekst = new Map(((woordenOpTekst.data ?? []) as unknown as Woordrij[]).map((w) => [w.word, w]));
+  const categorieVanWoord = new Map<string, string>();
+  for (const w of woorden) {
+    const rij = opId.get(w.item_id) ?? opTekst.get(woordVan(w));
+    if (rij?.category_id) categorieVanWoord.set(w.item_id, rij.category_id);
+  }
+  const woordCategorieIds = [...new Set(categorieVanWoord.values())];
+  if (woordCategorieIds.length) {
+    const { data } = await supabase
+      .from('vocabulary_categories')
+      .select('id, goal_codes')
+      .in('id', woordCategorieIds);
+    const doelenVanCategorie = new Map(
+      ((data ?? []) as unknown as { id: string; goal_codes: string[] }[]).map((c) => [c.id, c.goal_codes])
+    );
+    for (const [itemId, categorieId] of categorieVanWoord) {
+      zet('vocabulary_word', itemId, doelenVanCategorie.get(categorieId));
     }
   }
 
-  return Array.from(goalCodes).filter(code => code && code.trim() !== '');
+  const resultaat = new Map<string, string[]>();
+  for (const o of onderdelen) {
+    const codes = o.item_type === 'goal' ? [o.item_id] : codesPerOnderdeel.get(`${o.item_type}:${o.item_id}`) ?? [];
+    const set = new Set(resultaat.get(o.lesson_id) ?? []);
+    for (const c of codes) if (c && c.trim() !== '') set.add(c);
+    resultaat.set(o.lesson_id, [...set]);
+  }
+  return resultaat;
+}
+
+export async function extractGoalCodesFromLessonItems(lessonItems: LessonItem[]): Promise<string[]> {
+  const perLes = await doelcodesPerLes(lessonItems.map((i) => ({ ...i, lesson_id: '' })));
+  return perLes.get('') ?? [];
 }

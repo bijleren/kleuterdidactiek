@@ -8,7 +8,7 @@ import { Calendar, CalendarPlus, Plus, Pencil as Edit, Trash2, Clock, ChevronLef
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
 import WeekCalendarView from '../components/WeekCalendarView';
-import { extractGoalCodesFromLessonItems } from '../utils/lessonGoalExtractor';
+import { doelcodesPerLes, extractGoalCodesFromLessonItems } from '../utils/lessonGoalExtractor';
 import {
   loadLeerplandoelenVoorCodes,
   NET_LABELS,
@@ -191,6 +191,9 @@ export default function AgendaPage() {
 
   const selectedSchoolId = selectedSchool?.id || null;
 
+  const IS_WOORDENSCHAT = (type: LessonItem['item_type']) =>
+    type === 'vocabulary' || type === 'vocabulary_word';
+
   const getItemNavigationPath = (item: LessonItem) => {
     switch (item.item_type) {
       case 'vocabulary':
@@ -366,124 +369,18 @@ export default function AgendaPage() {
     }
   };
 
-  const loadGoalsForItems = async (items: LessonItem[]) => {
-    const goalCodesSet = new Set<string>();
+  // Zelfde afleiding als de kopieerknop en de Excel-export: zie lessonGoalExtractor.
+  const loadGoalsForItems = async (items: Pick<LessonItem, 'item_type' | 'item_id' | 'item_name'>[]) => {
+    const codes = await extractGoalCodesFromLessonItems(items);
+    if (codes.length === 0) return [];
 
-    for (const item of items) {
-      switch (item.item_type) {
-        case 'vocabulary': {
-          const { data } = await supabase
-            .from('vocabulary_categories')
-            .select('goal_codes')
-            .eq('id', item.item_id)
-            .single();
+    const { data: goalsData } = await supabase
+      .from('educational_goals')
+      .select('code, description')
+      .in('code', codes)
+      .order('code');
 
-          if (data?.goal_codes) {
-            (data.goal_codes as string[]).forEach(code => goalCodesSet.add(code));
-          }
-          break;
-        }
-
-        case 'vocabulary_word': {
-          // Try UUID lookup first; fall back to word-text match for legacy items
-          let categoryId: string | null = null;
-
-          const { data: wordByUuid } = await supabase
-            .from('vocabulary_words')
-            .select('category_id')
-            .eq('id', item.item_id)
-            .maybeSingle();
-
-          if (wordByUuid?.category_id) {
-            categoryId = wordByUuid.category_id;
-          } else {
-            const wordText = item.item_name.replace(/^Woordenschat:\s*/i, '').trim();
-            const { data: wordByText } = await supabase
-              .from('vocabulary_words')
-              .select('category_id')
-              .eq('word', wordText)
-              .maybeSingle();
-            if (wordByText?.category_id) categoryId = wordByText.category_id;
-          }
-
-          if (categoryId) {
-            const { data: catData } = await supabase
-              .from('vocabulary_categories')
-              .select('goal_codes')
-              .eq('id', categoryId)
-              .single();
-
-            if (catData?.goal_codes) {
-              (catData.goal_codes as string[]).forEach(code => goalCodesSet.add(code));
-            }
-          }
-          break;
-        }
-
-        case 'video': {
-          const { data } = await supabase
-            .from('educational_video_goals')
-            .select('goal_code')
-            .eq('video_id', item.item_id);
-
-          data?.forEach(g => goalCodesSet.add(g.goal_code));
-          break;
-        }
-
-        case 'material': {
-          const { data } = await supabase
-            .from('educational_material_goals')
-            .select('goal_code')
-            .eq('material_id', item.item_id);
-
-          data?.forEach(g => goalCodesSet.add(g.goal_code));
-          break;
-        }
-
-        case 'quiz': {
-          const { data: gameData } = await supabase
-            .from('learning_games')
-            .select('goal_codes')
-            .eq('id', item.item_id)
-            .maybeSingle();
-
-          if (gameData?.goal_codes) {
-            (gameData.goal_codes as string[]).forEach(code => goalCodesSet.add(code));
-          }
-          break;
-        }
-
-        case 'activity_preset': {
-          const { data: presetData } = await supabase
-            .from('activity_presets')
-            .select('goal_codes')
-            .eq('id', item.item_id)
-            .maybeSingle();
-
-          if (presetData?.goal_codes) {
-            (presetData.goal_codes as string[]).forEach(code => goalCodesSet.add(code));
-          }
-          break;
-        }
-
-        case 'goal': {
-          goalCodesSet.add(item.item_id);
-          break;
-        }
-      }
-    }
-
-    if (goalCodesSet.size > 0) {
-      const { data: goalsData } = await supabase
-        .from('educational_goals')
-        .select('code, description')
-        .in('code', Array.from(goalCodesSet))
-        .order('code');
-
-      return goalsData || [];
-    }
-
-    return [];
+    return goalsData || [];
   };
 
   const loadLessonGoals = async (items: typeof formData.items) => {
@@ -1098,7 +995,8 @@ export default function AgendaPage() {
 
       items.forEach((item, index) => {
         exportText += `${index + 1}. ${item.item_name}\n`;
-        if (item.duration_minutes) {
+        // Bij woordenschat zegt de duur niets: elk woord krijgt standaard 5 minuten.
+        if (item.duration_minutes && !IS_WOORDENSCHAT(item.item_type)) {
           exportText += `   Duur: ${item.duration_minutes} minuten\n`;
         }
         if (item.notes) {
@@ -1198,24 +1096,44 @@ export default function AgendaPage() {
           itemsMap.get(item.lesson_id)!.push(item);
         });
 
-        const { data: lessonGoalsData } = await supabase
-          .from('lesson_goals')
-          .select('lesson_id, goal_code, educational_goals(code, description)')
-          .in('lesson_id', lessonIds);
+        /*
+          De doelen volgen uit de onderdelen, net als in het lesvenster en bij
+          de kopieerknop. lesson_goals alleen volstond niet: bij lessen die
+          vanzelf ontstaan door een klik op een woord blijft die tabel leeg.
+          Wat er wel in staat, komt er nog bij.
+        */
+        const [afgeleid, { data: lessonGoalsData }] = await Promise.all([
+          doelcodesPerLes((itemsData || []) as LessonItem[]),
+          supabase.from('lesson_goals').select('lesson_id, goal_code').in('lesson_id', lessonIds),
+        ]);
 
-        lessonGoalsData?.forEach((lg: any) => {
-          if (!goalsMap.has(lg.lesson_id)) goalsMap.set(lg.lesson_id, []);
-          const label = lg.educational_goals
-            ? `${lg.educational_goals.code} - ${lg.educational_goals.description}`
-            : lg.goal_code;
-          goalsMap.get(lg.lesson_id)!.push(label);
-          if (!goalCodesMap.has(lg.lesson_id)) goalCodesMap.set(lg.lesson_id, []);
-          goalCodesMap.get(lg.lesson_id)!.push(lg.goal_code);
+        for (const [lesId, codes] of afgeleid) goalCodesMap.set(lesId, [...codes]);
+        (lessonGoalsData as { lesson_id: string; goal_code: string }[] | null)?.forEach((lg) => {
+          const lijst = goalCodesMap.get(lg.lesson_id) ?? [];
+          if (!lijst.includes(lg.goal_code)) lijst.push(lg.goal_code);
+          goalCodesMap.set(lg.lesson_id, lijst);
         });
 
-        // In één keer voor alle lessen, daarna per les de doelen die bij haar minimumdoelen horen.
-        const alleCodes = [...new Set(lessonGoalsData?.map((lg: any) => lg.goal_code as string) || [])];
-        leerplandoelen = await loadLeerplandoelenVoorCodes(alleCodes, klasFilter);
+        const alleCodes = [...new Set([...goalCodesMap.values()].flat())];
+        const [{ data: doelTeksten }, leerplan] = await Promise.all([
+          alleCodes.length
+            ? supabase.from('educational_goals').select('code, description').in('code', alleCodes)
+            : Promise.resolve({ data: [] }),
+          loadLeerplandoelenVoorCodes(alleCodes, klasFilter),
+        ]);
+        leerplandoelen = leerplan;
+
+        const omschrijving = new Map(
+          ((doelTeksten ?? []) as { code: string; description: string }[]).map((d) => [d.code, d.description])
+        );
+        for (const [lesId, codes] of goalCodesMap) {
+          goalsMap.set(
+            lesId,
+            [...codes]
+              .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+              .map((c) => (omschrijving.has(c) ? `${c} - ${omschrijving.get(c)}` : c))
+          );
+        }
       }
 
       const rows: Record<string, string>[] = [];
@@ -1244,7 +1162,7 @@ export default function AgendaPage() {
           contentLines.push(category.toUpperCase());
           catItems.forEach((item, idx) => {
             let line = `${idx + 1}. ${item.item_name}`;
-            if (item.duration_minutes) line += ` (${item.duration_minutes} min)`;
+            if (item.duration_minutes && !IS_WOORDENSCHAT(item.item_type)) line += ` (${item.duration_minutes} min)`;
             contentLines.push(line);
             if (item.notes) contentLines.push(`   ${item.notes}`);
           });
