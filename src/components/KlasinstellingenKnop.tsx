@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, Check, Settings } from 'lucide-react';
+import { AlertTriangle, Check, School, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useSchool } from '../contexts/SchoolContext';
 import Modal from './Modal';
@@ -38,7 +39,26 @@ export default function KlasinstellingenKnop() {
     setLeeftijd(selectedGroup?.leeftijdsgroep ?? '');
   }, [selectedSchool?.net_code, selectedGroup?.leeftijdsgroep, open]);
 
-  if (!selectedSchool) return null;
+  // Zonder school geen net of klas om in te stellen, maar wel de weg naar
+  // /onboarding: anders liep je vast op 'Geen school geselecteerd'.
+  if (!selectedSchool) {
+    return (
+      <>
+        <button
+          onClick={() => setOpen(true)}
+          title="Instellingen — koppel eerst een school"
+          aria-label="Instellingen"
+          className="relative bg-white/20 hover:bg-white/30 text-white p-1.5 sm:p-2 rounded-full border-2 border-white/30 transition-colors"
+        >
+          <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-deep-purple bg-red-500" />
+        </button>
+        <Modal isOpen={open} onClose={() => setOpen(false)} title="Instellingen">
+          <SchoolKoppelen heeftSchool={false} onKlik={() => setOpen(false)} />
+        </Modal>
+      </>
+    );
+  }
 
   const netOk = !!selectedSchool.net_code;
   const leeftijdOk = !selectedGroup || !!selectedGroup.leeftijdsgroep;
@@ -186,6 +206,8 @@ export default function KlasinstellingenKnop() {
               <p className="text-sm text-gray-500">Kies eerst een klas.</p>
             )}
           </div>
+
+          <SchoolKoppelen heeftSchool onKlik={() => setOpen(false)} />
         </div>
       </Modal>
 
@@ -238,5 +260,27 @@ function Status({ ok }: { ok: boolean }) {
     <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">
       <AlertTriangle className="w-3 h-3" /> Nog invullen
     </span>
+  );
+}
+
+/** Knop naar /onboarding: een (extra) school koppelen met een code of aanmaken. */
+function SchoolKoppelen({ heeftSchool, onKlik }: { heeftSchool: boolean; onKlik: () => void }) {
+  return (
+    <div className="space-y-2 border-t-2 border-gray-100 pt-5">
+      <label className="text-sm font-semibold text-gray-700">School</label>
+      <p className="text-xs text-gray-500">
+        {heeftSchool
+          ? 'Werk je ook op een andere school? Koppel ze met de schoolcode van een collega of maak ze aan.'
+          : 'Je account is nog niet aan een school gekoppeld. Pas daarna kan je een klas aanmaken.'}
+      </p>
+      <Link
+        to="/onboarding"
+        onClick={onKlik}
+        className="inline-flex items-center gap-2 bg-deep-purple hover:bg-deep-purple/90 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors"
+      >
+        <School className="w-4 h-4" />
+        {heeftSchool ? 'Extra school koppelen of aanmaken' : 'School koppelen of aanmaken'}
+      </Link>
+    </div>
   );
 }
