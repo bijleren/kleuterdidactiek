@@ -18,7 +18,9 @@ interface VocabularyCategory {
 export const exportVocabularyToPDF = (
   categories: VocabularyCategory[],
   groupName: string,
-  clickCounts: { [word: string]: number } = {}
+  clickCounts: { [word: string]: number } = {},
+  /** Gekozen leeftijd/net, bv. "4-5 jaar • Katholiek"; leeg = geen filter. */
+  filterLabel = ''
 ) => {
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
@@ -31,7 +33,7 @@ export const exportVocabularyToPDF = (
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Woordenschat - ${groupName}</title>
+  <title>Woordenschat - ${groupName}${filterLabel ? ` - ${filterLabel}` : ''}</title>
   <style>
     @page {
       size: A4;
@@ -172,7 +174,7 @@ export const exportVocabularyToPDF = (
 <body>
   <div class="header">
     <h1>📚 Woordenschat</h1>
-    <p>${groupName} • ${new Date().toLocaleDateString('nl-BE', {
+    <p>${groupName}${filterLabel ? ` • ${filterLabel}` : ''} • ${new Date().toLocaleDateString('nl-BE', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'

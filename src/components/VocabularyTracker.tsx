@@ -12,6 +12,8 @@ import DoelenPerNetModal from './DoelenPerNetModal';
 import { WoordNetBadges } from './NetBadges';
 import {
   NET_CODES,
+  NET_LABELS,
+  OVSG_GROEP_LABELS,
   loadWoordNetInfo,
   type NetCode,
   type WoordNetInfo,
@@ -902,9 +904,17 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
       if (goalFilter) {
         words = words.filter((w) => w.goals && w.goals.includes(goalFilter));
       }
+      // Zelfde net-/leeftijdsfilter als op het scherm: anders kwamen alle
+      // leeftijden mee in de PDF. Grijze woorden ('alle woorden tonen') niet.
+      words = words.filter((w) => woordVoldoet(w.word));
       return { ...category, words };
-    });
-    exportVocabularyToPDF(categoriesForPdf, groupName, clickCounts);
+    }).filter((category) => !filterActief || category.words.length > 0);
+    const filterLabel = [
+      leeftijdFilter !== 'all' ? `${leeftijdFilter} jaar` : null,
+      netFilter !== 'all' ? NET_LABELS[netFilter] : null,
+      ovsgGroep !== 'all' ? OVSG_GROEP_LABELS[ovsgGroep] : null,
+    ].filter(Boolean).join(' • ');
+    exportVocabularyToPDF(categoriesForPdf, groupName, clickCounts, filterLabel);
   };
 
   const getWordClassName = (word: string, isCustom: boolean = false) => {
