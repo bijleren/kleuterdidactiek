@@ -523,12 +523,16 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
       if (fetchError) throw fetchError;
 
       if (data && data.length > 0) {
-        const { error: deleteError } = await supabase
+        const { data: deleted, error: deleteError } = await supabase
           .from('vocabulary_practice_log')
           .delete()
-          .eq('id', data[0].id);
+          .eq('id', data[0].id)
+          .select('id');
 
         if (deleteError) throw deleteError;
+        // RLS weigert zonder fout: dan is er niets verwijderd en mag de
+        // teller niet omlaag (anders staat de klik er na herladen weer).
+        if (!deleted || deleted.length === 0) throw new Error('Klik niet verwijderd (geen rechten)');
 
         setClickCounts((prev) => {
           const newCount = Math.max(0, (prev[word] || 0) - 1);
