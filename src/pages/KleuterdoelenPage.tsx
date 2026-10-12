@@ -18,6 +18,7 @@ import LeerdoelActiviteiten from '../components/LeerdoelActiviteiten';
 import LichamelijkeOpvoeding from '../components/LichamelijkeOpvoeding';
 import ThemaOverzicht from '../components/ThemaOverzicht';
 import Leermiddelen from '../components/Leermiddelen';
+import VergelijkLeerplannen from '../components/VergelijkLeerplannen';
 import { supabase } from '../lib/supabase';
 import { useSchool } from '../contexts/SchoolContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -42,7 +43,7 @@ interface ActivityBoard {
   archived_at?: string | null;
 }
 
-type TabType = 'vocabulary' | 'games' | 'writing' | 'videos' | 'materials' | 'tasks' | 'activities' | 'routines' | 'leerdoelactiviteit' | 'bewegen' | 'thema' | 'leermiddel' | 'goals' | null;
+type TabType = 'vocabulary' | 'games' | 'writing' | 'videos' | 'materials' | 'tasks' | 'activities' | 'routines' | 'leerdoelactiviteit' | 'bewegen' | 'thema' | 'leermiddel' | 'vergelijk' | 'goals' | null;
 /** Binnen het doelenscherm: de minimumdoelen van de app, of de leerplandoelen per net. */
 type DoelenWeergave = 'minimum' | 'leerplan';
 
@@ -67,7 +68,7 @@ export default function KleuterdoelenPage() {
 
   useEffect(() => {
     const tabParam = searchParams.get('tab') as TabType;
-    if (tabParam && ['vocabulary', 'games', 'writing', 'videos', 'materials', 'tasks', 'activities', 'routines', 'leerdoelactiviteit', 'bewegen', 'thema', 'leermiddel', 'goals'].includes(tabParam)) {
+    if (tabParam && ['vocabulary', 'games', 'writing', 'videos', 'materials', 'tasks', 'activities', 'routines', 'leerdoelactiviteit', 'bewegen', 'thema', 'leermiddel', 'vergelijk', 'goals'].includes(tabParam)) {
       setActiveTab(tabParam);
     } else if (location.pathname === '/doelen' || location.pathname === '/leerdoelen') {
       setActiveTab('goals');
@@ -182,6 +183,7 @@ export default function KleuterdoelenPage() {
     materials: 'Hier krijg je een overzicht van alle bijleermaterialen die er voorhanden zijn om aan de minimumdoelen te werken, maar ook jij kan samen met het team jullie materialen databank bij elkaar brengen.',
     activities: 'Bepaal de verschillende activiteiten die er in jullie klassen kunnen zijn, maak de activiteiten aan en voeg ze samen tot een hoekenwerk. Hier kunnen leerlingen aanduiden welke activiteit ze willen doen. Ze kunnen hier ook hun webwijzer voor gebruiken.',
     routines: 'Maak één keer tijd voor je routines goed in kaart te brengen en pluk de vruchten en kijk aan welke doelen er gewerkt is. Gebruik onze routines als inspiratie of maak er nieuwe aan.',
+    vergelijk: 'Hetzelfde minimumdoel, drie leerplannen. Klap een doel open om de doelen van Katholiek Onderwijs, GO! en OVSG naast elkaar te zien, of zoek op een woord om alle leerplandoelen te vinden waarin het voorkomt.',
   };
 
   const isGoalsOnlyMode = activeTab === 'goals';
@@ -199,6 +201,7 @@ export default function KleuterdoelenPage() {
     { id: 'bewegen' as TabType, label: 'Lichamelijke opvoeding', icon: '🤸', color: 'bg-coral-pink' },
     { id: 'thema' as TabType, label: 'Thema', icon: '🌊', color: 'bg-sky-blue' },
     { id: 'leermiddel' as TabType, label: 'Leermiddel', icon: '🧰', color: 'bg-soft-orange' },
+    { id: 'vergelijk' as TabType, label: 'Vergelijk', icon: '⚖️', color: 'bg-grass-green' },
   ];
 
   const tabs = allTabs;
@@ -280,6 +283,7 @@ export default function KleuterdoelenPage() {
           {activeTab === 'bewegen' && groupId && <LichamelijkeOpvoeding groupId={groupId} />}
           {activeTab === 'thema' && <ThemaOverzicht />}
           {activeTab === 'leermiddel' && <Leermiddelen />}
+          {activeTab === 'vergelijk' && <VergelijkLeerplannen />}
           {activeTab === 'routines' && groupId && group && <RoutinesManager schoolId={group.school_id} groupId={groupId} goalFilter={goalFilter} />}
           {activeTab === 'goals' && groupId && (
             <div className="space-y-6">
