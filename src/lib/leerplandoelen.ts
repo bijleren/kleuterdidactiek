@@ -534,6 +534,8 @@ export interface LeerplandoelVoorExport {
   netCode: NetCode;
   doelnummer: string;
   omschrijving: string;
+  /** Ondersteunende tekst van het net, per label; leeg wanneer het net er geen heeft. */
+  toelichting?: Record<string, string>;
   /** De minimumdoelen van de les waaraan dit leerplandoel gekoppeld is. */
   codes: string[];
 }
@@ -582,7 +584,7 @@ export async function loadLeerplandoelenVoorCodes(
     const { rijen, error } = await haalAlles<LeerplandoelRow & { net_code: string }>(() => {
       let q = supabase
         .from('leerplandoelen')
-        .select('id, net_code, doelnummer, omschrijving, bron_volgorde, extra, leeftijd_25_4, leeftijd_4_5, leeftijd_5_6')
+        .select('id, net_code, doelnummer, omschrijving, toelichting, bron_volgorde, extra, leeftijd_25_4, leeftijd_4_5, leeftijd_5_6')
         .in('id', groep)
         .in('net_code', netten);
       // Zelfde leeftijdslogica als loadLeerplandoelen; OVSG filtert op zijn eigen leerjaar.
@@ -606,6 +608,7 @@ export async function loadLeerplandoelenVoorCodes(
         netCode: r.net_code,
         doelnummer: r.doelnummer,
         omschrijving: r.omschrijving,
+        toelichting: (r as unknown as { toelichting?: Record<string, string> }).toelichting ?? undefined,
         codes: (codesPerDoel.get(r.id) || []).sort(compareGoalCodes),
         volgorde: r.bron_volgorde ?? Number.MAX_SAFE_INTEGER,
       });

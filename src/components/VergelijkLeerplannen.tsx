@@ -87,8 +87,17 @@ export default function VergelijkLeerplannen() {
       try {
         const { data, error } = await supabase
           .from('leerplandoelen')
-          .select('id, net_code, doelnummer, omschrijving, path_labels')
-          .or(`omschrijving.ilike.%${zoekterm}%,doelnummer.ilike.%${zoekterm}%`)
+          .select('id, net_code, doelnummer, omschrijving, path_labels, toelichting')
+          /*
+            Ook in de toelichting zoeken: woorden als "drukletters" staan niet in
+            de doelzin maar in de ondersteunende tekst van het net. De komma en
+            de haakjes zijn scheidingstekens in deze filter, dus die vallen weg.
+          */
+          .or(
+            ['omschrijving', 'doelnummer', 'toelichting_tekst']
+              .map((kolom) => `${kolom}.ilike.%${zoekterm.replace(/[,()]/g, ' ')}%`)
+              .join(',')
+          )
           .order('net_code')
           .limit(MAX_TREFFERS + 1);
         if (error) throw error;
@@ -99,6 +108,7 @@ export default function VergelijkLeerplannen() {
           doelnummer: string;
           omschrijving: string;
           path_labels: string[] | null;
+          toelichting: Record<string, string> | null;
         }[];
 
         const teveel = rijen.length > MAX_TREFFERS;
@@ -126,6 +136,7 @@ export default function VergelijkLeerplannen() {
               doelnummer: r.doelnummer,
               omschrijving: r.omschrijving,
               pathLabels: r.path_labels ?? [],
+              toelichting: r.toelichting ?? undefined,
               codes: (codesPerDoel.get(r.id) ?? []).sort(compareGoalCodes),
             }))
         );
@@ -304,6 +315,7 @@ export default function VergelijkLeerplannen() {
                             {t.pathLabels.length > 0 && (
                               <div className="text-xs text-gray-400 mt-1">{t.pathLabels.join(' › ')}</div>
                             )}
+                            <Toelichting toelichting={t.toelichting} />
                             <div className="text-xs text-gray-500 mt-1">
                               {t.codes.length > 0
                                 ? `Bij minimumdoel ${t.codes.join(', ')}`
@@ -362,6 +374,37 @@ export default function VergelijkLeerplannen() {
               leerplandoelen={perDoel.get(d.code) ?? []}
               onToggle={() => klapOpen(d.code)}
             />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** De ondersteunende tekst van het net, ingeklapt: ze is vaak lang. */
+function Toelichting({ toelichting }: { toelichting?: Record<string, string> }) {
+  const [open, setOpen] = useState(false);
+  const delen = Object.entries(toelichting ?? {});
+  if (delen.length === 0) return null;
+
+  return (
+    <div className="mt-1">
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((o) => !o);
+        }}
+        className="text-xs font-semibold text-deep-purple hover:underline"
+      >
+        {open ? 'Toelichting verbergen' : 'Toelichting tonen'}
+      </button>
+      {open && (
+        <div className="mt-1 space-y-1">
+          {delen.map(([label, tekst]) => (
+            <div key={label} className="text-xs text-gray-600">
+              <span className="font-semibold">{label}: </span>
+              {tekst}
+            </div>
           ))}
         </div>
       )}
@@ -433,6 +476,7 @@ function DoelRij({
                       <div key={`${l.netCode}-${l.doelnummer}`} className="bg-white rounded-xl p-3 shadow-sm">
                         <div className="font-semibold text-sm text-deep-purple">{l.doelnummer}</div>
                         <div className="text-sm text-gray-700">{l.omschrijving}</div>
+                        <Toelichting toelichting={l.toelichting} />
                         {l.codes.length > 1 && (
                           <div className="text-xs text-gray-500 mt-1">
                             Ook bij {l.codes.filter((c) => c !== doel.code).join(', ')}
