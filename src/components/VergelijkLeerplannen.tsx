@@ -26,12 +26,28 @@ import { compareGoalCodes } from '../utils/goalSort';
  * openen van een tabblad.
  */
 
+interface Detailtreffer {
+  soort: string;
+  tekst: string;
+}
+
 interface Zoektreffer extends LeerplandoelVoorExport {
   id: string;
   pathLabels: string[];
+  /** Regels uit leerplandoel_details waarin de zoekterm staat. */
+  details: Detailtreffer[];
 }
 
 const MAX_TREFFERS = 300;
+
+const DETAIL_LABELS: Record<string, string> = {
+  mia: 'Mogelijke inhoud',
+  voorbeeld: 'Voorbeeld',
+  'te hanteren begrip': 'Te hanteren begrip',
+  ondersteuning: 'Ondersteuning',
+  verdieping: 'Verdieping',
+  toelichting: 'Toelichting',
+};
 
 export default function VergelijkLeerplannen() {
   const [doelen, setDoelen] = useState<DoelNetInfo[]>([]);
@@ -86,31 +102,73 @@ export default function VergelijkLeerplannen() {
 
     (async () => {
       try {
-        const { data, error } = await supabase
-          .from('leerplandoelen')
-          .select('id, net_code, doelnummer, omschrijving, path_labels, toelichting')
+        const kolommen = 'id, net_code, doelnummer, omschrijving, path_labels, toelichting';
+        const patroon = `%${zoekterm.replace(/[,()]/g, ' ')}%`;
+        const [doelRes, detailRes] = await Promise.all([
+          supabase
+            .from('leerplandoelen')
+            .select(kolommen)
+            /*
+              Ook in de toelichting zoeken: woorden als "drukletters" staan niet in
+              de doelzin maar in de ondersteunende tekst van het net. De komma en
+              de haakjes zijn scheidingstekens in deze filter, dus die vallen weg.
+            */
+            .or(
+              ['omschrijving', 'doelnummer', 'toelichting_tekst']
+                .map((kolom) => `${kolom}.ilike.${patroon}`)
+                .join(',')
+            )
+            .order('net_code')
+            .limit(MAX_TREFFERS + 1),
           /*
-            Ook in de toelichting zoeken: woorden als "drukletters" staan niet in
-            de doelzin maar in de ondersteunende tekst van het net. De komma en
-            de haakjes zijn scheidingstekens in deze filter, dus die vallen weg.
+            De mogelijke inhouden, voorbeelden en begrippen staan apart in
+            leerplandoel_details. Bij GO staat "kleine letter, hoofdletter" alleen
+            daar, niet in de doelzin of de toelichting.
           */
-          .or(
-            ['omschrijving', 'doelnummer', 'toelichting_tekst']
-              .map((kolom) => `${kolom}.ilike.%${zoekterm.replace(/[,()]/g, ' ')}%`)
-              .join(',')
-          )
-          .order('net_code')
-          .limit(MAX_TREFFERS + 1);
-        if (error) throw error;
+          supabase
+            .from('leerplandoel_details')
+            .select('leerplandoel_id, soort, tekst')
+            .ilike('tekst', patroon)
+            .order('volgorde')
+            .limit(MAX_TREFFERS * 3),
+        ]);
+        if (doelRes.error) throw doelRes.error;
+        if (detailRes.error) throw detailRes.error;
 
-        const rijen = (data ?? []) as unknown as {
+        type Rij = {
           id: string;
           net_code: string;
           doelnummer: string;
           omschrijving: string;
           path_labels: string[] | null;
           toelichting: Record<string, string> | null;
-        }[];
+        };
+        const rijen = (doelRes.data ?? []) as unknown as Rij[];
+
+        const detailsPerDoel = new Map<string, Detailtreffer[]>();
+        for (const d of (detailRes.data ?? []) as unknown as {
+          leerplandoel_id: string;
+          soort: string;
+          tekst: string;
+        }[]) {
+          detailsPerDoel.set(d.leerplandoel_id, [
+            ...(detailsPerDoel.get(d.leerplandoel_id) ?? []),
+            { soort: d.soort, tekst: d.tekst },
+          ]);
+        }
+
+        // Doelen die alleen via hun details gevonden zijn, nog apart ophalen.
+        const alGevonden = new Set(rijen.map((r) => r.id));
+        const ontbrekend = [...detailsPerDoel.keys()].filter((id) => !alGevonden.has(id));
+        if (ontbrekend.length > 0) {
+          const { data: extra, error: extraFout } = await supabase
+            .from('leerplandoelen')
+            .select(kolommen)
+            .in('id', ontbrekend.slice(0, MAX_TREFFERS + 1));
+          if (extraFout) throw extraFout;
+          rijen.push(...((extra ?? []) as unknown as Rij[]));
+          rijen.sort((a, b) => a.net_code.localeCompare(b.net_code) || compareGoalCodes(a.doelnummer, b.doelnummer));
+        }
 
         const teveel = rijen.length > MAX_TREFFERS;
         const beperkt = rijen.slice(0, MAX_TREFFERS);
@@ -139,6 +197,7 @@ export default function VergelijkLeerplannen() {
               pathLabels: r.path_labels ?? [],
               toelichting: r.toelichting ?? undefined,
               codes: (codesPerDoel.get(r.id) ?? []).sort(compareGoalCodes),
+              details: detailsPerDoel.get(r.id) ?? [],
             }))
         );
       } catch (e) {
@@ -325,6 +384,16 @@ export default function VergelijkLeerplannen() {
                             <div className="text-sm text-gray-700">{t.omschrijving}</div>
                             {t.pathLabels.length > 0 && (
                               <div className="text-xs text-gray-400 mt-1">{t.pathLabels.join(' › ')}</div>
+                            )}
+                            {t.details.length > 0 && (
+                              <div className="mt-1 space-y-0.5">
+                                {t.details.map((d, i) => (
+                                  <div key={i} className="text-xs text-gray-600">
+                                    <span className="font-semibold">{DETAIL_LABELS[d.soort] ?? d.soort}: </span>
+                                    {d.tekst}
+                                  </div>
+                                ))}
+                              </div>
                             )}
                             <Toelichting toelichting={t.toelichting} standaardOpen={alleToelichting} />
                             <div className="text-xs text-gray-500 mt-1">
