@@ -46,6 +46,7 @@ export default function VergelijkLeerplannen() {
 
   const [netten, setNetten] = useState<NetCode[]>([...NET_CODES]);
   const [vak, setVak] = useState('all');
+  const [alleToelichting, setAlleToelichting] = useState(false);
 
   const [open, setOpen] = useState<string | null>(null);
   const [perDoel, setPerDoel] = useState<Map<string, LeerplandoelVoorExport[]>>(new Map());
@@ -264,6 +265,16 @@ export default function VergelijkLeerplannen() {
               {NET_LABELS[n]}
             </button>
           ))}
+          <button
+            onClick={() => setAlleToelichting((a) => !a)}
+            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border-2 ${
+              alleToelichting
+                ? 'bg-grass-green text-white border-grass-green'
+                : 'bg-white text-gray-600 border-gray-200 hover:border-grass-green'
+            }`}
+          >
+            {alleToelichting ? 'Toelichtingen verbergen' : 'Alle toelichtingen tonen'}
+          </button>
           <select
             value={vak}
             onChange={(e) => setVak(e.target.value)}
@@ -315,7 +326,7 @@ export default function VergelijkLeerplannen() {
                             {t.pathLabels.length > 0 && (
                               <div className="text-xs text-gray-400 mt-1">{t.pathLabels.join(' › ')}</div>
                             )}
-                            <Toelichting toelichting={t.toelichting} />
+                            <Toelichting toelichting={t.toelichting} standaardOpen={alleToelichting} />
                             <div className="text-xs text-gray-500 mt-1">
                               {t.codes.length > 0
                                 ? `Bij minimumdoel ${t.codes.join(', ')}`
@@ -345,6 +356,7 @@ export default function VergelijkLeerplannen() {
                       key={d.code}
                       doel={d}
                       netten={netten}
+                      alleToelichting={alleToelichting}
                       open={open === d.code}
                       laden={doelLaden === d.code}
                       leerplandoelen={perDoel.get(d.code) ?? []}
@@ -369,6 +381,7 @@ export default function VergelijkLeerplannen() {
               key={d.code}
               doel={d}
               netten={netten}
+              alleToelichting={alleToelichting}
               open={open === d.code}
               laden={doelLaden === d.code}
               leerplandoelen={perDoel.get(d.code) ?? []}
@@ -382,8 +395,19 @@ export default function VergelijkLeerplannen() {
 }
 
 /** De ondersteunende tekst van het net, ingeklapt: ze is vaak lang. */
-function Toelichting({ toelichting }: { toelichting?: Record<string, string> }) {
-  const [open, setOpen] = useState(false);
+function Toelichting({
+  toelichting,
+  standaardOpen,
+}: {
+  toelichting?: Record<string, string>;
+  standaardOpen: boolean;
+}) {
+  const [open, setOpen] = useState(standaardOpen);
+
+  // De knop bovenaan zet ze allemaal open of dicht; daarna kan je ze apart bijsturen.
+  useEffect(() => {
+    setOpen(standaardOpen);
+  }, [standaardOpen]);
   const delen = Object.entries(toelichting ?? {});
   if (delen.length === 0) return null;
 
@@ -418,6 +442,7 @@ function DoelRij({
   open,
   laden,
   leerplandoelen,
+  alleToelichting,
   onToggle,
 }: {
   doel: DoelNetInfo;
@@ -425,6 +450,7 @@ function DoelRij({
   open: boolean;
   laden: boolean;
   leerplandoelen: LeerplandoelVoorExport[];
+  alleToelichting: boolean;
   onToggle: () => void;
 }) {
   return (
@@ -476,7 +502,7 @@ function DoelRij({
                       <div key={`${l.netCode}-${l.doelnummer}`} className="bg-white rounded-xl p-3 shadow-sm">
                         <div className="font-semibold text-sm text-deep-purple">{l.doelnummer}</div>
                         <div className="text-sm text-gray-700">{l.omschrijving}</div>
-                        <Toelichting toelichting={l.toelichting} />
+                        <Toelichting toelichting={l.toelichting} standaardOpen={alleToelichting} />
                         {l.codes.length > 1 && (
                           <div className="text-xs text-gray-500 mt-1">
                             Ook bij {l.codes.filter((c) => c !== doel.code).join(', ')}
