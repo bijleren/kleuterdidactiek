@@ -33,6 +33,8 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const SchoolAnalyticsPage = lazy(() => import('./pages/SchoolAnalyticsPage'));
 const NieuweScholenPage = lazy(() => import('./pages/NieuweScholenPage'));
+// Leerlingendeel (webversie van de iPad-app): eigen login, eigen opmaak.
+const LeerlingApp = lazy(() => import('./leerling/LeerlingApp'));
 
 function PaginaLaadt() {
   return (
@@ -92,6 +94,7 @@ function AppRoutes() {
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/algemene-voorwaarden" element={<TermsPage />} />
       <Route path="/nieuwe-scholen" element={<NieuweScholenPage />} />
+      <Route path="/leerling/*" element={<LeerlingApp />} />
       <Route
         path="/login"
         element={

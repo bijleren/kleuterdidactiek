@@ -13,6 +13,12 @@ export default function MarketingHeader() {
           </Link>
           <div className="flex md:flex-1 justify-center md:justify-end gap-3">
             <Link
+              to="/leerling"
+              className="bg-[#FFE66D] text-deep-purple px-4 py-2 rounded-full font-semibold text-sm shadow-lg hover:scale-105 transition-transform"
+            >
+              Leerlingen
+            </Link>
+            <Link
               to="/login"
               className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full font-semibold text-sm transition-all duration-200 border border-white/20"
             >
