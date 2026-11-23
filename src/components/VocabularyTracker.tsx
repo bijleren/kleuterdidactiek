@@ -587,21 +587,24 @@ export default function VocabularyTracker({ groupId, schoolId, goalFilter }: Voc
   };
 
   const openMeaningModal = async (word: string) => {
-    const { data } = await supabase
-      .from('wordfrequency')
-      .select('audio_file, image_file, klankteken')
-      .eq('word', word)
-      .maybeSingle();
+    // The word list itself is not readable from the browser; narrow
+    // functions return just this word and the phoneme legend.
+    type WordInfo = { word: string; klankteken: string | null; audio_file: string | null; image_file: string | null };
+    type Klank = { title: string; audio: string | null };
+    const rpc = supabase.rpc as unknown as (fn: string, args?: object) => Promise<{ data: unknown }>;
+    const { data: rows } = await rpc.call(supabase, 'word_info', { p_words: [word] });
+    const infoRows = Array.isArray(rows) ? (rows as WordInfo[]) : [];
+    const data = infoRows.find((r) => r.word === word) ?? infoRows[0] ?? null;
 
     let phonemes: { title: string; audio: string }[] = [];
 
     if (data?.klankteken) {
-      const tokens = data.klankteken.split('-').filter(Boolean);
+      const tokens: string[] = data.klankteken.split('-').filter(Boolean);
       if (tokens.length > 0) {
-        const { data: klankData } = await supabase
-          .from('klankteken')
-          .select('title, audio')
-          .in('title', tokens);
+        const { data: legend } = await rpc.call(supabase, 'klanken_legend');
+        const klankData = Array.isArray(legend)
+          ? (legend as Klank[]).filter((k) => tokens.includes(k.title))
+          : [];
 
         phonemes = tokens
           .map((token) => {
